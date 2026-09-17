@@ -1,0 +1,18 @@
+{
+  "schema": "CRUCIBLE_EXECUTION_STATE_V1",
+  "phase": 2,
+  "activePacket": "P2-TODAY-SCREEN",
+  "completed": [
+    "P0-CONTRAST",
+    "P0-SCROLL-FIX",
+    "P0-LABEL-AUDIT",
+    "P1-BEARING-ENGINE",
+    "P1-FOCUS-WEIGHT",
+    "P1-LOCAL-CONTEXT",
+    "P2-NAV-SHELL",
+    "P2-TODAY-SCREEN",
+    "P2-CONTEXT-BAR",
+    "P2-DEFAULT-VIEW"
+  ],
+  "nextAction": "Browser-verify Today journey on :1111; then natal wheel (P3)"
+}

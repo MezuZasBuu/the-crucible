@@ -1,0 +1,6 @@
+{
+  "name": "The Crucible",
+  "description": "Universal esoteric gridwork engine and temporal resonance matrix connecting Mayan, Chinese, Historical Calendars, Numerology, Astrocartography, and archetypal synthesis with sub-millisecond calculation and AI compass.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
