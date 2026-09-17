@@ -1,6 +1,10 @@
-import React from 'react';
-import { DailyBearing, ReadingFocus } from '../../types';
-import { ScrollMetric } from '../ui/ScrollCard';
+import React, { useMemo } from 'react';
+import { Compass } from 'lucide-react';
+import { CompleteCalculationContext, CrucibleProfile, DailyBearing, ReadingFocus } from '../../types';
+import { synthesizeDailyBearing } from '../../engine/editorialSynthesis';
+import { FadeInText } from '../ui/FadeInText';
+import { SlideCard, SlidePanel } from '../ui/SlideCard';
+import { ExpandableDetailCard } from '../ui/ExpandableDetailCard';
 
 const FOCUSES: Array<{ id: ReadingFocus; label: string }> = [
   { id: 'overview', label: 'Overview' },
@@ -29,26 +33,74 @@ export const FocusSelector: React.FC<{
   </div>
 );
 
-export const FeaturedReadingCard: React.FC<{ bearing: DailyBearing }> = ({ bearing }) => (
-  <article className="card-featured">
-    <div className="card-featured-atmosphere" aria-hidden="true" />
-    <p className="ui-eyebrow text-[color:var(--solar-deep)] relative">Today’s energy</p>
-    <h2 className="font-cinzel text-2xl sm:text-3xl md:text-[2.15rem] tracking-[0.04em] uppercase text-[color:var(--text-primary)] mt-2 leading-tight relative">
-      {bearing.theme}
-    </h2>
-    <p className="font-garamond text-[18px] md:text-[19px] leading-relaxed text-[color:var(--text-secondary)] mt-4 max-w-3xl relative">
-      {bearing.summary}
-    </p>
-    <p className="relative mt-5 text-[15px] text-[color:var(--text-primary)] font-medium">
-      Practice: {bearing.practice}
-    </p>
-  </article>
-);
+export const OverviewSlideCard: React.FC<{
+  ctx: CompleteCalculationContext;
+  profile: CrucibleProfile | null;
+  focus: ReadingFocus;
+}> = ({ ctx, profile, focus }) => {
+  const bearings = useMemo(
+    () =>
+      FOCUSES.map((f) => ({
+        id: f.id,
+        bearing: synthesizeDailyBearing(ctx, f.id, profile)
+      })),
+    [ctx, profile]
+  );
+  const slideIndex = FOCUSES.findIndex((f) => f.id === focus);
+
+  return (
+    <SlideCard index={slideIndex} className="card-featured gradient-card-solar">
+      {bearings.map(({ id, bearing }) => (
+        <SlidePanel key={id} className="card-featured-inner">
+          <div className="card-featured-atmosphere" aria-hidden="true" />
+          <p className="scroll-label readable-muted relative">Today’s energy · {FOCUSES.find((f) => f.id === id)?.label}</p>
+          <FadeInText
+            text={bearing.theme}
+            as="h2"
+            className="detail-title text-[clamp(1.45rem,3vw,2.35rem)] uppercase tracking-[0.04em] mt-2 relative"
+            delayMs={0}
+          />
+          <FadeInText text={bearing.summary} className="readable-body text-[1.15rem] md:text-[1.22rem] leading-relaxed mt-4 max-w-3xl relative" delayMs={120} />
+          <FadeInText
+            text={`Practice: ${bearing.practice}`}
+            className="readable-body text-[1.05rem] font-semibold mt-5 relative"
+            delayMs={280}
+          />
+        </SlidePanel>
+      ))}
+    </SlideCard>
+  );
+};
 
 export const AtmosphereTriad: React.FC<{ bearing: DailyBearing }> = ({ bearing }) => (
   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-    <ScrollMetric label="Emotional atmosphere" value={bearing.atmospheres.emotional} accent="rose" />
-    <ScrollMetric label="Social atmosphere" value={bearing.atmospheres.social} accent="indigo" />
-    <ScrollMetric label="Work & creative" value={bearing.atmospheres.workCreative} accent="ochre" />
+    <ExpandableDetailCard
+      label="Emotional atmosphere"
+      accent="rose"
+      title="Emotional atmosphere"
+      body={bearing.atmospheres.emotional}
+      preview={<p className="readable-body font-semibold">{bearing.atmospheres.emotional}</p>}
+    />
+    <ExpandableDetailCard
+      label="Social atmosphere"
+      accent="indigo"
+      title="Social atmosphere"
+      body={bearing.atmospheres.social}
+      preview={<p className="readable-body font-semibold">{bearing.atmospheres.social}</p>}
+    />
+    <ExpandableDetailCard
+      label="Work & creative"
+      accent="ochre"
+      title="Work & creative atmosphere"
+      body={bearing.atmospheres.workCreative}
+      preview={<p className="readable-body font-semibold">{bearing.atmospheres.workCreative}</p>}
+    />
   </div>
+);
+
+export const ExploreFrontButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <button type="button" onClick={onClick} className="cta-explore">
+    <Compass className="w-5 h-5" />
+    Explore calendars & systems
+  </button>
 );

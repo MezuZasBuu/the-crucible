@@ -140,6 +140,7 @@ export default function App() {
               onOpenCodex={() => setIsExportOpen(true)}
               onOpenCompass={() => goExplore('COMPASS')}
               onOpenYou={() => setPrimary('YOU')}
+              onOpenExplore={() => goExplore('CALENDARS')}
             />
           )}
 
