@@ -28,6 +28,7 @@ import { EXPLORE_TABS, ExploreTab, PrimaryDestination } from './app/viewModel';
 import { getActiveProfile } from './engine/crucibleProfile';
 import { synthesizeDailyBearing } from './engine/editorialSynthesis';
 import { loadInsights } from './engine/savedInsights';
+import { resolveInitialLocation, saveLocation } from './engine/locationStorage';
 import { NatalChartPanel } from './components/chart/NatalChartPanel';
 import { DreamspellCalendarWorkspace } from './components/calendar/DreamspellCalendarWorkspace';
 
@@ -45,16 +46,13 @@ export default function App() {
 
   const [temporalInput, setTemporalInput] = useState<TemporalInput>(() => {
     const now = new Date();
+    const loc = resolveInitialLocation();
     return {
       dateString: now.toISOString().slice(0, 10),
       timeString: now.toTimeString().slice(0, 8),
       timezoneOffsetMinutes: now.getTimezoneOffset(),
       isUTC: false,
-      location: {
-        latitude: 31.778,
-        longitude: 35.2354,
-        city: 'Jerusalem'
-      },
+      location: loc,
       querentName: '',
       methodology: {
         includeVedic: true,
@@ -73,8 +71,8 @@ export default function App() {
   }, [profileTick]);
 
   const localPreview = useMemo(
-    () => synthesizeDailyBearing(calculationContext, 'overview', profile).localContext,
-    [calculationContext, profile]
+    () => synthesizeDailyBearing(calculationContext, 'overview', profile, 'world', correlationKey).localContext,
+    [calculationContext, profile, correlationKey]
   );
 
   useEffect(() => {
@@ -95,6 +93,7 @@ export default function App() {
   }, [primary, exploreTab]);
 
   const handleLocationSelect = (loc: LocationCoordinates) => {
+    saveLocation(loc);
     setTemporalInput((prev) => ({
       ...prev,
       location: loc
@@ -137,6 +136,7 @@ export default function App() {
             <TodayScreen
               ctx={calculationContext}
               profile={profile}
+              correlationKey={correlationKey}
               onOpenCodex={() => setIsExportOpen(true)}
               onOpenCompass={() => goExplore('COMPASS')}
               onOpenYou={() => setPrimary('YOU')}

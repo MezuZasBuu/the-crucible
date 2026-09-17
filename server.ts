@@ -219,12 +219,12 @@ Measured against Gaia's daily overcast (Schumann base 7.83 Hz, energetic aspect 
         timeString: '12:00:00',
         timezoneOffsetMinutes: 0,
         isUTC: true,
-        location: { latitude: 31.7683, longitude: 35.2137 }
+        location: { latitude: 51.4779, longitude: 0, city: 'World · UTC' }
       };
       const forecast = generateFourteenDayForecast(
         effectiveBirthInput,
         startDateString,
-        targetLocationId || 'jerusalem',
+        targetLocationId || 'london',
         userName || 'Sovereign Querent'
       );
       res.json(forecast);

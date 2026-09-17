@@ -32,6 +32,7 @@ import {
   PRESET_LOCATIONS,
   PresetLocation
 } from '../engine/longTermResonance';
+import { nearestPresetLocationId } from '../engine/defaultLocation';
 
 interface LongTermResonancePanelProps {
   ctx: CompleteCalculationContext;
@@ -51,7 +52,9 @@ export const LongTermResonancePanel: React.FC<LongTermResonancePanelProps> = ({
   const [startDate, setStartDate] = useState<string>(ctx.input.dateString || new Date().toISOString().split('T')[0]);
   
   // Target Location State
-  const [selectedLocationId, setSelectedLocationId] = useState<string>('jerusalem');
+  const [selectedLocationId, setSelectedLocationId] = useState<string>(() =>
+    nearestPresetLocationId(ctx.input.location.latitude, ctx.input.location.longitude, PRESET_LOCATIONS)
+  );
   const [locationFilter, setLocationFilter] = useState<'ALL' | 'CITY' | 'SANCTUARY' | 'CONTINENT'>('ALL');
 
   // Active Selected Day in the 14-Day Grid (0 to 13)

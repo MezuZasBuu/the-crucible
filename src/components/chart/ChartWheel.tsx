@@ -1,5 +1,5 @@
 /**
- * Tropical chart wheel — ASC at left when known, vector-style unicode glyphs, house ring.
+ * Tropical chart wheel — ASC at left when known, familiar glyph ring, chord aspects at planet positions.
  */
 
 import React, { useMemo } from 'react';
@@ -14,6 +14,7 @@ interface ChartWheelProps {
   layout: ChartLayout;
   selectedId?: string;
   onSelect?: (id: string) => void;
+  onAspectSelect?: (aspect: CelestialAspect) => void;
 }
 
 function planetColor(id: string) {
@@ -47,16 +48,17 @@ function wedgePath(cx: number, cy: number, rInner: number, rOuter: number, a0: n
   return `M ${x0} ${y0} A ${rOuter} ${rOuter} 0 ${large} 1 ${x1} ${y1} L ${x2} ${y2} A ${rInner} ${rInner} 0 ${large} 0 ${x3} ${y3} Z`;
 }
 
-export const ChartWheel: React.FC<ChartWheelProps> = ({ bodies, aspects, layout, selectedId, onSelect }) => {
+export const ChartWheel: React.FC<ChartWheelProps> = ({
+  bodies,
+  aspects,
+  layout,
+  selectedId,
+  onSelect,
+  onAspectSelect
+}) => {
   const cx = 220;
   const cy = 220;
   const asc = layout.angles?.ascendantDeg;
-  const tightAspects = useMemo(() => {
-    const selected = bodies.find((b) => b.id === selectedId);
-    const tight = aspects.filter((a) => a.orbDeg <= 4);
-    if (!selected) return tight.slice(0, 12);
-    return tight.filter((a) => a.bodyA === selected.name || a.bodyB === selected.name);
-  }, [aspects, bodies, selectedId]);
 
   const stacked = useMemo(() => {
     const sorted = [...bodies].sort((a, b) => a.eclipticLongitude - b.eclipticLongitude);
@@ -68,10 +70,18 @@ export const ChartWheel: React.FC<ChartWheelProps> = ({ bodies, aspects, layout,
         if (d < 7 || d > 353) cluster++;
         else break;
       }
-      radius[body.id] = 118 - (cluster % 3) * 14;
+      radius[body.id] = 132 - (cluster % 3) * 12;
     });
     return radius;
   }, [bodies]);
+
+  const tightAspects = useMemo(() => {
+    const tight = aspects.filter((a) => a.orbDeg <= 4);
+    if (!selectedId) return tight.slice(0, 14);
+    const selected = bodies.find((b) => b.id === selectedId);
+    if (!selected) return tight.slice(0, 14);
+    return tight.filter((a) => a.bodyA === selected.name || a.bodyB === selected.name);
+  }, [aspects, bodies, selectedId]);
 
   return (
     <svg viewBox="0 0 440 440" className="w-full h-full max-w-[440px] select-none" role="img" aria-label={`${layout.mode} tropical chart wheel`}>
@@ -108,18 +118,35 @@ export const ChartWheel: React.FC<ChartWheelProps> = ({ bodies, aspects, layout,
       })}
 
       <circle cx={cx} cy={cy} r="168" fill="none" stroke="#c9bfae" strokeWidth="1" />
-      <circle cx={cx} cy={cy} r="102" fill="#faf6ef" stroke="#c9bfae" strokeWidth="1" />
+      <circle cx={cx} cy={cy} r="118" fill="#faf6ef" stroke="#c9bfae" strokeWidth="1" />
 
       {layout.houses.map((house) => {
         const ang = svgAngleForLongitude(house.longitude, asc);
-        const a = polar(cx, cy, 102, ang);
+        const a = polar(cx, cy, 118, ang);
         const b = polar(cx, cy, 168, ang);
-        const label = polar(cx, cy, 112, ang + 12);
+        const label = polar(cx, cy, 124, ang + 12);
         return (
           <g key={house.house}>
-            <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#b8862e" strokeWidth={house.house % 3 === 1 ? 1.4 : 0.6} opacity="0.7" />
-            <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="central" fill="#7a5a1a" fontSize="9" fontFamily="Plus Jakarta Sans, sans-serif">
+            <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#b8862e" strokeWidth={house.house % 3 === 1 ? 1.2 : 0.5} opacity="0.55" />
+            <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="central" fill="#7a5a1a" fontSize="9" fontFamily="Inter, sans-serif">
               {house.house}
+            </text>
+          </g>
+        );
+      })}
+
+      {bodies.map((body) => {
+        const ang = svgAngleForLongitude(body.eclipticLongitude, asc);
+        const r = stacked[body.id] || 132;
+        const p = polar(cx, cy, r, ang);
+        const selected = body.id === selectedId;
+        const color = planetColor(body.id);
+        return (
+          <g key={body.id} onClick={() => onSelect?.(body.id)} className="cursor-pointer">
+            {selected && <circle cx={p.x} cy={p.y} r="16" fill="none" stroke={color} strokeDasharray="3 2" />}
+            <circle cx={p.x} cy={p.y} r={selected ? 11 : 9} fill="#fffdf9" stroke={color} strokeWidth="1.6" />
+            <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="central" fill={color} fontSize={selected ? 13 : 11} fontWeight="700">
+              {body.symbol}
             </text>
           </g>
         );
@@ -129,8 +156,10 @@ export const ChartWheel: React.FC<ChartWheelProps> = ({ bodies, aspects, layout,
         const bodyA = bodies.find((b) => b.name === asp.bodyA);
         const bodyB = bodies.find((b) => b.name === asp.bodyB);
         if (!bodyA || !bodyB) return null;
-        const pa = polar(cx, cy, 88, svgAngleForLongitude(bodyA.eclipticLongitude, asc));
-        const pb = polar(cx, cy, 88, svgAngleForLongitude(bodyB.eclipticLongitude, asc));
+        const ra = stacked[bodyA.id] || 132;
+        const rb = stacked[bodyB.id] || 132;
+        const pa = polar(cx, cy, ra, svgAngleForLongitude(bodyA.eclipticLongitude, asc));
+        const pb = polar(cx, cy, rb, svgAngleForLongitude(bodyB.eclipticLongitude, asc));
         const stroke =
           asp.aspectType === 'Trine' || asp.aspectType === 'Sextile'
             ? '#4a7c8c'
@@ -139,41 +168,30 @@ export const ChartWheel: React.FC<ChartWheelProps> = ({ bodies, aspects, layout,
               : '#b8862e';
         return (
           <line
-            key={idx}
+            key={`${asp.bodyA}-${asp.bodyB}-${idx}`}
             x1={pa.x}
             y1={pa.y}
             x2={pb.x}
             y2={pb.y}
             stroke={stroke}
-            strokeWidth={asp.orbDeg < 1.5 ? 1.6 : 0.8}
+            strokeWidth={asp.orbDeg < 1.5 ? 1.8 : 1}
             strokeDasharray={asp.aspectType === 'Opposition' ? '4 3' : undefined}
-            opacity="0.65"
+            opacity="0.72"
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAspectSelect?.(asp);
+            }}
           />
-        );
-      })}
-
-      {bodies.map((body) => {
-        const ang = svgAngleForLongitude(body.eclipticLongitude, asc);
-        const p = polar(cx, cy, stacked[body.id] || 118, ang);
-        const selected = body.id === selectedId;
-        const color = planetColor(body.id);
-        return (
-          <g key={body.id} onClick={() => onSelect?.(body.id)} className="cursor-pointer">
-            {selected && <circle cx={p.x} cy={p.y} r="14" fill="none" stroke={color} strokeDasharray="3 2" />}
-            <circle cx={p.x} cy={p.y} r={selected ? 10 : 8} fill="#fffdf9" stroke={color} strokeWidth="1.5" />
-            <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="central" fill={color} fontSize={selected ? 12 : 10} fontWeight="700">
-              {body.symbol}
-            </text>
-          </g>
         );
       })}
 
       {layout.angles && (
         <>
-          <text x="18" y="222" fill="#2c2419" fontSize="11" fontFamily="Plus Jakarta Sans, sans-serif" fontWeight="700">
+          <text x="18" y="222" fill="#2c2419" fontSize="11" fontFamily="Inter, sans-serif" fontWeight="700">
             ASC {layout.angles.ascendantDeg.toFixed(0)}°
           </text>
-          <text x="300" y="28" fill="#2c2419" fontSize="11" fontFamily="Plus Jakarta Sans, sans-serif" fontWeight="700">
+          <text x="300" y="28" fill="#2c2419" fontSize="11" fontFamily="Inter, sans-serif" fontWeight="700">
             MC {layout.angles.midheavenDeg.toFixed(0)}°
           </text>
         </>

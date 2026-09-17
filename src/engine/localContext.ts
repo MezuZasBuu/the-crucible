@@ -1,9 +1,9 @@
 /**
  * Honest regional context: daylight, season, and what location actually changes.
- * Sunrise/sunset are a NOAA-style solar-geometry approximation, not a weather service.
  */
 
 import { CompleteCalculationContext, CrucibleProfile, LocalReadingContext } from '../types';
+import { WORLD_DEFAULT_LOCATION } from './defaultLocation';
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, n));
@@ -18,7 +18,6 @@ function formatClock(hours: number): string {
   return `${hh}:${mm}`;
 }
 
-/** Approximate local sunrise/sunset from day-of-year and coordinates. */
 export function approximateSolarTimes(
   dayOfYear: number,
   latitude: number,
@@ -52,21 +51,17 @@ export function buildLocalReadingContext(
   const loc = ctx.input.location;
   const cityLabel =
     loc.city?.trim() ||
-    (Math.abs(loc.latitude - 31.778) < 0.02 && Math.abs(loc.longitude - 35.2354) < 0.05
-      ? 'Jerusalem'
-      : `${loc.latitude.toFixed(2)}°, ${loc.longitude.toFixed(2)}°`);
+    `${Math.abs(loc.latitude).toFixed(2)}°${loc.latitude >= 0 ? 'N' : 'S'}, ${Math.abs(loc.longitude).toFixed(2)}°${loc.longitude >= 0 ? 'E' : 'W'}`;
 
-  const { sunrise, sunset } = approximateSolarTimes(
-    ctx.temporal.dayOfYear,
-    loc.latitude,
-    loc.longitude
-  );
-
+  const { sunrise, sunset } = approximateSolarTimes(ctx.temporal.dayOfYear, loc.latitude, loc.longitude);
   const moonPhase = ctx.gaiaOvercast?.lunarPhaseName || 'Moon phase unavailable';
   const seasonalNote = `${ctx.chinese.solarTerm.name} · ${ctx.egyptian.season}`;
+  const isWorldDefault =
+    Math.abs(loc.latitude - WORLD_DEFAULT_LOCATION.latitude) < 0.01 &&
+    Math.abs(loc.longitude - WORLD_DEFAULT_LOCATION.longitude) < 0.01;
 
   return {
-    cityLabel,
+    cityLabel: isWorldDefault ? 'World · UTC (no regional overlay)' : cityLabel,
     localTime: ctx.input.timeString.slice(0, 5),
     dateLabel: formatDateLabel(ctx.input.dateString, ctx.temporal.dayOfWeek),
     sunrise,

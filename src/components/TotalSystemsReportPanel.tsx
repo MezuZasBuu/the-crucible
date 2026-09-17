@@ -196,7 +196,7 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
   const handleSyncToCurrent = () => {
     setInputDate(currentCtx.input.dateString);
     setInputTime(currentCtx.input.timeString);
-    setInputCity(currentCtx.input.location.city || 'Jerusalem Sanctuary');
+    setInputCity(currentCtx.input.location.city || 'World · UTC');
     setInputLat(currentCtx.input.location.latitude);
     setInputLng(currentCtx.input.location.longitude);
   };

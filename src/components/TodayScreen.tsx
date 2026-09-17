@@ -1,19 +1,26 @@
 /**
- * Today — first-minute personal reading.
+ * Today — world energy first; personal chart overlay when saved.
  */
 
 import React, { useMemo, useState } from 'react';
 import { ArrowRight, BookmarkPlus, BookMarked, Check } from 'lucide-react';
-import { CompleteCalculationContext, CrucibleProfile, ReadingFocus } from '../types';
+import { CompleteCalculationContext, CrucibleProfile, ReadingFocus, ReadingMode } from '../types';
 import { synthesizeDailyBearing } from '../engine/editorialSynthesis';
 import { saveInsight } from '../engine/savedInsights';
-import { AtmosphereTriad, ExploreFrontButton, FocusSelector, OverviewSlideCard } from './cards/TodayCards';
+import {
+  AtmosphereTriad,
+  ExploreFrontButton,
+  FocusSelector,
+  OverviewSlideCard,
+  ReadingModeToggle
+} from './cards/TodayCards';
 import { ExpandableDetailCard } from './ui/ExpandableDetailCard';
 import { EpistemicBadge } from './EpistemicBadge';
 
 interface TodayScreenProps {
   ctx: CompleteCalculationContext;
   profile: CrucibleProfile | null;
+  correlationKey: 'GMT_584283' | 'GMT_584285' | 'SPINDEN_489384';
   onOpenCodex: () => void;
   onOpenCompass: () => void;
   onOpenYou: () => void;
@@ -23,62 +30,77 @@ interface TodayScreenProps {
 export const TodayScreen: React.FC<TodayScreenProps> = ({
   ctx,
   profile,
+  correlationKey,
   onOpenCodex,
   onOpenCompass,
   onOpenYou,
   onOpenExplore
 }) => {
   const [focus, setFocus] = useState<ReadingFocus>('overview');
+  const [mode, setMode] = useState<ReadingMode>('world');
   const [whyOpen, setWhyOpen] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const bearing = useMemo(() => synthesizeDailyBearing(ctx, focus, profile), [ctx, focus, profile]);
+  const bearing = useMemo(
+    () => synthesizeDailyBearing(ctx, focus, profile, mode, correlationKey),
+    [ctx, focus, profile, mode, correlationKey]
+  );
 
   return (
     <div className="space-y-5 md:space-y-6">
+      <ReadingModeToggle mode={mode} hasProfile={Boolean(profile)} onChange={setMode} />
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <FocusSelector value={focus} onChange={setFocus} />
         <ExploreFrontButton onClick={onOpenExplore} />
       </div>
 
-      <OverviewSlideCard ctx={ctx} profile={profile} focus={focus} />
+      <OverviewSlideCard ctx={ctx} profile={profile} focus={focus} mode={mode} correlationKey={correlationKey} />
       <AtmosphereTriad bearing={bearing} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ExpandableDetailCard
-          label="Around you"
+          label="Regional overlay (optional)"
           accent="sage"
-          title={`Around you · ${bearing.localContext.cityLabel}`}
-          body={`Approximate daylight ${bearing.localContext.sunrise}–${bearing.localContext.sunset}. ${bearing.localContext.moonPhase}. ${bearing.localContext.seasonalNote}. Changing city updates local clock, daylight, horizon, and hour-based timing. Global sky events stay the same.`}
+          title={`Regional timing · ${bearing.localContext.cityLabel}`}
+          body={`This region adjusts local clock, approximate daylight (${bearing.localContext.sunrise}–${bearing.localContext.sunset}), and horizon math. It does not change the world sky — only how the day lands where you are. Moon: ${bearing.localContext.moonPhase}. Seasonal note: ${bearing.localContext.seasonalNote}.`}
           preview={
             <>
               <p className="readable-body font-semibold">{bearing.localContext.cityLabel}</p>
               <p className="readable-body mt-2">
-                Approximate daylight {bearing.localContext.sunrise}–{bearing.localContext.sunset}. {bearing.localContext.moonPhase}.{' '}
-                {bearing.localContext.seasonalNote}.
+                Local {bearing.localContext.localTime} · daylight {bearing.localContext.sunrise}–{bearing.localContext.sunset}
               </p>
             </>
           }
         />
 
         <ExpandableDetailCard
-          label="Your current cycle"
+          label={mode === 'personal' ? 'Your chart lens' : 'Personal chart'}
           accent="terracotta"
-          title="Your current cycle"
+          title={mode === 'personal' ? 'Your chart × today' : 'Add your chart'}
           body={
             profile
-              ? `Saved as ${profile.displayName || profile.querentName}. Birth-time confidence: ${profile.birthTimeConfidence.replace('_', ' ')}. Houses and rising sign stay limited until time is exact. Your personal pattern weights today's reading when a profile is active.`
-              : 'No birth chart yet. You are seeing the shared atmosphere for this date and place. Add your pattern on the You tab to personalize houses, transits, and daily weighting.'
+              ? mode === 'personal'
+                ? bearing.domains.personalAlignment ||
+                  'Personal alignment copy unavailable — transit hits may be wide today.'
+                : 'Switch to “Your chart energy” above to compare today’s sky with your saved natal pattern.'
+              : 'Save birth data on the You tab to toggle between world energy and your personal chart overlay.'
           }
           preview={
             profile ? (
               <p className="readable-body">
-                Saved as {profile.displayName || profile.querentName}. Birth-time confidence:{' '}
-                {profile.birthTimeConfidence.replace('_', ' ')}.
+                {profile.displayName || profile.querentName} saved · confidence {profile.birthTimeConfidence.replace('_', ' ')}
               </p>
             ) : (
-              <p className="readable-body">No birth chart yet. You are seeing the shared atmosphere for this date and place.</p>
+              <p className="readable-body">No chart saved yet — world energy only.</p>
             )
+          }
+          extra={
+            !profile ? (
+              <button type="button" className="cta-ghost mt-3" onClick={onOpenYou}>
+                Add your chart
+              </button>
+            ) : undefined
           }
         />
       </div>
@@ -98,10 +120,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
         {whyOpen && (
           <ul className="mt-4 space-y-3">
             {bearing.contributors.map((c) => (
-              <li
-                key={c.systemId}
-                className="scroll-card gradient-card-base readable-body flex flex-wrap items-center justify-between gap-2"
-              >
+              <li key={c.systemId} className="scroll-card gradient-card-base readable-body flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="font-semibold readable-body">{c.label}</p>
                   <p className="readable-body mt-0.5 opacity-90">{c.signal}</p>
@@ -114,14 +133,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="cta-primary"
-          onClick={() => {
-            saveInsight(bearing);
-            setSaved(true);
-          }}
-        >
+        <button type="button" className="cta-primary" onClick={() => { saveInsight(bearing); setSaved(true); }}>
           {saved ? <Check className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
           {saved ? 'Saved' : 'Save insight'}
         </button>

@@ -18,10 +18,8 @@ import {
   RotateCw,
   RotateCcw,
   Maximize2,
-  Key,
   Eye,
   Crosshair,
-  ExternalLink,
   Shield,
   Info,
   Navigation2,
@@ -47,15 +45,12 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
   onEnochianFlipChange,
   enochianOrientation
 }) => {
-  // State for API Key & Map Configuration
-  const defaultApiKey = ((import.meta as any).env?.VITE_GOOGLE_MAPS_API_KEY as string) || '';
-  const [apiKey, setApiKey] = useState<string>(defaultApiKey);
-
-  const [showKeyInput, setShowKeyInput] = useState<boolean>(!defaultApiKey);
-  const [tempKeyInput, setTempKeyInput] = useState<string>('');
+  // Google Maps only when the service provides a key at build/deploy time — never user-entered.
+  const apiKey = ((import.meta as any).env?.VITE_GOOGLE_MAPS_API_KEY as string) || '';
+  const googleMapsAvailable = Boolean(apiKey);
 
   const [mapProvider, setMapProvider] = useState<'google' | 'osm' | 'vector'>(
-    defaultApiKey ? 'google' : 'osm'
+    googleMapsAvailable ? 'google' : 'osm'
   );
   const [mapTypeId, setMapTypeId] = useState<'roadmap' | 'satellite' | 'hybrid' | 'terrain'>('hybrid');
   const [tilt, setTilt] = useState<number>(45);
@@ -212,13 +207,21 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
             ).map((mode) => (
               <button
                 key={mode.id}
-                onClick={() => setMapProvider(mode.id)}
+                onClick={() => {
+                  if (mode.id === 'google' && !googleMapsAvailable) return;
+                  setMapProvider(mode.id);
+                }}
+                disabled={mode.id === 'google' && !googleMapsAvailable}
                 className={`nav-tab !px-2 !py-1 text-[10px] uppercase ${
                   mapProvider === mode.id
                     ? 'nav-tab-active bg-amber-300/[0.06] text-[color:var(--solar-bright)]'
                     : ''
-                }`}
-                title="Map provider — OSM requires no API key"
+                } ${mode.id === 'google' && !googleMapsAvailable ? 'opacity-40 cursor-not-allowed' : ''}`}
+                title={
+                  mode.id === 'google' && !googleMapsAvailable
+                    ? 'Google satellite maps unlock with a Crucible subscription'
+                    : 'Map provider — OSM requires no API key'
+                }
               >
                 {mode.label}
               </button>
@@ -296,16 +299,6 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
               Enoch Flip
             </button>
           </div>
-
-          {/* API Key Modal / Drawer Toggle */}
-          <button
-            onClick={() => setShowKeyInput((prev) => !prev)}
-            className="cta-ghost min-h-0 px-3 py-2 text-[10px]"
-            title="Google Maps Platform API Key Configuration"
-          >
-            <Key className="w-3 h-3 text-amber-400" />
-            <span>{apiKey ? 'API Key Active' : 'Configure Key'}</span>
-          </button>
         </div>
       </div>
 
@@ -371,56 +364,6 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
           </button>
         </div>
       </div>
-
-      {/* API Key Configuration Notification / Drawer */}
-      {showKeyInput && (
-        <div className="rounded-[var(--radius-md)] border border-cyan-300/20 bg-cyan-300/[0.045] p-4 text-xs space-y-3 shadow-[var(--glow-temporal)]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-cyan-300 font-bold uppercase text-[11px]">
-              <Key className="w-3.5 h-3.5 text-amber-400" />
-              <span>Google Maps Platform 3D Satellite Imagery Setup</span>
-            </div>
-            <button
-              onClick={() => setShowKeyInput(false)}
-              className="text-gray-400 hover:text-white text-[10px] uppercase font-bold"
-            >
-              Dismiss
-            </button>
-          </div>
-          <p className="text-gray-300 text-[11px] leading-relaxed">
-            To view full 3D Google Geo Satellite imagery, photorealistic tiles, and hardware-accelerated globe navigation, provide a Google Maps Platform API Key (or use the free Maps Demo Key for prototyping).
-          </p>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
-            <input
-              type="text"
-              value={tempKeyInput}
-              onChange={(e) => setTempKeyInput(e.target.value)}
-              placeholder="Paste VITE_GOOGLE_MAPS_API_KEY here..."
-              className="field-input flex-1"
-            />
-            <button
-              onClick={() => {
-                if (tempKeyInput.trim()) {
-                  setApiKey(tempKeyInput.trim());
-                  setShowKeyInput(false);
-                }
-              }}
-              className="cta-primary min-h-0 shrink-0 px-4 py-2"
-            >
-              Activate Google 3D Map
-            </button>
-            <a
-              href="https://mapsplatform.google.com/maps-demo-key?utm_campaign=gmp_mcp_codeassist_v1_aistudio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="cta-ghost min-h-0 shrink-0 px-3 py-2 text-[11px] text-[color:var(--solar-bright)]"
-            >
-              <span>Get Free Demo Key</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-        </div>
-      )}
 
       {/* Main Map Viewer Canvas: Live Google Maps or Geodesic Vector Engine */}
       <div
@@ -825,7 +768,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
                 <span>Geodesic Vector Matrix Active</span>
               </div>
               <p className="text-[10px] text-gray-300 mt-0.5 leading-relaxed">
-                Click "Configure Key" to enable full Google Maps 3D photorealistic satellite imagery and oblique flight controls.
+                OpenStreetMap and vector modes are free. Google 3D satellite imagery is provided through the Crucible service when enabled.
               </p>
             </div>
           </div>

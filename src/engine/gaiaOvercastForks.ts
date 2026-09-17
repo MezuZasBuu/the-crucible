@@ -339,7 +339,7 @@ export function buildTotalSystemsReport(
   const isNatalComparison = Boolean(natalContext);
   const natalDate = natalContext?.input?.dateString || ctx.input.dateString;
   const natalTime = natalContext?.input?.timeString || ctx.input.timeString;
-  const natalCity = natalContext?.input?.location?.city || ctx.input.location?.city || 'Jerusalem Sanctuary';
+  const natalCity = natalContext?.input?.location?.city || ctx.input.location?.city || 'World · UTC';
 
   const executiveSynthesizedTreatise = `EXECUTIVE SYNCHRONIC DOSSIER FOR ${querentName.toUpperCase()}:
 Measured against the living energetic overcast of Gaia on ${ctx.input.dateString}, your temporal coordinate intersects a dense matrix of multi-tradition computus. 

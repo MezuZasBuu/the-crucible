@@ -28,7 +28,23 @@ export type ReadingFocus =
   | 'overview'
   | 'relationships'
   | 'work'
-  | 'creativity';
+  | 'creativity'
+  | 'mood'
+  | 'travel'
+  | 'finance'
+  | 'tech';
+
+export type ReadingMode = 'world' | 'personal';
+
+export interface DomainImpacts {
+  mood: string;
+  people: string;
+  travel: string;
+  finance: string;
+  tech: string;
+  whyToday: string;
+  personalAlignment?: string;
+}
 
 export interface DailyBearingContributor {
   systemId: string;
@@ -60,9 +76,11 @@ export interface DailyBearing {
     social: string;
     workCreative: string;
   };
+  domains: DomainImpacts;
   localContext: LocalReadingContext;
   contributors: DailyBearingContributor[];
   focus: ReadingFocus;
+  mode: ReadingMode;
   generatedAtIso: string;
   calculationId: string;
 }

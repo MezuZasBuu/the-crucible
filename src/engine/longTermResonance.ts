@@ -279,7 +279,7 @@ export function calculateEclipseStatus(sunLongDeg: number, northNodeLongDeg: num
 export function generateFourteenDayForecast(
   birthDateInput: TemporalInput,
   startDateString?: string,
-  targetLocationId: string = 'jerusalem',
+  targetLocationId: string = 'london',
   userName: string = 'Sovereign Querent'
 ): LongTermResonanceForecast {
   // Normalize base start date

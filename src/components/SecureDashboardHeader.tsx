@@ -33,7 +33,7 @@ export const SecureDashboardHeader: React.FC<SecureDashboardHeaderProps> = ({
               The Crucible
             </h1>
             <p className="ui-eyebrow mt-1 text-[color:var(--temporal)]">
-              Daily energy for {ctx.input.location.city?.trim() || 'your place'}
+              Today&apos;s world energy
             </p>
           </div>
         </div>

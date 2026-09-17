@@ -30,7 +30,7 @@ const baseInput: TemporalInput = {
   timeString: '12:00:00',
   timezoneOffsetMinutes: 240,
   isUTC: false,
-  location: { latitude: 31.778, longitude: 35.2354, city: 'Jerusalem' },
+  location: { latitude: 51.4779, longitude: 0, city: 'World · UTC' },
   querentName: 'Test Querent',
   methodology: mergeMethodology({ includeVedic: true, includeGaiaOverlay: true })
 };
@@ -134,7 +134,7 @@ async function main() {
 
   results.push(
     await runNamed('longTermResonance.14day', () => {
-      const forecast = generateFourteenDayForecast(baseInput, '2026-09-07', 'jerusalem', 'Test Querent');
+      const forecast = generateFourteenDayForecast(baseInput, '2026-09-07', 'london', 'Test Querent');
       assert(forecast.fourteenDayEntries.length === 14, '14 days');
     })
   );
@@ -209,7 +209,7 @@ async function main() {
       assert(!!overview.theme && overview.theme.length > 4, 'theme');
       assert(!!overview.practice, 'practice');
       assert(!!overview.localContext.sunrise && !!overview.localContext.sunset, 'daylight');
-      assert(overview.localContext.cityLabel.includes('Jerusalem'), 'city');
+      assert(overview.localContext.cityLabel.includes('World'), 'city');
       assert(bearingIsPlainLanguage(overview), 'plain language');
       assert(overview.calculationId === ctx.calculationId, 'calc id');
       const again = synthesizeDailyBearing(ctx, 'overview', null);
