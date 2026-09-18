@@ -5,6 +5,7 @@
 import React, { useEffect, useId, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
 import { DeepReadingRequest } from '../../types';
+import { authFetch } from '../../engine/authFetch';
 import { FadeInText } from './FadeInText';
 
 type Accent = 'terracotta' | 'sage' | 'slate' | 'indigo' | 'ochre' | 'rose' | 'solar';
@@ -72,14 +73,21 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
     setDeepLoading(true);
     setDeepError(null);
 
-    fetch('/api/deep-reading', {
+    authFetch('/api/deep-reading', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(deepReading)
     })
       .then(async (res) => {
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Deep reading failed');
+        if (!res.ok) {
+          if (data.code === 'AUTH_REQUIRED') {
+            throw new Error('Sign in on the You tab (guest or Google) to unlock Cursor deep readings.');
+          }
+          if (data.code === 'QUOTA_EXCEEDED') {
+            throw new Error(data.error || 'Daily deep reading limit reached.');
+          }
+          throw new Error(data.error || 'Deep reading failed');
+        }
         if (cancelled) return;
         setDeepText(data.expandedText || body);
         setDeepSource(data.source || null);

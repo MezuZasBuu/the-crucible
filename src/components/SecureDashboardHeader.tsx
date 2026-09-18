@@ -5,6 +5,7 @@
 import React from 'react';
 import { BookMarked, ShieldCheck } from 'lucide-react';
 import { CompleteCalculationContext } from '../types';
+import { AccountPanel } from './auth/AccountPanel';
 
 interface SecureDashboardHeaderProps {
   ctx: CompleteCalculationContext;
@@ -39,6 +40,9 @@ export const SecureDashboardHeader: React.FC<SecureDashboardHeaderProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <div className="hidden lg:block">
+            <AccountPanel compact />
+          </div>
           <button type="button" onClick={onOpenDiagnostics} className="cta-ghost" title="Verify algorithms">
             <ShieldCheck className="w-4 h-4 text-[color:var(--accent-sage)]" />
             <span className="hidden md:inline">Verify</span>

@@ -1,20 +1,45 @@
 /**
- * Persistent My Crucible Profile — localStorage natal baseline.
+ * Persistent My Crucible Profile — scoped to signed-in Firebase uid when available.
  */
 
 import { CrucibleProfile, TemporalInput } from '../types';
 
-const STORAGE_KEY = 'crucible.profiles.v1';
-const ACTIVE_KEY = 'crucible.activeProfileId.v1';
+const LEGACY_STORAGE_KEY = 'crucible.profiles.v1';
+const LEGACY_ACTIVE_KEY = 'crucible.activeProfileId.v1';
+
+let activeUid: string | null = null;
+
+function profilesKey(uid?: string | null): string {
+  return uid ? `crucible.profiles.v1.${uid}` : LEGACY_STORAGE_KEY;
+}
+
+function activeKey(uid?: string | null): string {
+  return uid ? `crucible.activeProfileId.v1.${uid}` : LEGACY_ACTIVE_KEY;
+}
+
+export function setProfileStorageUid(uid: string | null): void {
+  activeUid = uid;
+}
 
 function uid(): string {
   return `profile-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function loadProfiles(): CrucibleProfile[] {
+export function migrateLegacyProfilesToUid(firebaseUid: string): void {
+  if (typeof localStorage === 'undefined') return;
+  const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+  const scopedKey = profilesKey(firebaseUid);
+  if (!legacy || localStorage.getItem(scopedKey)) return;
+
+  localStorage.setItem(scopedKey, legacy);
+  const legacyActive = localStorage.getItem(LEGACY_ACTIVE_KEY);
+  if (legacyActive) localStorage.setItem(activeKey(firebaseUid), legacyActive);
+}
+
+export function loadProfiles(forUid?: string | null): CrucibleProfile[] {
   try {
     if (typeof localStorage === 'undefined') return [];
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(profilesKey(forUid ?? activeUid));
     if (!raw) return [];
     const parsed = JSON.parse(raw) as CrucibleProfile[];
     return Array.isArray(parsed) ? parsed : [];
@@ -23,26 +48,27 @@ export function loadProfiles(): CrucibleProfile[] {
   }
 }
 
-export function saveProfiles(profiles: CrucibleProfile[]): void {
+export function saveProfiles(profiles: CrucibleProfile[], forUid?: string | null): void {
   if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+  localStorage.setItem(profilesKey(forUid ?? activeUid), JSON.stringify(profiles));
 }
 
-export function getActiveProfileId(): string | null {
+export function getActiveProfileId(forUid?: string | null): string | null {
   if (typeof localStorage === 'undefined') return null;
-  return localStorage.getItem(ACTIVE_KEY);
+  return localStorage.getItem(activeKey(forUid ?? activeUid));
 }
 
-export function setActiveProfileId(id: string | null): void {
+export function setActiveProfileId(id: string | null, forUid?: string | null): void {
   if (typeof localStorage === 'undefined') return;
-  if (!id) localStorage.removeItem(ACTIVE_KEY);
-  else localStorage.setItem(ACTIVE_KEY, id);
+  const key = activeKey(forUid ?? activeUid);
+  if (!id) localStorage.removeItem(key);
+  else localStorage.setItem(key, id);
 }
 
-export function getActiveProfile(): CrucibleProfile | null {
-  const id = getActiveProfileId();
+export function getActiveProfile(forUid?: string | null): CrucibleProfile | null {
+  const id = getActiveProfileId(forUid);
   if (!id) return null;
-  return loadProfiles().find((p) => p.id === id) || null;
+  return loadProfiles(forUid).find((p) => p.id === id) || null;
 }
 
 export function upsertProfile(
@@ -55,10 +81,12 @@ export function upsertProfile(
     birthTimeWindowStart?: string;
     birthTimeWindowEnd?: string;
     notes?: string;
-  }
+  },
+  forUid?: string | null
 ): CrucibleProfile {
   const now = new Date().toISOString();
-  const profiles = loadProfiles();
+  const uidScope = forUid ?? activeUid;
+  const profiles = loadProfiles(uidScope);
   const existingIdx = partial.id ? profiles.findIndex((p) => p.id === partial.id) : -1;
 
   const profile: CrucibleProfile = {
@@ -77,15 +105,16 @@ export function upsertProfile(
   if (existingIdx >= 0) profiles[existingIdx] = profile;
   else profiles.push(profile);
 
-  saveProfiles(profiles);
-  setActiveProfileId(profile.id);
+  saveProfiles(profiles, uidScope);
+  setActiveProfileId(profile.id, uidScope);
   return profile;
 }
 
-export function deleteProfile(id: string): void {
-  const next = loadProfiles().filter((p) => p.id !== id);
-  saveProfiles(next);
-  if (getActiveProfileId() === id) setActiveProfileId(next[0]?.id || null);
+export function deleteProfile(id: string, forUid?: string | null): void {
+  const uidScope = forUid ?? activeUid;
+  const next = loadProfiles(uidScope).filter((p) => p.id !== id);
+  saveProfiles(next, uidScope);
+  if (getActiveProfileId(uidScope) === id) setActiveProfileId(next[0]?.id || null, uidScope);
 }
 
 /** Birth-time sensitivity: compare contexts at window edges */

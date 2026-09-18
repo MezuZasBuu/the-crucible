@@ -31,8 +31,11 @@ import { loadInsights } from './engine/savedInsights';
 import { resolveInitialLocation, saveLocation } from './engine/locationStorage';
 import { NatalChartPanel } from './components/chart/NatalChartPanel';
 import { DreamspellCalendarWorkspace } from './components/calendar/DreamspellCalendarWorkspace';
+import { AccountPanel } from './components/auth/AccountPanel';
+import { useAuth } from './firebase/AuthProvider';
 
 export default function App() {
+  const { user, ready: authReady } = useAuth();
   const [primary, setPrimary] = useState<PrimaryDestination>('TODAY');
   const [exploreTab, setExploreTab] = useState<ExploreTab>('SYSTEMS');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
@@ -74,6 +77,10 @@ export default function App() {
     () => synthesizeDailyBearing(calculationContext, 'overview', profile, 'world', correlationKey).localContext,
     [calculationContext, profile, correlationKey]
   );
+
+  useEffect(() => {
+    if (authReady) setProfileTick((n) => n + 1);
+  }, [user?.uid, authReady]);
 
   useEffect(() => {
     if (!isStreaming) return;
@@ -146,6 +153,7 @@ export default function App() {
 
           {primary === 'YOU' && (
             <div className="space-y-5">
+              <AccountPanel />
               <div className="instrument-panel">
                 <p className="ui-eyebrow text-[color:var(--solar-deep)]">Your pattern</p>
                 <h2 className="panel-title mt-1">Birth chart, transits, and saved reflections</h2>

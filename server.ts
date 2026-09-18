@@ -16,6 +16,11 @@ import { generateTodayDailyReport } from './src/engine/dailyEnergyReport';
 import { BRIEFING_VOICE_PROMPT } from './src/engine/voiceStyle';
 import { executeDeepReading } from './src/engine/deepReadingService';
 import { DeepReadingRequest } from './src/types';
+import {
+  checkAndIncrementDeepReadingUsage,
+  extractBearerToken,
+  verifyFirebaseIdToken
+} from './src/engine/authGate';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -241,7 +246,7 @@ Measured against Gaia's daily overcast (Schumann base 7.83 Hz, energetic aspect 
     res.json(PRESET_LOCATIONS);
   });
 
-  // 7c. Multi-pass Cursor deep reading for expandable cards
+  // 7c. Multi-pass Cursor deep reading for expandable cards (auth required for Cursor pool)
   app.post('/api/deep-reading', async (req, res) => {
     try {
       const request = req.body as DeepReadingRequest;
@@ -249,18 +254,54 @@ Measured against Gaia's daily overcast (Schumann base 7.83 Hz, energetic aspect 
         return res.status(400).json({ error: 'seedText and domainKey are required' });
       }
 
-      const apiKey = process.env.CURSOR_API_KEY;
-      const result = await executeDeepReading(request, apiKey, {
-        model: process.env.CURSOR_MODEL || 'composer-2.5',
-        maxWaitMs: 180000,
-        pollMs: 2500,
-        passCount: 3
-      });
+      const cursorKey = process.env.CURSOR_API_KEY;
+      const firebaseWebKey =
+        process.env.FIREBASE_WEB_API_KEY || process.env.VITE_FIREBASE_API_KEY;
 
+      if (cursorKey) {
+        const token = extractBearerToken(req.headers.authorization);
+        if (!token) {
+          return res.status(401).json({
+            error: 'Sign in (guest or Google) to unlock Cursor deep readings.',
+            code: 'AUTH_REQUIRED'
+          });
+        }
+        if (!firebaseWebKey) {
+          return res.status(503).json({ error: 'Firebase auth verification is not configured on the server.' });
+        }
+        const verified = await verifyFirebaseIdToken(token, firebaseWebKey);
+        if (!verified) {
+          return res.status(401).json({ error: 'Invalid or expired session. Sign in again.', code: 'AUTH_INVALID' });
+        }
+        const quota = checkAndIncrementDeepReadingUsage(verified);
+        if (!quota.allowed) {
+          return res.status(429).json({
+            error: `Daily deep reading limit reached (${quota.used}/${quota.limit} for ${quota.tier} tier).`,
+            code: 'QUOTA_EXCEEDED',
+            quota
+          });
+        }
+
+        const result = await executeDeepReading(request, cursorKey, {
+          model: process.env.CURSOR_MODEL || 'composer-2.5',
+          maxWaitMs: 180000,
+          pollMs: 2500,
+          passCount: 3
+        });
+
+        return res.json({
+          expandedText: result.text,
+          source: result.source,
+          passesCompleted: result.passesCompleted,
+          quota
+        });
+      }
+
+      const offline = await executeDeepReading(request, undefined, { passCount: 0 });
       return res.json({
-        expandedText: result.text,
-        source: result.source,
-        passesCompleted: result.passesCompleted
+        expandedText: offline.text,
+        source: offline.source,
+        passesCompleted: offline.passesCompleted
       });
     } catch (err: any) {
       console.error('Deep reading error:', err);

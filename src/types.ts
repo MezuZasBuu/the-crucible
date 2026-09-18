@@ -36,6 +36,9 @@ export type ReadingFocus =
 
 export type ReadingMode = 'world' | 'personal';
 
+/** Account tier for service quotas — subscriber reserved for paid pool. */
+export type CrucibleAccountTier = 'visitor' | 'guest' | 'member' | 'subscriber';
+
 export interface DomainImpacts {
   mood: string;
   people: string;
