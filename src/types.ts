@@ -114,6 +114,9 @@ export interface DailyBearing {
   mode: ReadingMode;
   generatedAtIso: string;
   calculationId: string;
+  /** Full multi-section report — shown when Today's Report is opened */
+  fullReport?: string;
+  enrichedBy?: 'gemini' | 'deterministic';
 }
 
 export interface MethodologyBundle {

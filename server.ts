@@ -15,8 +15,10 @@ import { generateFourteenDayForecast, PRESET_LOCATIONS } from './src/engine/long
 import { generateTodayDailyReport } from './src/engine/dailyEnergyReport';
 import { BRIEFING_VOICE_PROMPT } from './src/engine/voiceStyle';
 import { executeDeepReading } from './src/engine/deepReadingService';
-import { DeepReadingRequest } from './src/types';
+import { DeepReadingRequest, CompleteCalculationContext, CrucibleProfile, ReadingMode } from './src/types';
 import { buildTgoldResearchPromptBlock, getTgoldResearchMetadata } from './src/engine/tgold';
+import { generateTodayEnergyWithGemini } from './src/engine/todayEnergyGemini';
+import { deterministicTodayEnergy } from './src/engine/todayEnergyService';
 import {
   checkAndIncrementDeepReadingUsage,
   extractBearerToken,
@@ -267,7 +269,40 @@ Measured against Gaia's daily overcast (Schumann base 7.83 Hz, energetic aspect 
     res.json(PRESET_LOCATIONS);
   });
 
-  // 7c. Multi-pass Cursor deep reading for expandable cards (auth required for Cursor pool)
+  // 7c. Gemini today energy — public-facing copy for Today screen (free tier)
+  app.post('/api/today-energy', async (req, res) => {
+    try {
+      const { context, profile, mode } = req.body as {
+        context?: CompleteCalculationContext;
+        profile?: CrucibleProfile | null;
+        mode?: ReadingMode;
+      };
+      if (!context?.input?.dateString) {
+        return res.status(400).json({ error: 'context with date is required' });
+      }
+      const readingMode = mode || 'world';
+      const correlationKey = 'GMT_584283';
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        const generated = await generateTodayEnergyWithGemini(
+          apiKey,
+          context,
+          profile || null,
+          readingMode,
+          correlationKey as 'GMT_584283' | 'GMT_584285' | 'SPINDEN_489384'
+        );
+        return res.json(generated);
+      }
+      return res.json(
+        deterministicTodayEnergy(context, profile || null, readingMode, correlationKey as 'GMT_584283')
+      );
+    } catch (err: any) {
+      console.error('Today energy error:', err);
+      res.status(500).json({ error: err.message || 'Today energy failed' });
+    }
+  });
+
+  // 7d. Multi-pass Cursor deep reading for expandable cards (auth required for Cursor pool)
   app.post('/api/deep-reading', async (req, res) => {
     try {
       const request = req.body as DeepReadingRequest;

@@ -243,7 +243,7 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
   };
 
   return (
-    <div className="space-y-5 motion-enter text-[color:var(--text-secondary)]">
+    <div className="space-y-5 motion-enter text-[color:var(--text-secondary)] parchment-surface">
       {/* Top Banner & Orientation */}
       <div className="instrument-panel">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[color:var(--line-soft)] pb-4 mb-4">

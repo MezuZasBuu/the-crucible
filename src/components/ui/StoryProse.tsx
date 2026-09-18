@@ -4,9 +4,22 @@
 
 import React from 'react';
 
+/** Ensure spaces around emphasis markers and fix jammed words. */
+export function normalizeStoryText(text: string): string {
+  return text
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/(\S)\*(?=[^\s*])/g, '$1 *')
+    .replace(/(\*[^*]+\*)(\S)/g, '$1 $2')
+    .replace(/(\S)\?(?=[^\s?])/g, '$1 ?')
+    .replace(/(\?[^?]+\?)(\S)/g, '$1 $2')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 /** Wrap *asterisk emphasis* and ?questions? in styled spans. */
 export function enrichStoryText(text: string): React.ReactNode[] {
-  const parts = text.split(/(\*[^*]+\*|\?[^?]+\?)/g);
+  const normalized = normalizeStoryText(text);
+  const parts = normalized.split(/(\*[^*]+\*|\?[^?]+\?)/g);
   return parts.map((part, i) => {
     if (part.startsWith('*') && part.endsWith('*')) {
       return (

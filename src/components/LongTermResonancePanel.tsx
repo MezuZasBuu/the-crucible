@@ -114,7 +114,7 @@ export const LongTermResonancePanel: React.FC<LongTermResonancePanelProps> = ({
   };
 
   return (
-    <div className="space-y-6 motion-enter text-[color:var(--text-secondary)]">
+    <div className="space-y-6 motion-enter text-[color:var(--text-secondary)] parchment-surface">
       {/* 1. Header Banner & Executive Synthesis */}
       <div className="instrument-panel instrument-panel-solar relative">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-950/10 rounded-full blur-3xl pointer-events-none" />

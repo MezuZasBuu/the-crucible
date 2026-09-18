@@ -1,14 +1,21 @@
 /**
- * Today — story-first world energy; galleries auto-advance every 4 seconds.
+ * Today — Gemini-enriched world energy; 6s galleries with swipe arrows.
  */
 
-import React, { useMemo, useState } from 'react';
-import { ArrowRight, BookmarkPlus, BookMarked, Check } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowRight, BookmarkPlus, BookMarked, Check, Loader2 } from 'lucide-react';
 import { CompleteCalculationContext, CrucibleProfile, ReadingMode } from '../types';
 import { synthesizeDailyBearing } from '../engine/editorialSynthesis';
+import {
+  fetchTodayEnergy,
+  mergeBearingWithGenerated,
+  type GeneratedTodayEnergy
+} from '../engine/todayEnergyService';
 import { saveInsight } from '../engine/savedInsights';
 import { getTgoldResearchMetadata } from '../engine/tgold';
-import { AtmosphereTriad, ExploreFrontButton, OverviewSlideCard, ReadingModeToggle } from './cards/TodayCards';
+import { useAuth } from '../firebase/AuthProvider';
+import { ExploreFrontButton, OverviewSlideCard, ReadingModeToggle } from './cards/TodayCards';
+import { WorldEnergyGallery } from './cards/WorldEnergyGallery';
 import { ExpandableDetailCard } from './ui/ExpandableDetailCard';
 import { StoryProse } from './ui/StoryProse';
 
@@ -31,42 +38,120 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
   onOpenYou,
   onOpenExplore
 }) => {
+  const { tier } = useAuth();
   const [overviewIndex, setOverviewIndex] = useState(0);
-  const [atmosphereIndex, setAtmosphereIndex] = useState(0);
-  const [domainIndex, setDomainIndex] = useState(0);
+  const [energyIndex, setEnergyIndex] = useState(0);
   const [mode, setMode] = useState<ReadingMode>('world');
   const [whyOpen, setWhyOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [generated, setGenerated] = useState<GeneratedTodayEnergy | null>(null);
+  const [loadingEnergy, setLoadingEnergy] = useState(true);
 
-  const bearing = useMemo(
-    () => synthesizeDailyBearing(ctx, 'overview', profile, mode, correlationKey),
-    [ctx, profile, mode, correlationKey]
+  const canUsePersonal = Boolean(profile) && tier !== 'visitor' && tier !== 'guest';
+
+  useEffect(() => {
+    if (mode === 'personal' && !canUsePersonal) {
+      setMode('world');
+    }
+  }, [mode, canUsePersonal]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingEnergy(true);
+    fetchTodayEnergy({ ctx, profile: canUsePersonal ? profile : null, mode, correlationKey })
+      .then((data) => {
+        if (!cancelled) setGenerated(data);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingEnergy(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ctx, profile, mode, correlationKey, canUsePersonal]);
+
+  const baseBearing = useMemo(
+    () => synthesizeDailyBearing(ctx, 'overview', canUsePersonal ? profile : null, mode, correlationKey),
+    [ctx, profile, mode, correlationKey, canUsePersonal]
   );
 
+  const bearing = useMemo(
+    () => mergeBearingWithGenerated(baseBearing, generated),
+    [baseBearing, generated]
+  );
+
+  const fullReport =
+    bearing.fullReport ||
+    [
+      bearing.summary,
+      bearing.atmospheres.emotional,
+      bearing.atmospheres.social,
+      bearing.atmospheres.workCreative,
+      bearing.domains.mood,
+      bearing.domains.people,
+      bearing.domains.travel,
+      bearing.domains.finance,
+      bearing.domains.tech,
+      bearing.domains.whyToday,
+      bearing.watchFor
+    ].join('\n\n');
+
+  const deepBase = { context: ctx, profile: canUsePersonal ? profile : null, mode };
+
   return (
-    <div className="space-y-5 md:space-y-6">
-      <ReadingModeToggle mode={mode} hasProfile={Boolean(profile)} onChange={setMode} />
+    <div className="space-y-5 md:space-y-6 parchment-surface">
+      <ReadingModeToggle
+        mode={mode}
+        hasProfile={canUsePersonal}
+        onChange={setMode}
+        onNeedAccount={onOpenYou}
+      />
+
+      {loadingEnergy && (
+        <p className="readable-muted text-sm inline-flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Composing today&apos;s reading…
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center justify-end gap-3">
         <ExploreFrontButton onClick={onOpenExplore} />
       </div>
 
+      <ExpandableDetailCard
+        label="Today's report"
+        title={`Full reading · ${ctx.input.dateString}`}
+        body={fullReport}
+        preview={
+          <StoryProse
+            text={bearing.summary}
+            className="text-[1.0625rem] leading-relaxed line-clamp-6"
+          />
+        }
+        deepReading={{
+          domainKey: 'whyToday',
+          seedText: fullReport,
+          cardTitle: "Today's full report",
+          ...deepBase
+        }}
+        className="card-featured"
+      />
+
       <OverviewSlideCard
         ctx={ctx}
-        profile={profile}
+        profile={canUsePersonal ? profile : null}
         slideIndex={overviewIndex}
         onSlideIndexChange={setOverviewIndex}
         mode={mode}
         correlationKey={correlationKey}
+        heroBearing={bearing}
       />
 
-      <AtmosphereTriad
+      <WorldEnergyGallery
         bearing={bearing}
-        deepReadingBase={{ context: ctx, profile, mode }}
-        atmosphereIndex={atmosphereIndex}
-        onAtmosphereIndexChange={setAtmosphereIndex}
-        domainIndex={domainIndex}
-        onDomainIndexChange={setDomainIndex}
+        deepReadingBase={deepBase}
+        slideIndex={energyIndex}
+        onSlideIndexChange={setEnergyIndex}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -78,9 +163,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
             domainKey: 'regional',
             seedText: `Regional overlay: ${bearing.localContext.cityLabel}.`,
             cardTitle: 'Local overlay',
-            context: ctx,
-            profile,
-            mode
+            ...deepBase
           }}
           preview={
             <StoryProse
@@ -90,29 +173,29 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
         />
 
         <ExpandableDetailCard
-          label={mode === 'personal' ? 'Your lens' : 'Your chart'}
-          title={mode === 'personal' ? 'Your pattern × today' : 'Add your chart'}
+          label={canUsePersonal ? 'Your lens' : 'Member charts'}
+          title={canUsePersonal ? 'Your pattern × today' : 'Personal chart (members)'}
           body={
-            profile
+            canUsePersonal
               ? mode === 'personal'
                 ? bearing.domains.personalAlignment ||
                   'Your saved chart is wide to today’s sky — nothing tight is pressing; treat it as ambient weather.'
                 : 'Switch to *Your chart energy* above to compare today’s sky with your saved pattern.'
-              : 'Save birth data on the You tab to compare world energy with your personal chart.'
+              : 'Sign in with Google on the You tab to unlock personal chart overlays, natal wheel, and astrocartography.'
           }
           preview={
-            profile ? (
+            canUsePersonal ? (
               <p className="readable-body text-[1.0625rem]">
-                {profile.displayName || profile.querentName}
+                {profile?.displayName || profile?.querentName}
               </p>
             ) : (
-              <p className="readable-body text-[1.0625rem]">World energy only — no chart saved.</p>
+              <p className="readable-body text-[1.0625rem]">World energy — member charts available when signed in.</p>
             )
           }
           extra={
-            !profile ? (
+            !canUsePersonal ? (
               <button type="button" className="cta-ghost mt-3" onClick={onOpenYou}>
-                Add your chart
+                Sign in for your chart
               </button>
             ) : undefined
           }
@@ -127,9 +210,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           domainKey: 'watchFor',
           seedText: bearing.watchFor,
           cardTitle: 'Watch for',
-          context: ctx,
-          profile,
-          mode
+          ...deepBase
         }}
         preview={<StoryProse text={bearing.watchFor} className="text-[1.0625rem]" />}
       />

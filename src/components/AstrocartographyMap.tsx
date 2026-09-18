@@ -9,6 +9,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 import { AstrocartographyLine, CelestialCoordinate, LocationCoordinates, SanctuaryNode, EnochianCompassOrientation } from '../types';
 import { SANCTUARY_NODES } from '../engine/astrocartography';
+import { OPEN_SOURCE_MAP_CATALOG } from '../engine/mapProviders';
 import { GoogleMapPolyline } from './GoogleMapPolyline';
 import { GoogleMapCameraController } from './GoogleMapCameraController';
 import {
@@ -200,7 +201,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
           <div className="flex rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-1">
             {(
               [
-                { id: 'osm' as const, label: 'OSM Free' },
+                { id: 'osm' as const, label: 'MapLibre/OSM' },
                 { id: 'vector' as const, label: 'Vector' },
                 { id: 'google' as const, label: 'Google' }
               ]
@@ -796,7 +797,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
           </div>
           {selectedLine ? (
             <div className="space-y-1 text-[11px]">
-              <p className="text-white leading-snug">{selectedLine.description}</p>
+              <p className="readable-body leading-snug">{selectedLine.description}</p>
               <div className="flex flex-wrap gap-1 pt-1">
                 {selectedLine.themes.map((t, idx) => (
                   <span
@@ -841,7 +842,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
               >
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: line.color }} />
-                  <span className="text-[10px] text-white font-bold">{line.lineTypeName}</span>
+                  <span className="text-[10px] readable-body font-bold">{line.lineTypeName}</span>
                 </div>
                 <span className="data-readout text-[9px]">{distanceDeg}° orb</span>
               </div>
@@ -861,7 +862,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
           </div>
           {selectedSanctuary ? (
             <div className="space-y-1 text-[11px]">
-              <div className="font-bold text-white font-serif">{selectedSanctuary.name}</div>
+              <div className="font-bold text-report-title font-serif">{selectedSanctuary.name}</div>
               <div className="ui-eyebrow text-emerald-400">{selectedSanctuary.archetype}</div>
               <p className="text-gray-300 text-[10px] leading-snug">{selectedSanctuary.description}</p>
               <div className="text-[9px] text-gray-500 pt-2 border-t border-[color:var(--line-soft)]">
@@ -886,6 +887,11 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
           )}
         </div>
       </div>
+
+      {/* Open-source geospatial stacks (TGOLD research catalog) */}
+      <p className="readable-muted text-[10px] pt-2 border-t border-[color:var(--line-soft)]">
+        Open maps: {OPEN_SOURCE_MAP_CATALOG.slice(0, 4).map((p) => p.name).join(' · ')} — member Google satellite when subscribed.
+      </p>
 
       {/* Quick Sanctuary Jump Navigation Ribbon */}
       <div className="pt-3 border-t border-[color:var(--line-soft)] flex flex-wrap items-center gap-1.5 text-[10px]">

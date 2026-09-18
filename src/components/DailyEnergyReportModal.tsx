@@ -178,7 +178,7 @@ Third read: ${report.dailyStrategicActionPlan.dialecticalFork.syntheticResolutio
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(44,36,25,0.45)] backdrop-blur-sm p-3 sm:p-6 overflow-y-auto">
-      <div className="relative w-full max-w-5xl scroll-sheet rounded-[var(--radius-lg)] flex flex-col max-h-[92vh] overflow-hidden motion-enter">
+      <div className="relative w-full max-w-5xl scroll-sheet parchment-surface rounded-[var(--radius-lg)] flex flex-col max-h-[92vh] overflow-hidden motion-enter">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[color:var(--line-soft)] bg-[color:var(--surface-raised)]">
           <div className="flex items-center gap-3">
             <div className="p-2 border border-[color:var(--line-medium)] text-[color:var(--accent-ochre)] bg-[color:var(--surface-well)] rounded-[var(--radius-sm)]">

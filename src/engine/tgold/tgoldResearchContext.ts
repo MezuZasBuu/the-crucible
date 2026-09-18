@@ -93,6 +93,10 @@ export function buildTgoldResearchPromptBlock(opts: {
     parts.push(
       'COMPASS MANDATE: Answer the user query using computed context + TGOLD practice nuance. Never invent citations. Preserve native terms with glosses.'
     );
+  } else if (opts.mode === 'daily-report') {
+    parts.push(
+      'DAILY REPORT MANDATE: Write expansive consumer-facing copy — warm, informative, not encyclopedic. Each domain 4-7 sentences minimum. fullReport 900+ words. Plain English; separate all words with spaces.'
+    );
   }
 
   return parts.filter(Boolean).join('\n');

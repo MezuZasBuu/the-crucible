@@ -129,7 +129,11 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
               </p>
             )}
             {deepError && <p className="readable-body text-[color:var(--solar-deep)] mt-4">{deepError}</p>}
-            <StoryProse text={displayBody} className="mt-4 text-[1.0625rem] leading-relaxed" />
+            <div className="detail-body mt-4 text-[1.0625rem] leading-relaxed space-y-4">
+              {displayBody.split(/\n\n+/).filter(Boolean).map((chunk, i) => (
+                <StoryProse key={i} text={chunk.trim()} />
+              ))}
+            </div>
             {deepSource && <p className="readable-muted text-[0.9rem] mt-4">{deepSource}</p>}
             {extra && <div className="detail-extra motion-fade-in">{extra}</div>}
           </article>

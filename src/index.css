@@ -963,3 +963,106 @@
 .kin-today-banner {
   padding: 1rem 1.1rem;
 }
+
+/* ── Parchment surface: force readable dark text on light panels ── */
+.parchment-surface,
+.instrument-panel,
+.report-well,
+.scroll-sheet {
+  color: var(--text-primary);
+}
+
+.parchment-surface .text-white,
+.instrument-panel .text-white,
+.report-well .text-white,
+.scroll-sheet .text-white {
+  color: var(--text-primary) !important;
+}
+
+.parchment-surface .text-gray-100,
+.parchment-surface .text-gray-200,
+.parchment-surface .text-gray-300,
+.parchment-surface .text-gray-400,
+.instrument-panel .text-gray-100,
+.instrument-panel .text-gray-200,
+.instrument-panel .text-gray-300,
+.instrument-panel .text-gray-400,
+.report-well .text-gray-100,
+.report-well .text-gray-200,
+.report-well .text-gray-300,
+.report-well .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+.parchment-surface .text-cyan-200,
+.parchment-surface .text-emerald-200,
+.parchment-surface .text-rose-200,
+.parchment-surface .text-amber-300,
+.instrument-panel .text-cyan-200,
+.instrument-panel .text-emerald-200,
+.instrument-panel .text-rose-200,
+.instrument-panel .text-amber-300 {
+  color: var(--temporal-deep) !important;
+}
+
+.parchment-surface .hover\:text-white:hover,
+.instrument-panel .hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Gallery navigation arrows (web) */
+.gallery-track-wrap {
+  position: relative;
+}
+
+.gallery-nav {
+  display: none;
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  transform: translateY(-50%);
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--line-medium);
+  background: rgba(255, 253, 249, 0.94);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-raised);
+  cursor: pointer;
+}
+
+.gallery-nav:hover {
+  border-color: var(--line-bright);
+  background: #fffdf9;
+}
+
+@media (min-width: 640px) {
+  .gallery-nav {
+    display: inline-flex;
+  }
+  .gallery-nav-prev {
+    left: 0.35rem;
+  }
+  .gallery-nav-next {
+    right: 0.35rem;
+  }
+}
+
+.readable-text {
+  word-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.story-prose {
+  word-spacing: 0.03em;
+  overflow-wrap: break-word;
+}
+
+.detail-body {
+  white-space: pre-wrap;
+  word-spacing: 0.03em;
+  line-height: 1.65;
+}
+

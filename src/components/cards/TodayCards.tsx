@@ -30,7 +30,8 @@ export const ReadingModeToggle: React.FC<{
   mode: ReadingMode;
   hasProfile: boolean;
   onChange: (mode: ReadingMode) => void;
-}> = ({ mode, hasProfile, onChange }) => (
+  onNeedAccount?: () => void;
+}> = ({ mode, hasProfile, onChange, onNeedAccount }) => (
   <div className="flex flex-wrap gap-2" role="tablist" aria-label="Reading mode">
     <button
       type="button"
@@ -47,8 +48,14 @@ export const ReadingModeToggle: React.FC<{
       role="tab"
       aria-selected={mode === 'personal'}
       disabled={!hasProfile}
-      onClick={() => onChange('personal')}
-      className={`nav-tab border inline-flex items-center gap-1.5 ${mode === 'personal' ? 'nav-tab-active border-[color:var(--line-medium)]' : 'border-transparent'} ${!hasProfile ? 'opacity-45 cursor-not-allowed' : ''}`}
+      onClick={() => {
+        if (!hasProfile) {
+          onNeedAccount?.();
+          return;
+        }
+        onChange('personal');
+      }}
+      className={`nav-tab border inline-flex items-center gap-1.5 ${mode === 'personal' ? 'nav-tab-active border-[color:var(--line-medium)]' : 'border-transparent'} ${!hasProfile ? 'opacity-55' : ''}`}
     >
       <UserRound className="w-4 h-4" />
       Your chart energy
@@ -63,7 +70,8 @@ export const OverviewSlideCard: React.FC<{
   onSlideIndexChange: (i: number) => void;
   mode: ReadingMode;
   correlationKey: 'GMT_584283' | 'GMT_584285' | 'SPINDEN_489384';
-}> = ({ ctx, profile, slideIndex, onSlideIndexChange, mode, correlationKey }) => {
+  heroBearing?: DailyBearing;
+}> = ({ ctx, profile, slideIndex, onSlideIndexChange, mode, correlationKey, heroBearing }) => {
   const bearings = React.useMemo(
     () =>
       FOCUSES.map((f) => ({
@@ -79,25 +87,30 @@ export const OverviewSlideCard: React.FC<{
       onIndexChange={onSlideIndexChange}
       panelCount={FOCUSES.length}
       labels={FOCUSES.map((f) => f.label)}
-      autoAdvanceMs={4000}
+      autoAdvanceMs={6000}
     >
-      {bearings.map(({ id, bearing }) => (
+      {bearings.map(({ id, bearing }) => {
+        const theme = id === 'overview' && heroBearing ? heroBearing.theme : bearing.theme;
+        const summary = id === 'overview' && heroBearing ? heroBearing.summary : bearing.summary;
+        const practice = id === 'overview' && heroBearing ? heroBearing.practice : bearing.practice;
+        return (
         <SlidePanel key={id} className="card-featured-inner">
           <p className="scroll-label readable-muted">
             {mode === 'world' ? 'World energy' : 'Your chart × today'}
           </p>
           <FadeInText
-            text={bearing.theme}
+            text={theme}
             as="h2"
             className="detail-title text-[clamp(1.35rem,2.8vw,2.1rem)] tracking-[0.02em] mt-2"
           />
-          <StoryProse text={bearing.summary} className="mt-4 text-[1.0625rem] leading-relaxed max-w-3xl" />
-          <StoryProse text={`*Practice:* ${bearing.practice}`} className="mt-5 text-[1rem] font-medium" />
+          <StoryProse text={summary} className="mt-4 text-[1.0625rem] leading-relaxed max-w-3xl" />
+          <StoryProse text={`*Practice:* ${practice}`} className="mt-5 text-[1rem] font-medium" />
           {bearing.domains.personalAlignment && (
             <StoryProse text={bearing.domains.personalAlignment} className="mt-4 text-[1rem]" />
           )}
         </SlidePanel>
-      ))}
+        );
+      })}
     </SlideGallery>
   );
 };
