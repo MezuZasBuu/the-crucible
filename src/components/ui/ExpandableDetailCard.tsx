@@ -1,9 +1,10 @@
 /**
- * Tap-to-expand card with a full-screen detail sheet and magic fade-in copy.
+ * Tap-to-expand card with optional Cursor deep-reading on expand.
  */
 
-import React, { useEffect, useId } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useId, useState } from 'react';
+import { Loader2, X } from 'lucide-react';
+import { DeepReadingRequest } from '../../types';
 import { FadeInText } from './FadeInText';
 
 type Accent = 'terracotta' | 'sage' | 'slate' | 'indigo' | 'ochre' | 'rose' | 'solar';
@@ -26,6 +27,7 @@ interface ExpandableDetailCardProps {
   extra?: React.ReactNode;
   accent?: Accent;
   className?: string;
+  deepReading?: DeepReadingRequest;
 }
 
 export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
@@ -35,10 +37,24 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
   body,
   extra,
   accent = 'slate',
-  className = ''
+  className = '',
+  deepReading
 }) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [deepText, setDeepText] = useState<string | null>(null);
+  const [deepSource, setDeepSource] = useState<string | null>(null);
+  const [deepLoading, setDeepLoading] = useState(false);
+  const [deepError, setDeepError] = useState<string | null>(null);
   const titleId = useId();
+
+  useEffect(() => {
+    if (!open) {
+      setDeepText(null);
+      setDeepSource(null);
+      setDeepError(null);
+      setDeepLoading(false);
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -49,6 +65,39 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
+  useEffect(() => {
+    if (!open || !deepReading || deepText || deepLoading) return;
+
+    let cancelled = false;
+    setDeepLoading(true);
+    setDeepError(null);
+
+    fetch('/api/deep-reading', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(deepReading)
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Deep reading failed');
+        if (cancelled) return;
+        setDeepText(data.expandedText || body);
+        setDeepSource(data.source || null);
+      })
+      .catch((err: Error) => {
+        if (!cancelled) setDeepError(err.message || 'Could not load deep reading');
+      })
+      .finally(() => {
+        if (!cancelled) setDeepLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, deepReading, body, deepText, deepLoading]);
+
+  const displayBody = deepText || body;
+
   return (
     <>
       <button
@@ -58,7 +107,9 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
       >
         <p className="scroll-label readable-muted">{label}</p>
         <div className="readable-body text-[1.05rem]">{preview}</div>
-        <p className="readable-muted text-[0.95rem] mt-3">Tap for full reading</p>
+        <p className="readable-muted text-[0.95rem] mt-3">
+          {deepReading ? 'Tap for full reading · deep expand on open' : 'Tap for full reading'}
+        </p>
       </button>
 
       {open && (
@@ -76,7 +127,19 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
               </button>
             </div>
             <FadeInText text={title} as="h3" className="detail-title" delayMs={80} />
-            <FadeInText text={body} className="detail-body" delayMs={220} />
+            {deepLoading && (
+              <p className="readable-body flex items-center gap-2 mt-4">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Deriving multi-pass reading…
+              </p>
+            )}
+            {deepError && (
+              <p className="readable-body text-[color:var(--solar-bright)] mt-4">{deepError}</p>
+            )}
+            <FadeInText text={displayBody} className="detail-body" delayMs={220} />
+            {deepSource && (
+              <p className="readable-muted text-[0.9rem] mt-4">Source: {deepSource}</p>
+            )}
             {extra && <div className="detail-extra motion-fade-in">{extra}</div>}
           </article>
         </div>

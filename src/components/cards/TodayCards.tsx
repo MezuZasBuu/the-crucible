@@ -4,7 +4,7 @@ import {
   CompleteCalculationContext,
   CrucibleProfile,
   DailyBearing,
-  DomainImpacts,
+  DeepReadingRequestBase,
   ReadingFocus,
   ReadingMode
 } from '../../types';
@@ -12,6 +12,7 @@ import { synthesizeDailyBearing } from '../../engine/editorialSynthesis';
 import { FadeInText } from '../ui/FadeInText';
 import { SlideCard, SlidePanel } from '../ui/SlideCard';
 import { ExpandableDetailCard } from '../ui/ExpandableDetailCard';
+import { DomainImpactCards } from './DomainImpactCards';
 
 const FOCUSES: Array<{ id: ReadingFocus; label: string }> = [
   { id: 'overview', label: 'Overview' },
@@ -111,27 +112,75 @@ export const OverviewSlideCard: React.FC<{
   );
 };
 
-function DomainCards({ domains }: { domains: DomainImpacts }) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-      <ExpandableDetailCard label="Why today feels this way" accent="solar" title="Why today" body={domains.whyToday} preview={<p className="readable-body font-semibold">{domains.whyToday}</p>} />
-      <ExpandableDetailCard label="Collective mood" accent="rose" title="Mood" body={domains.mood} preview={<p className="readable-body font-semibold">{domains.mood}</p>} />
-      <ExpandableDetailCard label="People & relationships" accent="indigo" title="People" body={domains.people} preview={<p className="readable-body font-semibold">{domains.people}</p>} />
-      <ExpandableDetailCard label="Travel & movement" accent="sage" title="Travel" body={domains.travel} preview={<p className="readable-body font-semibold">{domains.travel}</p>} />
-      <ExpandableDetailCard label="Money & resources" accent="ochre" title="Finance" body={domains.finance} preview={<p className="readable-body font-semibold">{domains.finance}</p>} />
-      <ExpandableDetailCard label="Tech & messages" accent="slate" title="Technology" body={domains.tech} preview={<p className="readable-body font-semibold">{domains.tech}</p>} />
-    </div>
-  );
+function DomainCards({
+  domains,
+  deepReadingBase
+}: {
+  domains: DailyBearing['domains'];
+  deepReadingBase?: DeepReadingRequestBase;
+}) {
+  return <DomainImpactCards domains={domains} deepReadingBase={deepReadingBase} />;
 }
 
-export const AtmosphereTriad: React.FC<{ bearing: DailyBearing }> = ({ bearing }) => (
+export const AtmosphereTriad: React.FC<{
+  bearing: DailyBearing;
+  deepReadingBase?: DeepReadingRequestBase;
+}> = ({ bearing, deepReadingBase }) => (
   <>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <ExpandableDetailCard label="Emotional atmosphere" accent="rose" title="Emotional atmosphere" body={bearing.atmospheres.emotional} preview={<p className="readable-body font-semibold">{bearing.atmospheres.emotional}</p>} />
-      <ExpandableDetailCard label="Social atmosphere" accent="indigo" title="Social atmosphere" body={bearing.atmospheres.social} preview={<p className="readable-body font-semibold">{bearing.atmospheres.social}</p>} />
-      <ExpandableDetailCard label="Work & creative" accent="ochre" title="Work & creative" body={bearing.atmospheres.workCreative} preview={<p className="readable-body font-semibold">{bearing.atmospheres.workCreative}</p>} />
+      <ExpandableDetailCard
+        label="Emotional atmosphere"
+        accent="rose"
+        title="Emotional atmosphere"
+        body={bearing.atmospheres.emotional}
+        preview={<p className="readable-body font-semibold">{bearing.atmospheres.emotional}</p>}
+        deepReading={
+          deepReadingBase
+            ? {
+                ...deepReadingBase,
+                domainKey: 'emotional',
+                seedText: bearing.atmospheres.emotional,
+                cardTitle: 'Emotional atmosphere'
+              }
+            : undefined
+        }
+      />
+      <ExpandableDetailCard
+        label="Social atmosphere"
+        accent="indigo"
+        title="Social atmosphere"
+        body={bearing.atmospheres.social}
+        preview={<p className="readable-body font-semibold">{bearing.atmospheres.social}</p>}
+        deepReading={
+          deepReadingBase
+            ? {
+                ...deepReadingBase,
+                domainKey: 'social',
+                seedText: bearing.atmospheres.social,
+                cardTitle: 'Social atmosphere'
+              }
+            : undefined
+        }
+      />
+      <ExpandableDetailCard
+        label="Work & creative"
+        accent="ochre"
+        title="Work & creative"
+        body={bearing.atmospheres.workCreative}
+        preview={<p className="readable-body font-semibold">{bearing.atmospheres.workCreative}</p>}
+        deepReading={
+          deepReadingBase
+            ? {
+                ...deepReadingBase,
+                domainKey: 'workCreative',
+                seedText: bearing.atmospheres.workCreative,
+                cardTitle: 'Work & creative'
+              }
+            : undefined
+        }
+      />
     </div>
-    <DomainCards domains={bearing.domains} />
+    <DomainCards domains={bearing.domains} deepReadingBase={deepReadingBase} />
   </>
 );
 

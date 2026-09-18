@@ -33,6 +33,8 @@ import {
   PresetLocation
 } from '../engine/longTermResonance';
 import { nearestPresetLocationId } from '../engine/defaultLocation';
+import { DomainImpactCards } from './cards/DomainImpactCards';
+import { FadeInText } from './ui/FadeInText';
 
 interface LongTermResonancePanelProps {
   ctx: CompleteCalculationContext;
@@ -62,8 +64,8 @@ export const LongTermResonancePanel: React.FC<LongTermResonancePanelProps> = ({
 
   // Active Sub-Tab in the Day Dossier
   const [activeDossierTab, setActiveDossierTab] = useState<
-    'SYNCHRONIC' | 'ASTROLOGY' | 'VEDIC_SIDEREAL' | 'GENE_KEYS' | 'ASTEROIDS_MOONS' | 'TERRESTRIAL' | 'SYNASTRY' | 'NARRATIVE'
-  >('SYNCHRONIC');
+    'IMPACTS' | 'SYNCHRONIC' | 'ASTROLOGY' | 'VEDIC_SIDEREAL' | 'GENE_KEYS' | 'ASTEROIDS_MOONS' | 'TERRESTRIAL' | 'SYNASTRY' | 'NARRATIVE'
+  >('IMPACTS');
 
   const activeLocation = useMemo(() => {
     return PRESET_LOCATIONS.find((l) => l.id === selectedLocationId) || PRESET_LOCATIONS[0];
@@ -455,6 +457,7 @@ export const LongTermResonancePanel: React.FC<LongTermResonancePanelProps> = ({
         {/* Dossier Navigation Sub-Tabs */}
         <div className="flex flex-wrap gap-1.5 border-b border-[color:var(--line-soft)] bg-black/10 px-4 py-2 text-xs">
           {[
+            { id: 'IMPACTS', label: 'Daily impacts', icon: Flame },
             { id: 'SYNCHRONIC', label: 'Synchronic Core', icon: Layers },
             { id: 'ASTROLOGY', label: 'Planetary Transits', icon: Sun },
             { id: 'VEDIC_SIDEREAL', label: 'Vedic & Sidereal', icon: Moon },
@@ -485,6 +488,50 @@ export const LongTermResonancePanel: React.FC<LongTermResonancePanelProps> = ({
 
         {/* Tab Content Display */}
         <div className="p-5 text-xs">
+          {activeDossierTab === 'IMPACTS' && (
+            <div className="space-y-5">
+              <div className="card-featured gradient-card-solar p-5">
+                <p className="scroll-label readable-muted">Day {activeDayIndex + 1} energy theme</p>
+                <FadeInText text={activeEntry.dailyTheme} as="h3" className="detail-title text-[clamp(1.2rem,2.5vw,1.85rem)] mt-2" />
+                <FadeInText
+                  text={`Practice: ${activeEntry.dailyPractice}`}
+                  className="readable-body text-[1.05rem] font-semibold mt-4"
+                  delayMs={160}
+                />
+                <p className="readable-muted text-[0.95rem] mt-3">
+                  {activeEntry.resonanceArchetype} · {activeEntry.synchronicResonanceScore}% birth affinity · {activeLocation.name}
+                </p>
+              </div>
+              <DomainImpactCards
+                domains={activeEntry.domains}
+                deepReadingBase={{
+                  forecastEntry: activeEntry,
+                  targetLocationName: activeLocation.name,
+                  mode: 'personal',
+                  profile: {
+                    id: 'forecast-panel',
+                    displayName: userName || forecast.birthProfile.name,
+                    querentName: userName || forecast.birthProfile.name,
+                    birth: {
+                      dateString: birthDate || forecast.birthProfile.dateString,
+                      timeString: birthTime || forecast.birthProfile.timeString,
+                      timezoneOffsetMinutes: 0,
+                      isUTC: true,
+                      location: {
+                        latitude: forecast.birthProfile.coordinates.lat,
+                        longitude: forecast.birthProfile.coordinates.lng,
+                        city: forecast.birthProfile.city
+                      }
+                    },
+                    birthTimeConfidence: 'approximate',
+                    createdAtIso: forecast.generatedAt,
+                    updatedAtIso: forecast.generatedAt
+                  }
+                }}
+              />
+            </div>
+          )}
+
           {/* TAB 1: SYNCHRONIC CORE */}
           {activeDossierTab === 'SYNCHRONIC' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

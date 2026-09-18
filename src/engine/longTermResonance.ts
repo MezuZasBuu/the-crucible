@@ -8,11 +8,14 @@
 
 import {
   CompleteCalculationContext,
+  CrucibleProfile,
   FourteenDayForecastEntry,
   LongTermResonanceForecast,
   TemporalInput
 } from '../types';
 import { executeCrucibleCalculation } from './crucibleCore';
+import { synthesizeDailyBearing } from './editorialSynthesis';
+import { WORLD_DEFAULT_LOCATION } from './defaultLocation';
 
 // Preset locations for City, Country, Continent, and Sanctuary analysis
 export interface PresetLocation {
@@ -297,6 +300,16 @@ export function generateFourteenDayForecast(
   // Calculate Natal Birth Context
   const birthCtx = executeCrucibleCalculation(birthDateInput);
 
+  const birthProfile: CrucibleProfile = {
+    id: 'forecast-birth',
+    displayName: userName,
+    querentName: userName,
+    birth: birthDateInput,
+    birthTimeConfidence: 'approximate',
+    createdAtIso: new Date().toISOString(),
+    updatedAtIso: new Date().toISOString()
+  };
+
   const entries: FourteenDayForecastEntry[] = [];
   const portalDayIndices: number[] = [];
 
@@ -461,6 +474,8 @@ ${isPeakResonanceDay ? 'This is a sovereign gateway day marked by heightened luc
       synthesis: `The Golden Mean: Act decisively on essential covenants while remaining internally serene and impervious to peripheral turbulence.`
     };
 
+    const dayBearing = synthesizeDailyBearing(dayCtx, 'overview', birthProfile, 'personal');
+
     entries.push({
       dayOffset: offset,
       dateString: dateStr,
@@ -559,7 +574,10 @@ ${isPeakResonanceDay ? 'This is a sovereign gateway day marked by heightened luc
         actionableOpportunities
       },
       dailyNovelisticForecast,
-      dialecticalFork
+      dialecticalFork,
+      domains: dayBearing.domains,
+      dailyTheme: dayBearing.theme,
+      dailyPractice: dayBearing.practice
     });
   }
 
@@ -600,8 +618,8 @@ ${isPeakResonanceDay ? 'This is a sovereign gateway day marked by heightened luc
       name: userName,
       city: birthCtx.input.location?.city || 'Universal Meridian',
       coordinates: {
-        lat: birthCtx.input.location?.latitude || 31.7683,
-        lng: birthCtx.input.location?.longitude || 35.2137
+        lat: birthCtx.input.location?.latitude ?? WORLD_DEFAULT_LOCATION.latitude,
+        lng: birthCtx.input.location?.longitude ?? WORLD_DEFAULT_LOCATION.longitude
       },
       sunSign: birthCtx.celestialBodies[0]?.zodiacSign || 'Aries',
       mayanKin: birthCtx.mayan.kinNumber,

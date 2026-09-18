@@ -14,6 +14,8 @@ import { CANONICAL_CLAIMS, CANONICAL_RULESETS, getClaimsJSONL } from './src/engi
 import { generateFourteenDayForecast, PRESET_LOCATIONS } from './src/engine/longTermResonance';
 import { generateTodayDailyReport } from './src/engine/dailyEnergyReport';
 import { BRIEFING_VOICE_PROMPT } from './src/engine/voiceStyle';
+import { executeDeepReading } from './src/engine/deepReadingService';
+import { DeepReadingRequest } from './src/types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -237,6 +239,33 @@ Measured against Gaia's daily overcast (Schumann base 7.83 Hz, energetic aspect 
   // 7b. Locations preset endpoint
   app.get('/api/forecast/locations', (req, res) => {
     res.json(PRESET_LOCATIONS);
+  });
+
+  // 7c. Multi-pass Cursor deep reading for expandable cards
+  app.post('/api/deep-reading', async (req, res) => {
+    try {
+      const request = req.body as DeepReadingRequest;
+      if (!request?.seedText || !request?.domainKey) {
+        return res.status(400).json({ error: 'seedText and domainKey are required' });
+      }
+
+      const apiKey = process.env.CURSOR_API_KEY;
+      const result = await executeDeepReading(request, apiKey, {
+        model: process.env.CURSOR_MODEL || 'composer-2.5',
+        maxWaitMs: 180000,
+        pollMs: 2500,
+        passCount: 3
+      });
+
+      return res.json({
+        expandedText: result.text,
+        source: result.source,
+        passesCompleted: result.passesCompleted
+      });
+    } catch (err: any) {
+      console.error('Deep reading error:', err);
+      return res.status(500).json({ error: err.message || 'Deep reading failed' });
+    }
   });
 
   // 8. 20,000-Token-Target Extended AI Monograph Generation Endpoint

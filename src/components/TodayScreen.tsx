@@ -56,7 +56,10 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
       </div>
 
       <OverviewSlideCard ctx={ctx} profile={profile} focus={focus} mode={mode} correlationKey={correlationKey} />
-      <AtmosphereTriad bearing={bearing} />
+      <AtmosphereTriad
+        bearing={bearing}
+        deepReadingBase={{ context: ctx, profile, mode }}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ExpandableDetailCard
@@ -64,6 +67,14 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           accent="sage"
           title={`Regional timing · ${bearing.localContext.cityLabel}`}
           body={`This region adjusts local clock, approximate daylight (${bearing.localContext.sunrise}–${bearing.localContext.sunset}), and horizon math. It does not change the world sky — only how the day lands where you are. Moon: ${bearing.localContext.moonPhase}. Seasonal note: ${bearing.localContext.seasonalNote}.`}
+          deepReading={{
+            domainKey: 'regional',
+            seedText: `Regional overlay: ${bearing.localContext.cityLabel}. Local ${bearing.localContext.localTime}. Daylight ${bearing.localContext.sunrise}–${bearing.localContext.sunset}.`,
+            cardTitle: 'Regional overlay',
+            context: ctx,
+            profile,
+            mode
+          }}
           preview={
             <>
               <p className="readable-body font-semibold">{bearing.localContext.cityLabel}</p>
@@ -110,6 +121,14 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
         accent="rose"
         title="Watch for"
         body={bearing.watchFor}
+        deepReading={{
+          domainKey: 'watchFor',
+          seedText: bearing.watchFor,
+          cardTitle: 'Watch for',
+          context: ctx,
+          profile,
+          mode
+        }}
         preview={<p className="readable-body text-[1.15rem] font-semibold">{bearing.watchFor}</p>}
       />
 

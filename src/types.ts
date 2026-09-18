@@ -46,6 +46,34 @@ export interface DomainImpacts {
   personalAlignment?: string;
 }
 
+export type DeepReadingDomainKey =
+  | keyof DomainImpacts
+  | 'emotional'
+  | 'social'
+  | 'workCreative'
+  | 'watchFor'
+  | 'regional';
+
+export interface DeepReadingRequestBase {
+  context?: CompleteCalculationContext;
+  profile?: CrucibleProfile | null;
+  mode?: ReadingMode;
+  forecastEntry?: FourteenDayForecastEntry;
+  targetLocationName?: string;
+}
+
+export interface DeepReadingRequest extends DeepReadingRequestBase {
+  domainKey: DeepReadingDomainKey;
+  seedText: string;
+  cardTitle: string;
+}
+
+export interface DeepReadingResponse {
+  expandedText: string;
+  source: string;
+  passesCompleted: number;
+}
+
 export interface DailyBearingContributor {
   systemId: string;
   label: string;
@@ -635,6 +663,9 @@ export interface FourteenDayForecastEntry {
     pathB: string;
     synthesis: string;
   };
+  domains: DomainImpacts;
+  dailyTheme: string;
+  dailyPractice: string;
 }
 
 export interface LongTermResonanceForecast {

@@ -136,6 +136,9 @@ async function main() {
     await runNamed('longTermResonance.14day', () => {
       const forecast = generateFourteenDayForecast(baseInput, '2026-09-07', 'london', 'Test Querent');
       assert(forecast.fourteenDayEntries.length === 14, '14 days');
+      const day = forecast.fourteenDayEntries[0];
+      assert(!!day.domains.mood && !!day.domains.whyToday, 'domain impacts');
+      assert(!!day.dailyTheme && !!day.dailyPractice, 'daily theme');
     })
   );
 
