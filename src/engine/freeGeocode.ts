@@ -55,14 +55,14 @@ export async function geocodeNominatim(query: string, limit = 5): Promise<Geocod
   return mapped;
 }
 
-/** Static sanctuary presets — always available offline */
+/** Static world presets — synced with locationCatalog (offline fallback) */
 export const FREE_SANCTUARY_PRESETS: GeocodeResult[] = [
-  { displayName: 'Jerusalem Sanctuary', latitude: 31.778, longitude: 35.2354, city: 'Jerusalem Sanctuary', country: 'Israel' },
-  { displayName: 'Giza Plateau, Egypt', latitude: 29.9792, longitude: 31.1342, city: 'Giza', country: 'Egypt' },
-  { displayName: 'Chichen Itza, Mexico', latitude: 20.6843, longitude: -88.5678, city: 'Chichen Itza', country: 'Mexico' },
-  { displayName: 'Stonehenge, UK', latitude: 51.1789, longitude: -1.8262, city: 'Stonehenge', country: 'United Kingdom' },
-  { displayName: 'Varanasi, India', latitude: 25.3176, longitude: 82.9739, city: 'Varanasi', country: 'India' },
-  { displayName: 'Lhasa, Tibet', latitude: 29.652, longitude: 91.172, city: 'Lhasa', country: 'China' },
-  { displayName: 'Machu Picchu, Peru', latitude: -13.1631, longitude: -72.545, city: 'Machu Picchu', country: 'Peru' },
-  { displayName: 'Delphi, Greece', latitude: 38.4824, longitude: 22.501, city: 'Delphi', country: 'Greece' }
+  { displayName: 'World · UTC', latitude: 51.4779, longitude: 0, city: 'World · UTC', country: 'Global' },
+  { displayName: 'London, UK', latitude: 51.5074, longitude: -0.1278, city: 'London', country: 'United Kingdom' },
+  { displayName: 'New York, USA', latitude: 40.7128, longitude: -74.006, city: 'New York City', country: 'United States' },
+  { displayName: 'Tokyo, Japan', latitude: 35.6762, longitude: 139.6503, city: 'Tokyo', country: 'Japan' },
+  { displayName: 'Sydney, Australia', latitude: -33.8688, longitude: 151.2093, city: 'Sydney', country: 'Australia' },
+  { displayName: 'São Paulo, Brazil', latitude: -23.5505, longitude: -46.6333, city: 'São Paulo', country: 'Brazil' },
+  { displayName: 'Cape Town, South Africa', latitude: -33.9249, longitude: 18.4241, city: 'Cape Town', country: 'South Africa' },
+  { displayName: 'Singapore', latitude: 1.3521, longitude: 103.8198, city: 'Singapore', country: 'Singapore' }
 ];

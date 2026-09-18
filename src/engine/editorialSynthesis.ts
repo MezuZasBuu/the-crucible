@@ -41,12 +41,19 @@ function atmospheresFor(focus: ReadingFocus, entries: ReturnType<typeof compileA
   const gene = entries.find((e) => e.id === 'gene-key-sun');
   const maya = entries.find((e) => e.id === 'maya-seal');
 
-  const emotional = firstSentence(lunar?.individualImpact || maya?.individualImpact || 'Collective mood runs closer to the surface than usual.');
-  const social = firstSentence(lunar?.collectiveImpact || bazi?.collectiveImpact || 'Conversations carry more weight than small talk.');
+  const emotional = firstSentence(
+    lunar?.individualImpact?.replace(/\b(kin|tzolk|nakshatra|bazi)\b/gi, '') ||
+      `*Feelings run closer to the surface* than usual — the kind of day where small slights land big if you're tired.`
+  );
+  const social = firstSentence(
+    lunar?.collectiveImpact?.replace(/\b(kin|tzolk|nakshatra|bazi)\b/gi, '') ||
+      `*Conversations carry weight* beyond small talk; people read tone before they read logic.`
+  );
   const workCreative = firstSentence(
-    focus === 'creativity' || focus === 'tech'
-      ? gene?.individualImpact || bazi?.individualImpact || ''
-      : bazi?.individualImpact || gene?.individualImpact || 'Work favors one clear commitment over scattered effort.'
+    (focus === 'creativity' || focus === 'tech'
+      ? gene?.individualImpact || bazi?.individualImpact
+      : bazi?.individualImpact || gene?.individualImpact)?.replace(/\b(kin|gene key|gate)\b/gi, '') ||
+      `*One clear commitment* beats scattered effort — finish before you start something new.`
   );
 
   return { emotional, social, workCreative };
@@ -66,29 +73,31 @@ function buildDomains(
   const tone = entries.find((e) => e.id === 'maya-tone');
   const fork = ctx.dialecticalForks?.[0];
 
+  const sunSign = ctx.celestialBodies.find((b) => b.id === 'sun')?.zodiacSign || 'the current season';
+  const moonPhase = ctx.gaiaOvercast?.lunarPhaseName || 'a shifting moon';
+
   const mood = firstSentence(
-    `${lunar?.individualImpact || ''} Typical collective mood: ${lunar?.collectiveImpact || 'mixed pacing'}. Most people meet the day with ${ctx.gaiaOvercast?.lunarPhaseName || 'changing lunar light'} — patience or irritability scales with sleep and overstimulation.`
+    `*${moonPhase}* keeps feelings closer to the surface. Most people meet the day with mixed pacing — sleep and overstimulation decide whether patience or irritability wins.`
   );
 
   const people = firstSentence(
-    bazi?.collectiveImpact ||
-      `${ctx.chinese.dayPillar.stemPinYin}-${ctx.chinese.dayPillar.branchPinYin} colors negotiations — alliances move at the day pillar’s pace, not yours alone.`
+    `Negotiations inherit today's social temperature — *alliances move at the day's pace*, not yours alone. Small misreads in tone carry extra weight.`
   );
 
   const travel = firstSentence(
-    `${maya?.individualImpact || ''} Movement favors clarity over speed: ${tone?.behavioralCue || 'check timing twice before committing to departures'}. Delays often come from mood compression, not cosmic veto.`
+    `Movement favors clarity over speed. *Check timing twice* before departures; delays usually come from compressed mood, not a cosmic veto.`
   );
 
   const finance = firstSentence(
-    `${bazi?.individualImpact || ''} Money energy: ${gene?.collectiveImpact || 'avoid impulsive commitments'}. Contracts and purchases benefit from a second read — especially when the day’s tone is ${ctx.mayan.galacticTone.name.toLowerCase()}.`
+    `Money decisions want a second read today. Avoid impulsive commitments — contracts and purchases benefit from patience, especially when the emotional weather is restless.`
   );
 
   const tech = firstSentence(
-    `${gene?.individualImpact || ''} Tools, networks, and messages inherit ${ctx.geneKeysSun.gift} as the growth edge and ${ctx.geneKeysSun.shadow} as the friction field — double-check automation, passwords, and assumptions before shipping.`
+    `Messages, tools, and networks inherit today's friction field — *double-check automation, passwords, and assumptions* before you ship anything important.`
   );
 
   const whyToday = firstSentence(
-    `${tone?.dataPoint || ctx.mayan.tzolkin.formatted} · ${ctx.chinese.solarTerm.name} · Sun ${ctx.celestialBodies.find((b) => b.id === 'sun')?.zodiacSign}. ${fork?.synthesis.summary || 'Multiple calendars agree on a theme even when they name it differently.'}`
+    `The sky, season, and calendar weather converge on one atmospheric theme — *${sunSign} light*, ${ctx.chinese.solarTerm.name.toLowerCase()} pacing, and ${moonPhase.toLowerCase()} mood. ${fork?.synthesis.summary || 'Different lenses name the same pressure differently.'}`
   );
 
   let personalAlignment: string | undefined;
@@ -127,7 +136,7 @@ export function synthesizeDailyBearing(
       ? `${profile.displayName || profile.querentName}: this layers today’s world sky against your saved chart.`
       : 'This is today’s world energy — the shared sky and calendar weather everyone moves through.';
 
-  const summary = `${lead} ${second} ${who}`;
+  const summary = `*${lead.replace(/\.$/, '')}.* ${second ? `${second} ` : ''}${who}`;
 
   const contributors: DailyBearingContributor[] = selected
     .filter((e) => e.id !== 'tribe')

@@ -1,21 +1,15 @@
 /**
- * Today — world energy first; personal chart overlay when saved.
+ * Today — story-first world energy; galleries auto-advance every 4 seconds.
  */
 
 import React, { useMemo, useState } from 'react';
 import { ArrowRight, BookmarkPlus, BookMarked, Check } from 'lucide-react';
-import { CompleteCalculationContext, CrucibleProfile, ReadingFocus, ReadingMode } from '../types';
+import { CompleteCalculationContext, CrucibleProfile, ReadingMode } from '../types';
 import { synthesizeDailyBearing } from '../engine/editorialSynthesis';
 import { saveInsight } from '../engine/savedInsights';
-import {
-  AtmosphereTriad,
-  ExploreFrontButton,
-  FocusSelector,
-  OverviewSlideCard,
-  ReadingModeToggle
-} from './cards/TodayCards';
+import { AtmosphereTriad, ExploreFrontButton, OverviewSlideCard, ReadingModeToggle } from './cards/TodayCards';
 import { ExpandableDetailCard } from './ui/ExpandableDetailCard';
-import { EpistemicBadge } from './EpistemicBadge';
+import { StoryProse } from './ui/StoryProse';
 
 interface TodayScreenProps {
   ctx: CompleteCalculationContext;
@@ -36,74 +30,82 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
   onOpenYou,
   onOpenExplore
 }) => {
-  const [focus, setFocus] = useState<ReadingFocus>('overview');
+  const [overviewIndex, setOverviewIndex] = useState(0);
+  const [atmosphereIndex, setAtmosphereIndex] = useState(0);
+  const [domainIndex, setDomainIndex] = useState(0);
   const [mode, setMode] = useState<ReadingMode>('world');
   const [whyOpen, setWhyOpen] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const bearing = useMemo(
-    () => synthesizeDailyBearing(ctx, focus, profile, mode, correlationKey),
-    [ctx, focus, profile, mode, correlationKey]
+    () => synthesizeDailyBearing(ctx, 'overview', profile, mode, correlationKey),
+    [ctx, profile, mode, correlationKey]
   );
 
   return (
     <div className="space-y-5 md:space-y-6">
       <ReadingModeToggle mode={mode} hasProfile={Boolean(profile)} onChange={setMode} />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <FocusSelector value={focus} onChange={setFocus} />
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <ExploreFrontButton onClick={onOpenExplore} />
       </div>
 
-      <OverviewSlideCard ctx={ctx} profile={profile} focus={focus} mode={mode} correlationKey={correlationKey} />
+      <OverviewSlideCard
+        ctx={ctx}
+        profile={profile}
+        slideIndex={overviewIndex}
+        onSlideIndexChange={setOverviewIndex}
+        mode={mode}
+        correlationKey={correlationKey}
+      />
+
       <AtmosphereTriad
         bearing={bearing}
         deepReadingBase={{ context: ctx, profile, mode }}
+        atmosphereIndex={atmosphereIndex}
+        onAtmosphereIndexChange={setAtmosphereIndex}
+        domainIndex={domainIndex}
+        onDomainIndexChange={setDomainIndex}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ExpandableDetailCard
-          label="Regional overlay (optional)"
-          accent="sage"
-          title={`Regional timing · ${bearing.localContext.cityLabel}`}
-          body={`This region adjusts local clock, approximate daylight (${bearing.localContext.sunrise}–${bearing.localContext.sunset}), and horizon math. It does not change the world sky — only how the day lands where you are. Moon: ${bearing.localContext.moonPhase}. Seasonal note: ${bearing.localContext.seasonalNote}.`}
+          label="Local overlay"
+          title={`How the day lands · ${bearing.localContext.cityLabel}`}
+          body={`Local clock ${bearing.localContext.localTime}. Daylight ${bearing.localContext.sunrise}–${bearing.localContext.sunset}. The global sky stays the same — this only shifts *how it feels on the ground*. Moon: ${bearing.localContext.moonPhase}.`}
           deepReading={{
             domainKey: 'regional',
-            seedText: `Regional overlay: ${bearing.localContext.cityLabel}. Local ${bearing.localContext.localTime}. Daylight ${bearing.localContext.sunrise}–${bearing.localContext.sunset}.`,
-            cardTitle: 'Regional overlay',
+            seedText: `Regional overlay: ${bearing.localContext.cityLabel}.`,
+            cardTitle: 'Local overlay',
             context: ctx,
             profile,
             mode
           }}
           preview={
-            <>
-              <p className="readable-body font-semibold">{bearing.localContext.cityLabel}</p>
-              <p className="readable-body mt-2">
-                Local {bearing.localContext.localTime} · daylight {bearing.localContext.sunrise}–{bearing.localContext.sunset}
-              </p>
-            </>
+            <StoryProse
+              text={`*${bearing.localContext.cityLabel}* · ${bearing.localContext.localTime} · daylight ${bearing.localContext.sunrise}–${bearing.localContext.sunset}`}
+            />
           }
         />
 
         <ExpandableDetailCard
-          label={mode === 'personal' ? 'Your chart lens' : 'Personal chart'}
-          accent="terracotta"
-          title={mode === 'personal' ? 'Your chart × today' : 'Add your chart'}
+          label={mode === 'personal' ? 'Your lens' : 'Your chart'}
+          title={mode === 'personal' ? 'Your pattern × today' : 'Add your chart'}
           body={
             profile
               ? mode === 'personal'
                 ? bearing.domains.personalAlignment ||
-                  'Personal alignment copy unavailable — transit hits may be wide today.'
-                : 'Switch to “Your chart energy” above to compare today’s sky with your saved natal pattern.'
-              : 'Save birth data on the You tab to toggle between world energy and your personal chart overlay.'
+                  'Your saved chart is wide to today’s sky — nothing tight is pressing; treat it as ambient weather.'
+                : 'Switch to *Your chart energy* above to compare today’s sky with your saved pattern.'
+              : 'Save birth data on the You tab to compare world energy with your personal chart.'
           }
           preview={
             profile ? (
-              <p className="readable-body">
-                {profile.displayName || profile.querentName} saved · confidence {profile.birthTimeConfidence.replace('_', ' ')}
+              <p className="readable-body text-[1.0625rem]">
+                {profile.displayName || profile.querentName}
               </p>
             ) : (
-              <p className="readable-body">No chart saved yet — world energy only.</p>
+              <p className="readable-body text-[1.0625rem]">World energy only — no chart saved.</p>
             )
           }
           extra={
@@ -118,8 +120,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
 
       <ExpandableDetailCard
         label="Watch for"
-        accent="rose"
-        title="Watch for"
+        title="The friction cue"
         body={bearing.watchFor}
         deepReading={{
           domainKey: 'watchFor',
@@ -129,22 +130,19 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           profile,
           mode
         }}
-        preview={<p className="readable-body text-[1.15rem] font-semibold">{bearing.watchFor}</p>}
+        preview={<StoryProse text={bearing.watchFor} className="text-[1.0625rem]" />}
       />
 
       <div>
         <button type="button" onClick={() => setWhyOpen((v) => !v)} className="cta-ghost">
-          {whyOpen ? 'Hide contributing systems' : 'Why this reading?'}
+          {whyOpen ? 'Hide the weave' : 'See what shaped this read'}
         </button>
         {whyOpen && (
           <ul className="mt-4 space-y-3">
             {bearing.contributors.map((c) => (
-              <li key={c.systemId} className="scroll-card gradient-card-base readable-body flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-semibold readable-body">{c.label}</p>
-                  <p className="readable-body mt-0.5 opacity-90">{c.signal}</p>
-                </div>
-                <EpistemicBadge epistemicClass={c.epistemic} />
+              <li key={c.systemId} className="ladder-card">
+                <span className="ladder-category">{c.label}</span>
+                <p className="ladder-answer">{c.signal}</p>
               </li>
             ))}
           </ul>
@@ -152,7 +150,14 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button type="button" className="cta-primary" onClick={() => { saveInsight(bearing); setSaved(true); }}>
+        <button
+          type="button"
+          className="cta-primary"
+          onClick={() => {
+            saveInsight(bearing);
+            setSaved(true);
+          }}
+        >
           {saved ? <Check className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
           {saved ? 'Saved' : 'Save insight'}
         </button>

@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { CompleteCalculationContext, TemporalInput } from '../types';
 import { FREE_SANCTUARY_PRESETS, geocodeNominatim, GeocodeResult } from '../engine/freeGeocode';
+import { LocationPicker } from './location/LocationPicker';
 
 interface TemporalControlBarProps {
   ctx: CompleteCalculationContext;
@@ -180,8 +181,21 @@ export const TemporalControlBar: React.FC<TemporalControlBarProps> = ({
             />
           </label>
 
-          <label className="space-y-1 relative">
-            <span className="ui-eyebrow block">Place</span>
+          <div className="w-full xl:col-span-2">
+            <LocationPicker
+              compact
+              value={ctx.input.location}
+              onChange={(location) =>
+                onInputChange(
+                  { ...ctx.input, dateString: dateStr, timeString: timeStr, isUTC: isUtc, location },
+                  correlationKey
+                )
+              }
+            />
+          </div>
+
+          <label className="space-y-1 relative xl:col-span-2">
+            <span className="ui-eyebrow block">Search more places</span>
             <div className="flex items-center gap-1">
               <input
                 type="text"

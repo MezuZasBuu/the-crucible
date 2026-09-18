@@ -169,8 +169,8 @@ async function main() {
   results.push(
     await runNamed('freeGeocode.sanctuaryPresets', () => {
       assert(FREE_SANCTUARY_PRESETS.length >= 5, 'preset count');
-      const j = FREE_SANCTUARY_PRESETS.find((p) => p.city.includes('Jerusalem'));
-      assert(!!j && Math.abs(j.latitude - 31.778) < 0.01, 'jerusalem coords');
+      const world = FREE_SANCTUARY_PRESETS.find((p) => p.city.includes('World'));
+      assert(!!world && Math.abs(world.latitude - 51.4779) < 0.01, 'world coords');
     })
   );
 

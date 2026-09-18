@@ -1,69 +1,75 @@
 import React from 'react';
 import { DomainImpacts, DeepReadingRequestBase } from '../../types';
 import { ExpandableDetailCard } from '../ui/ExpandableDetailCard';
+import { SlideGallery, SlidePanel } from '../ui/SlideGallery';
+import { StoryProse } from '../ui/StoryProse';
 
 const DOMAIN_META: Array<{
   key: keyof DomainImpacts;
   label: string;
   title: string;
-  accent: 'solar' | 'rose' | 'indigo' | 'sage' | 'ochre' | 'slate';
 }> = [
-  { key: 'whyToday', label: 'Why today feels this way', title: 'Why today', accent: 'solar' },
-  { key: 'mood', label: 'Collective mood', title: 'Mood', accent: 'rose' },
-  { key: 'people', label: 'People & relationships', title: 'People', accent: 'indigo' },
-  { key: 'travel', label: 'Travel & movement', title: 'Travel', accent: 'sage' },
-  { key: 'finance', label: 'Money & resources', title: 'Finance', accent: 'ochre' },
-  { key: 'tech', label: 'Tech & messages', title: 'Technology', accent: 'slate' }
+  { key: 'whyToday', label: 'Why today', title: 'Why today feels this way' },
+  { key: 'mood', label: 'Mood', title: 'Collective mood' },
+  { key: 'people', label: 'People', title: 'People & relationships' },
+  { key: 'travel', label: 'Travel', title: 'Travel & movement' },
+  { key: 'finance', label: 'Finance', title: 'Money & resources' },
+  { key: 'tech', label: 'Technology', title: 'Tech & messages' }
 ];
 
 export const DomainImpactCards: React.FC<{
   domains: DomainImpacts;
   deepReadingBase?: DeepReadingRequestBase;
-}> = ({ domains, deepReadingBase }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-    {DOMAIN_META.map(({ key, label, title, accent }) => {
-      const body = domains[key];
-      if (!body) return null;
-      return (
-        <ExpandableDetailCard
-          key={key}
-          label={label}
-          accent={accent}
-          title={title}
-          body={body}
-          preview={<p className="readable-body font-semibold">{body}</p>}
-          deepReading={
-            deepReadingBase
-              ? {
-                  ...deepReadingBase,
-                  domainKey: key,
-                  seedText: body,
-                  cardTitle: title
-                }
-              : undefined
-          }
-        />
-      );
-    })}
-    {domains.personalAlignment && (
-      <ExpandableDetailCard
-        label="Your chart alignment"
-        accent="terracotta"
-        title="Personal alignment"
-        body={domains.personalAlignment}
-        preview={<p className="readable-body font-semibold">{domains.personalAlignment}</p>}
-        deepReading={
-          deepReadingBase
-            ? {
-                ...deepReadingBase,
-                domainKey: 'personalAlignment',
-                seedText: domains.personalAlignment,
-                cardTitle: 'Personal alignment',
-                mode: 'personal'
-              }
-            : undefined
-        }
-      />
-    )}
-  </div>
-);
+  slideIndex: number;
+  onSlideIndexChange: (i: number) => void;
+}> = ({ domains, deepReadingBase, slideIndex, onSlideIndexChange }) => {
+  const panels = DOMAIN_META.filter(({ key }) => domains[key]).map(({ key, label, title }) => ({
+    key,
+    label,
+    title,
+    body: domains[key] as string
+  }));
+
+  if (domains.personalAlignment) {
+    panels.push({
+      key: 'personalAlignment' as keyof DomainImpacts,
+      label: 'Your chart',
+      title: 'Personal alignment',
+      body: domains.personalAlignment
+    });
+  }
+
+  if (panels.length === 0) return null;
+
+  return (
+    <SlideGallery
+      index={Math.min(slideIndex, panels.length - 1)}
+      onIndexChange={onSlideIndexChange}
+      panelCount={panels.length}
+      labels={panels.map((p) => p.label)}
+      autoAdvanceMs={4000}
+    >
+      {panels.map(({ key, label, title, body }) => (
+        <SlidePanel key={String(key)}>
+          <ExpandableDetailCard
+            label={label}
+            title={title}
+            body={body}
+            preview={<StoryProse text={body} className="text-[1.0625rem] leading-snug" />}
+            deepReading={
+              deepReadingBase
+                ? {
+                    ...deepReadingBase,
+                    domainKey: key === 'personalAlignment' ? 'personalAlignment' : key,
+                    seedText: body,
+                    cardTitle: title,
+                    mode: key === 'personalAlignment' ? 'personal' : deepReadingBase.mode
+                  }
+                : undefined
+            }
+          />
+        </SlidePanel>
+      ))}
+    </SlideGallery>
+  );
+};

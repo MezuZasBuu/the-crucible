@@ -10,9 +10,10 @@ import {
 } from '../../types';
 import { synthesizeDailyBearing } from '../../engine/editorialSynthesis';
 import { FadeInText } from '../ui/FadeInText';
-import { SlideCard, SlidePanel } from '../ui/SlideCard';
+import { SlideGallery, SlidePanel } from '../ui/SlideGallery';
 import { ExpandableDetailCard } from '../ui/ExpandableDetailCard';
 import { DomainImpactCards } from './DomainImpactCards';
+import { StoryProse } from '../ui/StoryProse';
 
 const FOCUSES: Array<{ id: ReadingFocus; label: string }> = [
   { id: 'overview', label: 'Overview' },
@@ -39,7 +40,7 @@ export const ReadingModeToggle: React.FC<{
       className={`nav-tab border inline-flex items-center gap-1.5 ${mode === 'world' ? 'nav-tab-active border-[color:var(--line-medium)]' : 'border-transparent'}`}
     >
       <Globe2 className="w-4 h-4" />
-      Today’s world energy
+      Today&apos;s world energy
     </button>
     <button
       type="button"
@@ -55,33 +56,14 @@ export const ReadingModeToggle: React.FC<{
   </div>
 );
 
-export const FocusSelector: React.FC<{
-  value: ReadingFocus;
-  onChange: (focus: ReadingFocus) => void;
-}> = ({ value, onChange }) => (
-  <div className="flex flex-wrap gap-2" role="tablist" aria-label="Reading focus">
-    {FOCUSES.map((item) => (
-      <button
-        key={item.id}
-        type="button"
-        role="tab"
-        aria-selected={value === item.id}
-        onClick={() => onChange(item.id)}
-        className={`nav-tab border ${value === item.id ? 'nav-tab-active border-[color:var(--line-medium)]' : 'border-transparent'}`}
-      >
-        {item.label}
-      </button>
-    ))}
-  </div>
-);
-
 export const OverviewSlideCard: React.FC<{
   ctx: CompleteCalculationContext;
   profile: CrucibleProfile | null;
-  focus: ReadingFocus;
+  slideIndex: number;
+  onSlideIndexChange: (i: number) => void;
   mode: ReadingMode;
   correlationKey: 'GMT_584283' | 'GMT_584285' | 'SPINDEN_489384';
-}> = ({ ctx, profile, focus, mode, correlationKey }) => {
+}> = ({ ctx, profile, slideIndex, onSlideIndexChange, mode, correlationKey }) => {
   const bearings = React.useMemo(
     () =>
       FOCUSES.map((f) => ({
@@ -90,97 +72,93 @@ export const OverviewSlideCard: React.FC<{
       })),
     [ctx, profile, mode, correlationKey]
   );
-  const slideIndex = Math.max(0, FOCUSES.findIndex((f) => f.id === focus));
 
   return (
-    <SlideCard index={slideIndex} className="card-featured gradient-card-solar">
+    <SlideGallery
+      index={slideIndex}
+      onIndexChange={onSlideIndexChange}
+      panelCount={FOCUSES.length}
+      labels={FOCUSES.map((f) => f.label)}
+      autoAdvanceMs={4000}
+    >
       {bearings.map(({ id, bearing }) => (
         <SlidePanel key={id} className="card-featured-inner">
-          <div className="card-featured-atmosphere" aria-hidden="true" />
-          <p className="scroll-label readable-muted relative">
-            {mode === 'world' ? 'World energy' : 'Your chart × today'} · {FOCUSES.find((f) => f.id === id)?.label}
+          <p className="scroll-label readable-muted">
+            {mode === 'world' ? 'World energy' : 'Your chart × today'}
           </p>
-          <FadeInText text={bearing.theme} as="h2" className="detail-title text-[clamp(1.45rem,3vw,2.35rem)] uppercase tracking-[0.04em] mt-2 relative" />
-          <FadeInText text={bearing.summary} className="readable-body text-[1.15rem] md:text-[1.22rem] leading-relaxed mt-4 max-w-3xl relative" delayMs={120} />
-          <FadeInText text={`Practice: ${bearing.practice}`} className="readable-body text-[1.05rem] font-semibold mt-5 relative" delayMs={280} />
+          <FadeInText
+            text={bearing.theme}
+            as="h2"
+            className="detail-title text-[clamp(1.35rem,2.8vw,2.1rem)] tracking-[0.02em] mt-2"
+          />
+          <StoryProse text={bearing.summary} className="mt-4 text-[1.0625rem] leading-relaxed max-w-3xl" />
+          <StoryProse text={`*Practice:* ${bearing.practice}`} className="mt-5 text-[1rem] font-medium" />
           {bearing.domains.personalAlignment && (
-            <FadeInText text={bearing.domains.personalAlignment} className="readable-body text-[1.02rem] mt-4 relative" delayMs={360} />
+            <StoryProse text={bearing.domains.personalAlignment} className="mt-4 text-[1rem]" />
           )}
         </SlidePanel>
       ))}
-    </SlideCard>
+    </SlideGallery>
   );
 };
 
-function DomainCards({
-  domains,
-  deepReadingBase
-}: {
-  domains: DailyBearing['domains'];
-  deepReadingBase?: DeepReadingRequestBase;
-}) {
-  return <DomainImpactCards domains={domains} deepReadingBase={deepReadingBase} />;
-}
+const ATMOSPHERE_META = [
+  { key: 'emotional' as const, label: 'Emotional atmosphere', domainKey: 'emotional' as const },
+  { key: 'social' as const, label: 'Social atmosphere', domainKey: 'social' as const },
+  { key: 'workCreative' as const, label: 'Work & creative', domainKey: 'workCreative' as const }
+];
 
 export const AtmosphereTriad: React.FC<{
   bearing: DailyBearing;
   deepReadingBase?: DeepReadingRequestBase;
-}> = ({ bearing, deepReadingBase }) => (
+  atmosphereIndex: number;
+  onAtmosphereIndexChange: (i: number) => void;
+  domainIndex: number;
+  onDomainIndexChange: (i: number) => void;
+}> = ({
+  bearing,
+  deepReadingBase,
+  atmosphereIndex,
+  onAtmosphereIndexChange,
+  domainIndex,
+  onDomainIndexChange
+}) => (
   <>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <ExpandableDetailCard
-        label="Emotional atmosphere"
-        accent="rose"
-        title="Emotional atmosphere"
-        body={bearing.atmospheres.emotional}
-        preview={<p className="readable-body font-semibold">{bearing.atmospheres.emotional}</p>}
-        deepReading={
-          deepReadingBase
-            ? {
-                ...deepReadingBase,
-                domainKey: 'emotional',
-                seedText: bearing.atmospheres.emotional,
-                cardTitle: 'Emotional atmosphere'
-              }
-            : undefined
-        }
-      />
-      <ExpandableDetailCard
-        label="Social atmosphere"
-        accent="indigo"
-        title="Social atmosphere"
-        body={bearing.atmospheres.social}
-        preview={<p className="readable-body font-semibold">{bearing.atmospheres.social}</p>}
-        deepReading={
-          deepReadingBase
-            ? {
-                ...deepReadingBase,
-                domainKey: 'social',
-                seedText: bearing.atmospheres.social,
-                cardTitle: 'Social atmosphere'
-              }
-            : undefined
-        }
-      />
-      <ExpandableDetailCard
-        label="Work & creative"
-        accent="ochre"
-        title="Work & creative"
-        body={bearing.atmospheres.workCreative}
-        preview={<p className="readable-body font-semibold">{bearing.atmospheres.workCreative}</p>}
-        deepReading={
-          deepReadingBase
-            ? {
-                ...deepReadingBase,
-                domainKey: 'workCreative',
-                seedText: bearing.atmospheres.workCreative,
-                cardTitle: 'Work & creative'
-              }
-            : undefined
-        }
-      />
-    </div>
-    <DomainCards domains={bearing.domains} deepReadingBase={deepReadingBase} />
+    <SlideGallery
+      index={atmosphereIndex}
+      onIndexChange={onAtmosphereIndexChange}
+      panelCount={ATMOSPHERE_META.length}
+      labels={ATMOSPHERE_META.map((m) => m.label)}
+      autoAdvanceMs={4000}
+    >
+      {ATMOSPHERE_META.map(({ key, label, domainKey }) => (
+        <SlidePanel key={key}>
+          <ExpandableDetailCard
+            label={label}
+            title={label}
+            body={bearing.atmospheres[key]}
+            preview={<StoryProse text={bearing.atmospheres[key]} className="text-[1.0625rem]" />}
+            deepReading={
+              deepReadingBase
+                ? {
+                    ...deepReadingBase,
+                    domainKey,
+                    seedText: bearing.atmospheres[key],
+                    cardTitle: label
+                  }
+                : undefined
+            }
+          />
+        </SlidePanel>
+      ))}
+    </SlideGallery>
+
+    <DomainImpactCards
+      domains={bearing.domains}
+      deepReadingBase={deepReadingBase}
+      slideIndex={domainIndex}
+      onSlideIndexChange={onDomainIndexChange}
+    />
   </>
 );
 

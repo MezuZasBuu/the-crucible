@@ -21,7 +21,9 @@ export const AccountPanel: React.FC<{ compact?: boolean }> = ({ compact = false 
         <p className="readable-body mt-3">
           Add Firebase keys to enable private accounts and Cursor deep readings. Today&apos;s deterministic readings still work without auth.
         </p>
-        <p className="readable-muted text-[0.95rem] mt-2">See <code className="text-[0.9em]">.env.example</code> for <code className="text-[0.9em]">VITE_FIREBASE_*</code> variables.</p>
+          <p className="readable-muted text-[0.95rem] mt-2">
+            Setup guide: <code className="text-[0.9em]">docs/FIREBASE_SETUP.md</code> (owner: mezuai000@gmail.com)
+          </p>
       </div>
     );
   }

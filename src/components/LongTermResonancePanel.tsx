@@ -61,6 +61,7 @@ export const LongTermResonancePanel: React.FC<LongTermResonancePanelProps> = ({
 
   // Active Selected Day in the 14-Day Grid (0 to 13)
   const [activeDayIndex, setActiveDayIndex] = useState<number>(0);
+  const [domainSlideIndex, setDomainSlideIndex] = useState(0);
 
   // Active Sub-Tab in the Day Dossier
   const [activeDossierTab, setActiveDossierTab] = useState<
@@ -504,6 +505,8 @@ export const LongTermResonancePanel: React.FC<LongTermResonancePanelProps> = ({
               </div>
               <DomainImpactCards
                 domains={activeEntry.domains}
+                slideIndex={domainSlideIndex}
+                onSlideIndexChange={setDomainSlideIndex}
                 deepReadingBase={{
                   forecastEntry: activeEntry,
                   targetLocationName: activeLocation.name,
