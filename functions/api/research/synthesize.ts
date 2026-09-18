@@ -2,6 +2,8 @@
  * Cloudflare Pages Function — research synthesize
  */
 
+import { tgoldBlockForMode } from '../../_shared/tgoldPrompt';
+
 export async function onRequestPost(context: { request: Request; env: { GEMINI_API_KEY?: string } }) {
   try {
     const body = await context.request.json() as {
@@ -14,13 +16,17 @@ export async function onRequestPost(context: { request: Request; env: { GEMINI_A
     const apiKey = context.env.GEMINI_API_KEY;
 
     if (apiKey) {
-      const prompt = `Research Dossier for "${name || 'Querent'}" on ${date || 'current'}. Reason: ${reason || 'natal measurement'}. Gaia: ${calc?.gaiaOvercast?.geomagneticStatus || 'n/a'}. Provide etymology, gematria notes, and field overlay as comparative analogy—not destiny.`;
+      const systemInstruction = `${tgoldBlockForMode('research-dossier')}
+
+You are the Scholarly Research Archivist of The Crucible. Provide etymology, gematria, and field overlay as comparative analogy—not destiny. End with Investigation Hooks and Intelligence Gaps.`;
+      const prompt = `Research Dossier for "${name || 'Querent'}" on ${date || 'current'}. Reason: ${reason || 'natal measurement'}. Gaia: ${calc?.gaiaOvercast?.geomagneticStatus || 'n/a'}. Provide etymology, gematria notes, and field overlay.`;
       const geminiRes = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemInstruction }] },
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             generationConfig: { temperature: 0.6 }
           })

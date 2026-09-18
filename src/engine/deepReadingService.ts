@@ -11,6 +11,7 @@ import {
   ReadingMode
 } from '../types';
 import { BRIEFING_VOICE_PROMPT } from './voiceStyle';
+import { buildTgoldResearchPromptBlock } from './tgold/tgoldResearchContext';
 
 const CURSOR_API = 'https://api.cursor.com';
 
@@ -122,8 +123,16 @@ export function buildDeepReadingPasses(req: DeepReadingRequest): string[] {
   const block = contextBlock(req.context, req.forecastEntry, req.targetLocationName);
   const profile = profileBlock(req.profile);
   const domainLabel = req.cardTitle || req.domainKey;
+  const tgoldBlock = buildTgoldResearchPromptBlock({
+    mode: 'deep-reading',
+    ctx: req.context,
+    query: `${domainLabel} ${req.seedText.slice(0, 120)}`,
+    compact: true
+  });
 
   const pass1 = `${BRIEFING_VOICE_PROMPT}
+
+${tgoldBlock}
 
 You are The Crucible deep-reading engine. Pass 1 of 3 — analyze computed data only; do not invent citations.
 

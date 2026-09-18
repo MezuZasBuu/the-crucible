@@ -7,6 +7,7 @@ import { ArrowRight, BookmarkPlus, BookMarked, Check } from 'lucide-react';
 import { CompleteCalculationContext, CrucibleProfile, ReadingMode } from '../types';
 import { synthesizeDailyBearing } from '../engine/editorialSynthesis';
 import { saveInsight } from '../engine/savedInsights';
+import { getTgoldResearchMetadata } from '../engine/tgold';
 import { AtmosphereTriad, ExploreFrontButton, OverviewSlideCard, ReadingModeToggle } from './cards/TodayCards';
 import { ExpandableDetailCard } from './ui/ExpandableDetailCard';
 import { StoryProse } from './ui/StoryProse';
@@ -154,7 +155,10 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           type="button"
           className="cta-primary"
           onClick={() => {
-            saveInsight(bearing);
+            const tgold = getTgoldResearchMetadata(ctx);
+            saveInsight(bearing, undefined, {
+              tgoldVectorsConsulted: tgold.evidenceVectors.map((b) => b.id)
+            });
             setSaved(true);
           }}
         >

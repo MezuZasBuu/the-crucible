@@ -11,6 +11,13 @@ import { generateFourteenDayForecast } from '../src/engine/longTermResonance';
 import { generateCSVReport } from '../src/engine/export';
 import { calculateGematriaEtymology } from '../src/engine/gematriaEtymology';
 import { CANONICAL_CLAIMS, CANONICAL_RULESETS } from '../src/engine/knowledgeBase';
+import {
+  buildTgoldResearchPromptBlock,
+  vectorsForTraditions,
+  extractResearchArtifacts,
+  getTgoldResearchMetadata,
+  nuanceForTradition
+} from '../src/engine/tgold';
 import { lunarMetricsFromBodies } from '../src/engine/sharedCelestial';
 import { mergeMethodology, EPISTEMIC_LABELS } from '../src/engine/epistemic';
 import { FREE_SANCTUARY_PRESETS } from '../src/engine/freeGeocode';
@@ -256,6 +263,28 @@ async function main() {
         birthTimeConfidence: 'unknown_window'
       });
       assert(!natalUnknown.hasAngles && natalUnknown.houses.length === 0, 'no fake houses');
+    })
+  );
+
+  results.push(
+    await runNamed('tgold.researchLayer', () => {
+      const ctx = executeCrucibleCalculation(baseInput);
+      const meta = getTgoldResearchMetadata(ctx);
+      assert(meta.evidenceVectors.length >= 4, 'evidence vectors for active traditions');
+      assert(CANONICAL_CLAIMS.some((c) => c.id.startsWith('CLAIM-008')), 'TGOLD claims loaded');
+      assert(CANONICAL_RULESETS.some((r) => r.id === 'RULES-TGOLD-RESEARCH'), 'TGOLD ruleset');
+      const block = buildTgoldResearchPromptBlock({ mode: 'compass', ctx, query: 'mood travel' });
+      assert(block.includes('TGOLD RESEARCH LAYER'), 'prompt block');
+      assert(block.includes('TGOLD EVIDENCE VECTORS'), 'vectors in block');
+      const mayaNuance = nuanceForTradition('Maya Calendrical');
+      assert(!!mayaNuance?.practiceFrame, 'practice nuance');
+      const vectors = vectorsForTraditions(['Maya Calendrical', 'Chinese Sexagenary']);
+      assert(vectors.length >= 2, 'tradition vector mapping');
+      const artifacts = extractResearchArtifacts(
+        '**Investigation Hooks**\n- Compare Dreamspell vs classical GMT correlation\n\n**Intelligence Gaps**\n- Missing primary source on regional tekufah'
+      );
+      assert(artifacts.investigationHooks.length >= 1, 'hooks extracted');
+      assert(artifacts.intelligenceGaps.length >= 1, 'gaps extracted');
     })
   );
 

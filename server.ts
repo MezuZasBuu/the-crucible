@@ -16,6 +16,7 @@ import { generateTodayDailyReport } from './src/engine/dailyEnergyReport';
 import { BRIEFING_VOICE_PROMPT } from './src/engine/voiceStyle';
 import { executeDeepReading } from './src/engine/deepReadingService';
 import { DeepReadingRequest } from './src/types';
+import { buildTgoldResearchPromptBlock, getTgoldResearchMetadata } from './src/engine/tgold';
 import {
   checkAndIncrementDeepReadingUsage,
   extractBearerToken,
@@ -73,6 +74,10 @@ async function startServer() {
     res.json(CANONICAL_RULESETS);
   });
 
+  app.get('/api/knowledge-base/tgold', (_req, res) => {
+    res.json(getTgoldResearchMetadata());
+  });
+
   // 5. Conversational Compass (Gemini LLM grounded in context)
   app.post('/api/compass', async (req, res) => {
     try {
@@ -88,10 +93,17 @@ async function startServer() {
         .map((c) => `${c.id} [${c.status}/${c.confidenceScore}] ${c.tradition}: ${c.entity} ${c.relation} ${c.target} (${c.sourceCitation})`)
         .join('\n');
       const rulesetSummary = CANONICAL_RULESETS.map((r) => `${r.id} v${r.version} — ${r.name} (${r.tradition})`).join('\n');
+      const tgoldBlock = buildTgoldResearchPromptBlock({
+        mode: 'compass',
+        ctx: context,
+        query: String(prompt).slice(0, 200)
+      });
 
       if (apiKey) {
         const ai = new GoogleGenAI({ apiKey });
         const systemInstruction = `${BRIEFING_VOICE_PROMPT}
+
+${tgoldBlock}
 
 You are the Conversational Compass of The Crucible.
 EPISTEMIC RULES (mandatory):
@@ -175,13 +187,22 @@ Knowledge claims loaded: ${CANONICAL_CLAIMS.length}. Rulesets: ${CANONICAL_RULES
 
       if (apiKey) {
         const ai = new GoogleGenAI({ apiKey });
-        const systemInstruction = `You are the Scholarly Research Archivist of The Crucible, specialized in ancient linguistic etymology, multi-cipher Gematria, astronomical ephemerides, and planetary/terrestrial field overcast synthesis.
+        const tgoldBlock = buildTgoldResearchPromptBlock({
+          mode: 'research-dossier',
+          ctx: context,
+          query: `${name || 'Querent'} ${reason || ''}`
+        });
+        const systemInstruction = `${BRIEFING_VOICE_PROMPT}
+
+${tgoldBlock}
+
+You are the Scholarly Research Archivist of The Crucible, specialized in ancient linguistic etymology, multi-cipher Gematria, astronomical ephemerides, and planetary/terrestrial field overcast synthesis.
 Conduct a rigorous, beautifully composed research inquiry into the provided name and temporal profile.
 Provide:
 1. Deep etymological and morphological lineage of the name (Proto-Indo-European / Semitic / Hellenic roots, historical shifts, cultural semantics).
 2. Esoteric & Gematric correspondences across Hebrew, Greek Isopsephy, and English ciphers with scholarly citations.
 3. Analysis of how this energetic profile navigates Gaia's current daily energetic overcast (geomagnetic tension, Schumann resonance, dialectical forks in the road).
-Speak with elegant, authoritative prose. Include specific historical academic sources.`;
+Speak with elegant, authoritative prose. Include specific historical academic sources. End with Investigation Hooks and Intelligence Gaps sections.`;
 
         const prompt = `Research Dossier Request:
 Subject Name: "${name || 'Querent'}"

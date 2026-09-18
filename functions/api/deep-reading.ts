@@ -7,6 +7,7 @@ import {
   extractBearerToken,
   verifyFirebaseIdToken
 } from '../_shared/authGate';
+import { tgoldBlockForMode } from '../_shared/tgoldPrompt';
 
 type DeepReadingBody = {
   domainKey: string;
@@ -133,6 +134,8 @@ export async function onRequestPost(context: {
     const snippet = contextSnippet(req);
 
     const pass1 = `${BRIEFING}
+
+${tgoldBlockForMode('deep-reading')}
 
 Pass 1 — analyze computed data for domain "${req.cardTitle}" (${req.domainKey}).
 Mode: ${req.mode || 'world'}

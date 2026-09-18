@@ -169,6 +169,24 @@ export const CANONICAL_RULESETS: RulesetMetadata[] = [
       'First hour after sunrise matches the weekday planetary ruler',
       'Half-hours: Ingress Crest (0–30m) and Mid-Hour Echo (30–60m)'
     ]
+  },
+  {
+    id: 'RULES-TGOLD-RESEARCH',
+    name: 'TGOLD Epistemic Research Layer',
+    tradition: 'Cross-Tradition Research',
+    category: 'archetype',
+    version: '1.0.0',
+    epoch: 'The Crucible TGOLD operational layer',
+    sourceAuthority: 'The Crucible research methodology',
+    description:
+      'Evidence-vector triangulation, temporal accuracy gate, and ancient-practice nuance protocols for calendrical and spiritual claims without collapsing symbol into mechanism.',
+    gridlockedRules: [
+      'Symbol ≠ mechanism — recurring symbolism is not automatic proof of literal mechanism',
+      'Phenomenological reports are data; theological interpretation is secondary framework',
+      'Oral/indigenous knowledge: consult primary tradition accounts, not only academic summaries',
+      'Time-sensitive claims require [TRAINING DATA — VERIFY] unless live-verified',
+      'Structural paradox that exposes a gap is a valid research outcome'
+    ]
   }
 ];
 
@@ -249,6 +267,61 @@ export const CANONICAL_CLAIMS: KnowledgeClaim[] = [
     sourceCitation: 'Dio Cassius Roman History 37.18; traditional planetary week',
     status: 'Authoritative',
     confidenceScore: 0.97
+  },
+  {
+    id: 'CLAIM-008',
+    tradition: 'Cross-Tradition Research',
+    entity: 'mythology.recurring_motif',
+    relation: 'encodes_as',
+    target: 'compressed_observational_storage',
+    validityScope: 'Cross-cultural mythological analysis',
+    sourceCitation: 'Comparative mythology; structural motif studies',
+    status: 'Documented',
+    confidenceScore: 0.88
+  },
+  {
+    id: 'CLAIM-009',
+    tradition: 'Cross-Tradition Research',
+    entity: 'indigenous.oral_tradition',
+    relation: 'preserves',
+    target: 'multi_generational_observational_database',
+    validityScope: 'Indigenous and ancestral knowledge systems',
+    sourceCitation: 'Ethnographic primary sources; oral history methodology',
+    status: 'Documented',
+    confidenceScore: 0.9
+  },
+  {
+    id: 'CLAIM-010',
+    tradition: 'Cross-Tradition Research',
+    entity: 'spiritual.practice_report',
+    relation: 'constitutes',
+    target: 'phenomenological_data',
+    validityScope: 'Religious and metaphysical knowledge as evidence source',
+    sourceCitation: 'Phenomenology of religion; comparative spiritual studies',
+    status: 'Documented',
+    confidenceScore: 0.87
+  },
+  {
+    id: 'CLAIM-011',
+    tradition: 'Maya Calendrical',
+    entity: 'tzolkin.day_sign',
+    relation: 'prescribes',
+    target: 'daily_conduct_and_ceremonial_timing',
+    validityScope: 'Classical Mesoamerica; distinguish from modern Dreamspell overlay',
+    sourceCitation: 'Dresden Codex; Linda Schele & David Freidel',
+    status: 'Documented',
+    confidenceScore: 0.91
+  },
+  {
+    id: 'CLAIM-012',
+    tradition: 'Chinese Sexagenary',
+    entity: 'day_pillar.stem_branch',
+    relation: 'describes',
+    target: 'daily_qi_quality_and_conduct_window',
+    validityScope: 'Traditional BaZi day-level reading (one pillar of four)',
+    sourceCitation: 'Sanming Tonghui; Di Tian Sui',
+    status: 'Documented',
+    confidenceScore: 0.89
   }
 ];
 

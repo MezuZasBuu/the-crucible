@@ -3,6 +3,8 @@
  * Offline grounded synthesis when GEMINI_API_KEY is unset.
  */
 
+import { tgoldBlockForMode } from '../_shared/tgoldPrompt';
+
 export async function onRequestPost(context: { request: Request; env: { GEMINI_API_KEY?: string } }) {
   try {
     const body = await context.request.json() as { prompt?: string; context?: any };
@@ -13,7 +15,9 @@ export async function onRequestPost(context: { request: Request; env: { GEMINI_A
 
     const apiKey = context.env.GEMINI_API_KEY;
     if (apiKey) {
-      const systemInstruction = `You are the Conversational Compass of The Crucible.
+      const systemInstruction = `${tgoldBlockForMode('compass')}
+
+You are the Conversational Compass of The Crucible.
 Distinguish HISTORICAL_FACT, TEXTUAL_TRADITION, SCHOLARLY_INTERPRETATION, COMPARATIVE_ANALOGY, SYSTEM_INTERPRETATION, SPECULATIVE_SYNTHESIS.
 Do NOT invent academic citations. Gaia Kp/Schumann are SPECULATIVE proxies.
 Date: ${calc?.input?.dateString} ${calc?.input?.timeString}
