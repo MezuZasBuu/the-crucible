@@ -329,7 +329,7 @@ export function toSharedDialecticalForks(
  */
 export function buildTotalSystemsReport(
   ctx: CompleteCalculationContext,
-  querentName: string = 'The Sovereign Querent',
+  querentName: string = 'you',
   measurementReason: string = 'Cosmic Natal & Daily Trajectory Measurement',
   natalContext?: CompleteCalculationContext
 ): TotalSystemsReportData {
@@ -341,21 +341,24 @@ export function buildTotalSystemsReport(
   const natalTime = natalContext?.input?.timeString || ctx.input.timeString;
   const natalCity = natalContext?.input?.location?.city || ctx.input.location?.city || 'World · UTC';
 
-  const executiveSynthesizedTreatise = `EXECUTIVE SYNCHRONIC DOSSIER FOR ${querentName.toUpperCase()}:
-Measured against the living energetic overcast of Gaia on ${ctx.input.dateString}, your temporal coordinate intersects a dense matrix of multi-tradition computus. 
-Under the Great Baktun Loom of the Maya (Long Count ${ctx.mayan.longCount.formatted}), this moment registers Kin ${ctx.mayan.kinNumber} (${ctx.mayan.tzolkin.formatted}, ${ctx.mayan.haab.formatted}), vibrating through the ${ctx.dreamspell.signature}. 
-The Chinese BaZi pillars channel ${ctx.chinese.yearPillar.stemElement} ${ctx.chinese.yearPillar.zodiacAnimal} through the solar term of ${ctx.chinese.solarTerm.name}, while the ancient Nile civil year ${ctx.egyptian.civilYear} holds the season of ${ctx.egyptian.season}.
-Enochian computus registers ${ctx.enochianBiblical.enochian.formatted} at the ${ctx.enochianBiblical.enochian.watchGate}, concurrent with biblical ${ctx.enochianBiblical.biblicalSeason.hebrewTekufah} (${ctx.enochianBiblical.biblicalTransits.seasonVerseAnchors[0]}). Roman ${ctx.enochianBiblical.gregorianWeekdayDeity.latinDies} (${ctx.enochianBiblical.gregorianWeekdayDeity.romanDeity}) and planetary hour of ${ctx.enochianBiblical.currentPlanetaryHour.planet} supply the diurnal temperament; the Enochian compass flip remaps cardinals for Watcher-gate triangulation in all final outputs.
-Numerologically, your Life Path vibration ${ctx.numerology.lifePathNumber} encounters Universal Day ${ctx.numerology.universalDay}. 
-Crucially, where these systems appear to offer divergent instructions, The Crucible does not collapse them into bland averages; rather, they are mapped as explicit Forks in the Road. 
-By measuring your personal trajectory against Gaia\'s real-time geomagnetic and aspect overcast (${overcast.geomagneticStatus}, ${overcast.celestialAspectTensionScore}/100 tension), you hold the key to navigating the bifurcation points with sovereign deliberate intent.`;
+  const who = querentName && querentName !== 'you' ? `${querentName}: here` : 'Here';
+  const sunBody = ctx.celestialBodies.find((x) => x.id === 'sun');
+  const moonBody = ctx.celestialBodies.find((x) => x.id === 'moon');
+  const executiveSynthesizedTreatise = `${who} is how each tradition reads ${ctx.input.dateString}.
+Western astrology: the Sun is in ${sunBody?.zodiacSign ?? 'n/a'} and the Moon is in ${moonBody?.zodiacSign ?? 'n/a'}.
+Maya calendar: the day is ${ctx.mayan.tzolkin.formatted} (${ctx.mayan.tzolkin.meaning}), ${ctx.mayan.haab.formatted} in the solar year, Long Count ${ctx.mayan.longCount.formatted}.
+Chinese calendar: a ${ctx.chinese.dayPillar.stemElement} ${ctx.chinese.dayPillar.zodiacAnimal} day in a ${ctx.chinese.yearPillar.stemElement} ${ctx.chinese.yearPillar.zodiacAnimal} year; the season marker is ${ctx.chinese.solarTerm.name}.
+Egyptian calendar: the season of ${ctx.egyptian.season}. The 364-day calendar: month ${ctx.enochianBiblical.enochian.monthIndex}, day ${ctx.enochianBiblical.enochian.dayOfMonth}.
+The weekday is named for ${ctx.enochianBiblical.gregorianWeekdayDeity.planetaryRuler}, and this hour for ${ctx.enochianBiblical.currentPlanetaryHour.planet}.
+Numerology: today is a ${ctx.numerology.universalDay} day; the Life Path number for this date is ${ctx.numerology.lifePathNumber}.
+Where the traditions point in different directions, the report shows both views side by side rather than averaging them. Estimated tension between the planets today: ${overcast.celestialAspectTensionScore} out of 100.`;
 
   const temporalDeltaSummary = isNatalComparison
-    ? `Natal Origin: ${natalDate} at ${natalTime} (${natalCity}) compared against Earth Real-Time Transit: ${ctx.input.dateString} at ${ctx.input.timeString}. Total temporal span: ${Math.abs(ctx.temporal.julianDayUT - (natalContext?.temporal.julianDayUT || ctx.temporal.julianDayUT)).toFixed(2)} Julian Days.`
-    : `Temporal Invariant: Point-in-time calculation executed on JD ${ctx.temporal.julianDayUT.toFixed(4)} with sub-millisecond deterministic precision.`;
+    ? `Birth: ${natalDate} at ${natalTime} (${natalCity}), compared with ${ctx.input.dateString} at ${ctx.input.timeString}. Time between them: ${Math.abs(ctx.temporal.julianDayUT - (natalContext?.temporal.julianDayUT || ctx.temporal.julianDayUT)).toFixed(0)} days.`
+    : `Calculated for a single moment (Julian Day ${ctx.temporal.julianDayUT.toFixed(4)}).`;
 
   const researchNetworkingCitations = [
-    { source: 'Crucible mean-motion ephemeris (crucible_mean_motion_v1)', domain: 'Astro-Mechanics', note: 'Approximate tropical geocentric longitudes — not VSOP87 or JPL Horizons' },
+    { source: 'astronomy-engine (open-source library)', domain: 'Astronomy', note: 'Tropical geocentric positions for the Sun, Moon and planets, accurate to arc-minutes' },
     { source: 'Online Etymology Dictionary (Harper)', domain: 'Linguistic Roots', note: 'Morphological origin of names and cultural semantic fields' },
     { source: 'Goodman-Martínez-Thompson (GMT 584283) Correlation', domain: 'Mayan Archeo-Astronomy', note: 'Validated on Dresden & Madrid codices' },
     { source: 'Purple Star Astrological BaZi Gan-Zhi Computus', domain: 'Chinese Chronobiology', note: 'Sexagenary solar term ingress and Wu Xing balance' },

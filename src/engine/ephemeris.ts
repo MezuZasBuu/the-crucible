@@ -37,6 +37,22 @@ export const ZODIAC_SIGNS = [
   { name: 'Pisces', symbol: '♓\uFE0E', element: 'Water', modality: 'Mutable', ruler: 'Neptune & Jupiter' }
 ];
 
+/** Everyday keywords for each sign, used in plain-language readings. */
+export const SIGN_KEYWORDS: Record<string, string> = {
+  Aries: 'starting things and acting boldly',
+  Taurus: 'steadiness, comfort and patience',
+  Gemini: 'curiosity, talk and variety',
+  Cancer: 'care, home and protection',
+  Leo: 'confidence, warmth and play',
+  Virgo: 'craft, detail and being useful',
+  Libra: 'balance, fairness and partnership',
+  Scorpio: 'depth, intensity and honesty',
+  Sagittarius: 'meaning, adventure and big-picture thinking',
+  Capricorn: 'discipline, structure and long-term goals',
+  Aquarius: 'ideas, community and doing things differently',
+  Pisces: 'imagination, compassion and going with the flow'
+};
+
 const PLANET_DEFINITIONS: Array<{ id: string; name: string; symbol: string; body?: Astronomy.Body; title: string }> = [
   { id: 'sun', name: 'Sun', symbol: '☉\uFE0E', body: Astronomy.Body.Sun, title: 'The Radiant Heart of Sovereign Will' },
   { id: 'moon', name: 'Moon', symbol: '☽\uFE0E', body: Astronomy.Body.Moon, title: 'The Silver Mirror of Memory and Tide' },

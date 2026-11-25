@@ -74,7 +74,7 @@ export function generateDossierHTML(
     fourteenDaySummary?: string;
   }
 ): string {
-  const name = opts?.querentName || ctx.input.querentName || 'Sovereign Querent';
+  const name = opts?.querentName || ctx.input.querentName || 'Guest';
   const meta = DOSSIER_TIER_META[tier];
   const calling = ctx.intertwining.primaryCallingLife;
   const gaia = ctx.gaiaOvercast;
@@ -134,7 +134,7 @@ export function generateDossierHTML(
     )}
     ${section(
       'Name · Numerology',
-      kv('Querent', name) +
+      kv('Name', name) +
         kv('Life Path', String(ctx.numerology.lifePathNumber)) +
         kv('Universal Month / Year', `${ctx.numerology.universalMonth} / ${ctx.numerology.universalYear}`) +
         kv('Chaldean Vibration', String(ctx.numerology.chaldeanVibration))

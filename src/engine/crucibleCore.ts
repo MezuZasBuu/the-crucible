@@ -133,7 +133,7 @@ export function executeCrucibleCalculation(
       epistemicClass: gaia.epistemicClass
     };
     dialecticalForks = toSharedDialecticalForks(
-      buildDialecticalForks(partialForGaia, gaia, input.querentName || 'Querent')
+      buildDialecticalForks(partialForGaia, gaia, input.querentName || 'you')
     );
   }
 

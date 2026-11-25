@@ -1,31 +1,40 @@
 /**
- * The Crucible — Astrocartography World Matrix Component
- * Google Maps Platform 3D Navigation & Geo Satellite Imagery Integration
- * High Density Theme: #0a0a0a surfaces, #222 borders, sharp corners,
- * accurate geodesic lines (MC, IC, ASC, DSC), sanctuary nodes, parans, and 3D camera flight.
+ * The Crucible — world map of planet lines.
+ * Shows where each planet is overhead (MC), underfoot (IC), rising (ASC) or setting (DSC),
+ * on a satellite map when available, otherwise on the built-in street or outline map.
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 import { AstrocartographyLine, CelestialCoordinate, LocationCoordinates, SanctuaryNode, EnochianCompassOrientation } from '../types';
 import { SANCTUARY_NODES } from '../engine/astrocartography';
-import { OPEN_SOURCE_MAP_CATALOG } from '../engine/mapProviders';
 import { GoogleMapPolyline } from './GoogleMapPolyline';
 import { GoogleMapCameraController } from './GoogleMapCameraController';
-import {
-  Compass,
-  Globe,
-  Layers,
-  RotateCw,
-  RotateCcw,
-  Maximize2,
-  Eye,
-  Crosshair,
-  Shield,
-  Info,
-  Navigation2,
-  FlipHorizontal2
-} from 'lucide-react';
+import { RotateCw, RotateCcw, FlipHorizontal2 } from 'lucide-react';
+import { CultureHeader } from './symbols/CultureSymbols';
+import { PlanetGlyph } from './symbols/AstroGlyph';
+
+/** Plain word for each of the four line types. */
+const LINE_WORD: Record<'MC' | 'IC' | 'ASC' | 'DSC', string> = {
+  MC: 'overhead',
+  IC: 'underfoot',
+  ASC: 'rising',
+  DSC: 'setting'
+};
+
+const LINE_FILTERS: ReadonlyArray<{ id: 'ALL' | 'MC' | 'IC' | 'ASC' | 'DSC'; label: string }> = [
+  { id: 'ALL', label: 'All' },
+  { id: 'MC', label: 'Overhead (MC)' },
+  { id: 'IC', label: 'Underfoot (IC)' },
+  { id: 'ASC', label: 'Rising (ASC)' },
+  { id: 'DSC', label: 'Setting (DSC)' }
+];
+
+/** "Sun overhead", "Moon rising" … */
+const lineLabel = (line: AstrocartographyLine) => `${line.planetName} ${LINE_WORD[line.lineType]}`;
+
+const formatLatLng = (lat: number, lng: number) =>
+  `${Math.abs(lat).toFixed(2)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng).toFixed(2)}°${lng >= 0 ? 'E' : 'W'}`;
 
 interface AstrocartographyMapProps {
   lines: AstrocartographyLine[];
@@ -105,7 +114,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
       onLocationSelect({
         latitude: lat,
         longitude: lng,
-        city: `Probe (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`
+        city: `Map point (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`
       });
     },
     [onLocationSelect]
@@ -169,201 +178,185 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
     onLocationSelect({
       latitude: lat,
       longitude: lng,
-      city: `Probe (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`
+      city: `Map point (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`
     });
   };
 
   return (
-    <div className="instrument-panel motion-enter !p-4 space-y-4 text-[color:var(--text-secondary)]">
-      {/* Top Header & Map Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[color:var(--line-soft)] pb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="rounded-[var(--radius-md)] border border-cyan-300/20 bg-cyan-300/[0.06] p-2 text-[color:var(--temporal)] shadow-[var(--glow-temporal)]">
-            <Globe className="w-4 h-4 animate-pulse" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="panel-title">
-                Astrocartography Geodetic Matrix
-              </h3>
-              <span className="ui-eyebrow rounded-full border border-cyan-300/20 bg-cyan-300/[0.06] px-2 py-1 text-[color:var(--temporal-bright)]">
-                Google Geo 3D Satellite
-              </span>
-            </div>
-            <p className="ui-eyebrow mt-1">
-              Precision Geodesic Meridian (MC/IC) & Horizon (ASC/DSC) Great Circles
-            </p>
-          </div>
-        </div>
+    <div className="instrument-panel motion-enter space-y-4">
+      <CultureHeader culture="map" title="Where the planets are over the world" />
 
-        {/* Action Buttons & 3D Camera Controls */}
-        <div className="flex flex-wrap items-center gap-2 text-[10px]">
-          <div className="flex rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-1">
+      <p className="readable-body max-w-3xl">
+        Each coloured line shows where a planet is rising, setting, directly overhead or directly underfoot at this
+        moment. Click a line to read what astrologers associate with it, or click anywhere on the map to pick a point and
+        see which lines pass closest. These are traditions offered for reflection, not predictions.
+      </p>
+
+      {!googleMapsAvailable && (
+        <p className="chart-note">The satellite map is unavailable, showing the built-in map instead.</p>
+      )}
+
+      {/* Map style and view controls */}
+      <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
+        <div className="space-y-1">
+          <span className="field-label">Map style</span>
+          <div className="seg">
             {(
               [
-                { id: 'osm' as const, label: 'MapLibre/OSM' },
-                { id: 'vector' as const, label: 'Vector' },
-                { id: 'google' as const, label: 'Google' }
+                { id: 'osm' as const, label: 'Street map' },
+                { id: 'vector' as const, label: 'Simple outline' },
+                { id: 'google' as const, label: 'Satellite' }
               ]
             ).map((mode) => (
               <button
                 key={mode.id}
+                type="button"
                 onClick={() => {
                   if (mode.id === 'google' && !googleMapsAvailable) return;
                   setMapProvider(mode.id);
                 }}
                 disabled={mode.id === 'google' && !googleMapsAvailable}
-                className={`nav-tab !px-2 !py-1 text-[10px] uppercase ${
-                  mapProvider === mode.id
-                    ? 'nav-tab-active bg-amber-300/[0.06] text-[color:var(--solar-bright)]'
-                    : ''
-                } ${mode.id === 'google' && !googleMapsAvailable ? 'opacity-40 cursor-not-allowed' : ''}`}
-                title={
-                  mode.id === 'google' && !googleMapsAvailable
-                    ? 'Google satellite maps unlock with a Crucible subscription'
-                    : 'Map provider — OSM requires no API key'
-                }
-              >
-                {mode.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Map Type Mode Switcher */}
-          <div className="flex rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-1">
-            {(
-              [
-                { id: 'hybrid', label: '3D Satellite' },
-                { id: 'satellite', label: 'Pure Space' },
-                { id: 'roadmap', label: 'Night Vector' },
-                { id: 'terrain', label: 'Terrain' }
-              ] as const
-            ).map((mode) => (
-              <button
-                key={mode.id}
-                onClick={() => setMapTypeId(mode.id)}
-                className={`nav-tab !px-2 !py-1 text-[10px] uppercase ${
-                  mapTypeId === mode.id
-                    ? 'nav-tab-active bg-cyan-300/[0.06]'
-                    : ''
+                className={`seg-btn ${mapProvider === mode.id ? 'seg-btn-active' : ''} ${
+                  mode.id === 'google' && !googleMapsAvailable ? 'seg-btn-locked cursor-not-allowed' : ''
                 }`}
+                title={mode.id === 'google' && !googleMapsAvailable ? 'The satellite map is unavailable' : undefined}
               >
                 {mode.label}
               </button>
             ))}
-          </div>
-
-          {/* 3D Tilt & Heading Navigation Toggles */}
-          <div className="flex items-center gap-1 rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-1">
-            <button
-              onClick={handleTiltToggle}
-              className={`nav-tab !px-2 !py-1 text-[9px] uppercase ${
-                tilt > 0
-                  ? 'nav-tab-active bg-cyan-300/[0.06]'
-                  : ''
-              }`}
-              title="Toggle 3D Horizon Tilt (0° / 45° / 65°)"
-            >
-              3D Tilt: {tilt}°
-            </button>
-            <button
-              onClick={() => handleRotateHeading(-30)}
-              className="cta-ghost min-h-0 p-1.5"
-              title="Rotate Heading Orbit Left (-30°)"
-            >
-              <RotateCcw className="w-3 h-3" />
-            </button>
-            <button
-              onClick={() => handleRotateHeading(30)}
-              className="cta-ghost min-h-0 p-1.5"
-              title="Rotate Heading Orbit Right (+30°)"
-            >
-              <RotateCw className="w-3 h-3" />
-            </button>
-            <button
-              onClick={handleResetNorth}
-              className="data-readout px-1.5 py-1 text-[9px]"
-              title="Reset True North (0°)"
-            >
-              N {effectiveHeading}°
-            </button>
-            <button
-              onClick={handleEnochianFlipToggle}
-              className={`cta-ghost min-h-0 px-2 py-1 text-[9px] uppercase ${
-                enochianFlip
-                  ? 'border-amber-300/40 bg-amber-300/[0.08] text-[color:var(--solar-bright)]'
-                  : ''
-              }`}
-              title="Enochian compass directional flip + world map East–West mirror"
-            >
-              <FlipHorizontal2 className="w-3 h-3" />
-              Enoch Flip
-            </button>
           </div>
         </div>
+
+        {mapProvider === 'google' && googleMapsAvailable && (
+          <>
+            <div className="space-y-1">
+              <span className="field-label">Satellite view</span>
+              <div className="seg">
+                {(
+                  [
+                    { id: 'hybrid', label: 'Photo with labels' },
+                    { id: 'satellite', label: 'Photo only' },
+                    { id: 'roadmap', label: 'Roads' },
+                    { id: 'terrain', label: 'Hills and valleys' }
+                  ] as const
+                ).map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => setMapTypeId(mode.id)}
+                    className={`seg-btn ${mapTypeId === mode.id ? 'seg-btn-active' : ''}`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="field-label">Camera</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleTiltToggle}
+                  className="cta-ghost !min-h-[36px] !px-3 text-sm"
+                  title="Tilt the view: flat, 45° or 65°"
+                >
+                  {tilt === 0 ? 'Tilt: flat' : `Tilt: ${tilt}°`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRotateHeading(-30)}
+                  className="cta-ghost !min-h-[36px] !px-2.5"
+                  title="Turn the map left"
+                  aria-label="Turn the map left"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRotateHeading(30)}
+                  className="cta-ghost !min-h-[36px] !px-2.5"
+                  title="Turn the map right"
+                  aria-label="Turn the map right"
+                >
+                  <RotateCw className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetNorth}
+                  className="cta-ghost !min-h-[36px] !px-3 text-sm"
+                  title={`The map is turned ${effectiveHeading}° from north`}
+                >
+                  Reset view
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-[color:var(--text-primary)] min-h-[36px]">
+          <input
+            type="checkbox"
+            checked={enochianFlip}
+            onChange={handleEnochianFlipToggle}
+            className="h-4 w-4 accent-[color:var(--solar-deep)]"
+          />
+          <FlipHorizontal2 className="w-4 h-4 text-[color:var(--text-muted)]" aria-hidden="true" />
+          Flipped ancient view (south at top, mirrored)
+        </label>
       </div>
 
-      {/* Filter and Layer Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-3 text-[10px]">
-        {/* Line Type Filter */}
-        <div className="flex items-center gap-1.5">
-          <span className="ui-eyebrow">Power Line:</span>
-          <div className="flex rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-black/10 p-1">
-            {(['ALL', 'MC', 'IC', 'ASC', 'DSC'] as const).map((t) => (
+      {/* What to show */}
+      <div className="flex flex-wrap items-end gap-x-5 gap-y-3 curious-box !p-3">
+        <div className="space-y-1">
+          <span className="field-label">Show lines where a planet is</span>
+          <div className="seg flex-wrap">
+            {LINE_FILTERS.map((t) => (
               <button
-                key={t}
-                onClick={() => setFilterType(t)}
-                className={`nav-tab !px-2 !py-1 text-[10px] uppercase ${
-                  filterType === t
-                    ? 'nav-tab-active bg-cyan-300/[0.06]'
-                    : ''
-                }`}
+                key={t.id}
+                type="button"
+                onClick={() => setFilterType(t.id)}
+                className={`seg-btn ${filterType === t.id ? 'seg-btn-active' : ''}`}
               >
-                {t}
+                {t.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Planet Filter */}
-        <div className="flex items-center gap-2">
-          <span className="ui-eyebrow">Planet:</span>
-          <select
-            value={filterPlanet}
-            onChange={(e) => setFilterPlanet(e.target.value)}
-            className="field-input py-1.5 text-[10px]"
-          >
-            <option value="all">All Celestial Bodies ({bodies.length})</option>
+        <label className="space-y-1">
+          <span className="field-label">Planet</span>
+          <select value={filterPlanet} onChange={(e) => setFilterPlanet(e.target.value)} className="field-input">
+            <option value="all">All planets</option>
             {bodies.slice(0, 8).map((b) => (
               <option key={b.id} value={b.id}>
-                {b.symbol} {b.name} ({b.zodiacSign} {b.signDegree.toFixed(0)}°)
+                {b.name} (in {b.zodiacSign})
               </option>
             ))}
           </select>
+        </label>
 
-          {/* Toggle Sanctuaries & Parans */}
-          <button
-            onClick={() => setShowSanctuaries((p) => !p)}
-            className={`cta-ghost min-h-0 px-2 py-1.5 text-[9px] uppercase ${
-              showSanctuaries
-                ? 'border-cyan-300/30 bg-cyan-300/[0.07] text-[color:var(--temporal-bright)]'
-                : ''
-            }`}
-          >
-            Sanctuary Nodes ({SANCTUARY_NODES.length})
-          </button>
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-[color:var(--text-primary)] min-h-[42px]">
+          <input
+            type="checkbox"
+            checked={showSanctuaries}
+            onChange={() => setShowSanctuaries((p) => !p)}
+            className="h-4 w-4 accent-[color:var(--temporal-deep)]"
+          />
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#00c2d1]" aria-hidden="true" />
+          Notable places ({SANCTUARY_NODES.length})
+        </label>
 
-          <button
-            onClick={() => setShowParans((p) => !p)}
-            className={`cta-ghost min-h-0 px-2 py-1.5 text-[9px] uppercase ${
-              showParans
-                ? 'border-amber-300/30 bg-amber-300/[0.07] text-[color:var(--solar-bright)]'
-                : ''
-            }`}
-          >
-            Paran Crossings
-          </button>
-        </div>
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-[color:var(--text-primary)] min-h-[42px]">
+          <input
+            type="checkbox"
+            checked={showParans}
+            onChange={() => setShowParans((p) => !p)}
+            className="h-4 w-4 accent-[color:var(--solar-deep)]"
+          />
+          <span className="inline-block w-2.5 h-2.5 rotate-45 bg-[#f59e0b]" aria-hidden="true" />
+          Points where two lines cross
+        </label>
       </div>
 
       {/* Main Map Viewer Canvas: Live Google Maps or Geodesic Vector Engine */}
@@ -373,10 +366,10 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
       >
         {enochianFlip && (
           <div
-            className="absolute top-2 left-2 z-20 px-2 py-1 bg-amber-950/90 border border-amber-600 text-amber-200 text-[9px] uppercase font-bold font-mono"
+            className="absolute top-2 left-2 z-20 rounded-md px-2.5 py-1 bg-white/95 border border-[color:var(--line-medium)] text-[color:var(--text-primary)] text-xs font-medium"
             style={{ transform: `scaleX(${mapScaleX})` }}
           >
-            Enochian World Flip Active · Heading {effectiveHeading}° · N→S / E↔W
+            Flipped ancient view is on: south is at the top and east and west are swapped
           </div>
         )}
         {mapProvider === 'google' && apiKey ? (
@@ -436,7 +429,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
                       <div className="w-5 h-5 rounded-full bg-cyan-500/30 border border-cyan-400 flex items-center justify-center shadow-lg group-hover:scale-125 transition-transform backdrop-blur-xs">
                         <div className="w-2 h-2 rounded-full bg-cyan-300" />
                       </div>
-                      <span className="text-[8px] font-mono px-1 py-0.2 bg-black/90 text-cyan-300 border border-cyan-800/80 rounded-xs mt-0.5 whitespace-nowrap opacity-85 group-hover:opacity-100">
+                      <span className="text-xs px-1.5 py-0.5 bg-white/95 text-[#1b1f3b] border border-black/20 rounded mt-0.5 whitespace-nowrap">
                         {s.name.split(',')[0]}
                       </span>
                     </div>
@@ -470,7 +463,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
                     <div className="w-6 h-6 rounded-full border-2 border-amber-400 flex items-center justify-center animate-pulse">
                       <div className="w-2 h-2 bg-amber-400 rounded-full" />
                     </div>
-                    <span className="text-[8px] font-mono px-1 py-0.2 bg-black/90 text-amber-300 border border-amber-500/80 rounded-xs mt-0.5 whitespace-nowrap">
+                    <span className="text-xs px-1.5 py-0.5 bg-white/95 text-[#1b1f3b] border border-black/20 rounded mt-0.5 whitespace-nowrap">
                       {inspectorCoord.lat.toFixed(1)}°, {inspectorCoord.lng.toFixed(1)}°
                     </span>
                   </div>
@@ -481,7 +474,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
         ) : mapProvider === 'osm' ? (
           <div className="relative w-full h-full bg-[#050505]">
             <iframe
-              title="OpenStreetMap Free Basemap"
+              title="Street map of the world"
               className="absolute inset-0 w-full h-full border-0 opacity-75 pointer-events-none"
               src={`https://www.openstreetmap.org/export/embed.html?bbox=${currentLocation.longitude - 40}%2C${currentLocation.latitude - 25}%2C${currentLocation.longitude + 40}%2C${currentLocation.latitude + 25}&layer=mapnik&marker=${currentLocation.latitude}%2C${currentLocation.longitude}`}
             />
@@ -551,6 +544,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
                       flyToSanctuary(s);
                     }}
                   >
+                    <title>{s.name}</title>
                     <circle cx="0" cy="0" r="5" fill="#00f0ff" stroke="#fff" strokeWidth="0.8" />
                   </g>
                 ))}
@@ -578,26 +572,30 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
                 </g>
               )}
             </svg>
-            <div className="absolute top-2 left-2 z-20 px-2 py-1 bg-black/80 border border-amber-700 text-amber-200 text-[9px] uppercase font-bold font-mono">
-              OSM + Full Line Overlay · Free · Click map to probe
-            </div>
+            {!enochianFlip && (
+              <div className="absolute top-2 left-2 z-20 rounded-md px-2.5 py-1 bg-white/95 border border-[color:var(--line-medium)] text-[color:var(--text-primary)] text-xs font-medium">
+                Click the map to pick a point
+              </div>
+            )}
             <div className="absolute bottom-2 right-2 z-20 flex gap-1">
               <a
                 href={`https://www.openstreetmap.org/#map=3/${currentLocation.latitude}/${currentLocation.longitude}`}
                 target="_blank"
                 rel="noreferrer"
-                className="px-2 py-1 bg-black/80 border border-[#333] text-[9px] text-cyan-300 uppercase font-mono"
+                className="rounded-md px-2.5 py-1 bg-white/95 border border-[color:var(--line-medium)] text-xs font-medium text-[color:var(--temporal-deep)]"
               >
-                Open full OSM
+                Open in OpenStreetMap
               </a>
             </div>
           </div>
         ) : (
           /* High-Precision Interactive Geodesic Vector World Canvas (Immediate Zero-Latency Fallback) */
           <div className="relative w-full h-full">
-            <div className="absolute top-2 left-2 z-20 px-2 py-1 bg-black/80 border border-cyan-800 text-cyan-200 text-[9px] uppercase font-bold font-mono">
-              Free vector canvas · OSM tiles optional via provider toggle
-            </div>
+            {!enochianFlip && (
+              <div className="absolute top-2 left-2 z-20 rounded-md px-2.5 py-1 bg-white/95 border border-[color:var(--line-medium)] text-[color:var(--text-primary)] text-xs font-medium">
+                Click the map to pick a point
+              </div>
+            )}
             <svg
               viewBox="0 0 1000 500"
               className="w-full h-full cursor-crosshair select-none"
@@ -677,12 +675,11 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
                         x={x + 3}
                         y={line.lineType === 'MC' ? 14 : 26}
                         fill={line.color}
-                        fontSize="8"
-                        fontFamily="JetBrains Mono"
-                        fontWeight="bold"
+                        fontSize="10"
+                        fontWeight="600"
                         className="select-none pointer-events-none"
                       >
-                        {line.planetName.slice(0, 3)} {line.lineType}
+                        {lineLabel(line)}
                       </text>
                     </g>
                   );
@@ -727,6 +724,7 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
                         flyToSanctuary(s);
                       }}
                     >
+                      <title>{s.name}</title>
                       <circle cx="0" cy="0" r="4.5" fill="#00f0ff" stroke="#ffffff" strokeWidth="0.8" />
                       <circle cx="0" cy="0" r="9" fill="none" stroke="#00f0ff" strokeWidth="0.5" className="animate-ping opacity-40" />
                     </g>
@@ -761,155 +759,130 @@ export const AstrocartographyMap: React.FC<AstrocartographyMapProps> = ({
                 </g>
               )}
             </svg>
-
-            {/* Overlay Notice when operating in Fallback Geodesic Mode */}
-            <div className="pointer-events-none absolute left-3 top-3 max-w-sm rounded-[var(--radius-md)] border border-cyan-300/20 bg-[color:var(--surface-glass)] p-3 shadow-[var(--glow-temporal)] backdrop-blur-md">
-              <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-[10px] uppercase">
-                <Navigation2 className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Geodesic Vector Matrix Active</span>
-              </div>
-              <p className="text-[10px] text-gray-300 mt-0.5 leading-relaxed">
-                OpenStreetMap and vector modes are free. Google 3D satellite imagery is provided through the Crucible service when enabled.
-              </p>
-            </div>
           </div>
         )}
       </div>
 
-      {/* Telemetry & Detailed Inspector Panels */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-        {/* Panel 1: Active Planetary Corridor */}
-        <div className="rounded-[var(--radius-md)] border border-cyan-300/10 border-l-2 border-l-[color:var(--temporal)] bg-cyan-300/[0.025] p-3 space-y-2">
-          <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-2">
-            <span className="ui-eyebrow">Active Power Line</span>
-            {selectedLine && (
-              <span
-                className="rounded-[var(--radius-sm)] border px-2 py-0.5 text-[10px] font-bold uppercase"
-                style={{
-                  backgroundColor: `${selectedLine.color}15`,
-                  borderColor: selectedLine.color,
-                  color: selectedLine.color
-                }}
-              >
-                {selectedLine.lineTypeName}
-              </span>
-            )}
-          </div>
+      {/* What is selected */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Selected line */}
+        <div className="curious-box space-y-2">
+          <p className="ui-eyebrow">Selected line</p>
           {selectedLine ? (
-            <div className="space-y-1 text-[11px]">
-              <p className="readable-body leading-snug">{selectedLine.description}</p>
-              <div className="flex flex-wrap gap-1 pt-1">
+            <>
+              <p className="flex items-center gap-2 text-base font-semibold text-[color:var(--text-primary)]">
+                <span className="inline-block h-1 w-5 rounded-full" style={{ backgroundColor: selectedLine.color }} aria-hidden="true" />
+                <PlanetGlyph planet={selectedLine.planetId} size={18} tinted />
+                {lineLabel(selectedLine)}
+              </p>
+              <p className="readable-muted text-sm">
+                Along this line, {selectedLine.planetName} is {LINE_WORD[selectedLine.lineType]} right now. Astrologers
+                associate places on it with:
+              </p>
+              <p className="readable-body text-sm">{selectedLine.description}</p>
+              <div className="flex flex-wrap gap-1.5">
                 {selectedLine.themes.map((t, idx) => (
                   <span
                     key={idx}
-                    className="rounded-full border border-[color:var(--line-soft)] bg-white/[0.035] px-2 py-0.5 text-[9px] text-[color:var(--text-muted)]"
+                    className="rounded-full border border-[color:var(--line-soft)] px-2 py-0.5 text-xs text-[color:var(--text-secondary)]"
                   >
-                    #{t}
+                    {t}
                   </span>
                 ))}
               </div>
-              <div className="data-readout flex justify-between border-t border-[color:var(--line-soft)] pt-2 text-[9px]">
-                <span>Meridian Longitude: <strong className="text-cyan-400">{selectedLine.subSolarLongitude}°</strong></span>
-                {selectedLine.declinationDegrees !== undefined && (
-                  <span>Declination: <strong className="text-gray-300">{selectedLine.declinationDegrees.toFixed(1)}°</strong></span>
-                )}
-              </div>
-            </div>
+              <details>
+                <summary className="cursor-pointer text-sm text-[color:var(--text-secondary)]">Technical details</summary>
+                <dl className="trad-facts mt-2">
+                  <dt>Astrology name</dt>
+                  <dd>{selectedLine.lineTypeName}</dd>
+                  <dt>Longitude</dt>
+                  <dd>{selectedLine.subSolarLongitude}°</dd>
+                  {selectedLine.declinationDegrees !== undefined && (
+                    <>
+                      <dt>Angle north or south of the equator</dt>
+                      <dd>{selectedLine.declinationDegrees.toFixed(1)}°</dd>
+                    </>
+                  )}
+                </dl>
+              </details>
+            </>
           ) : (
-            <p className="text-gray-500 italic text-[10px]">Click any planetary line to inspect its geodetic archetype.</p>
+            <p className="readable-muted text-sm">Click any coloured line on the map to read about it.</p>
           )}
         </div>
 
-        {/* Panel 2: Geographic Probe & Closest Corridors */}
-        <div className="rounded-[var(--radius-md)] border border-amber-300/10 border-l-2 border-l-[color:var(--solar)] bg-amber-300/[0.025] p-3 space-y-2">
-          <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-2">
-            <span className="ui-eyebrow">Coordinate Probe</span>
-            <span className="data-readout text-[10px] text-[color:var(--solar-bright)]">
-              {inspectorCoord.lat >= 0 ? `${inspectorCoord.lat.toFixed(2)}°N` : `${Math.abs(inspectorCoord.lat).toFixed(2)}°S`},{' '}
-              {inspectorCoord.lng >= 0 ? `${inspectorCoord.lng.toFixed(2)}°E` : `${Math.abs(inspectorCoord.lng).toFixed(2)}°W`}
-            </span>
-          </div>
-          <div className="space-y-1">
-            <p className="text-[9px] text-gray-500 uppercase">Closest Planetary Corridors:</p>
+        {/* Selected point */}
+        <div className="curious-box space-y-2">
+          <p className="ui-eyebrow">Selected point</p>
+          <p className="text-base font-semibold text-[color:var(--text-primary)]">
+            {formatLatLng(inspectorCoord.lat, inspectorCoord.lng)}
+          </p>
+          <p className="readable-muted text-sm">Nearest planet lines (distance in degrees east or west):</p>
+          <div className="space-y-1.5">
             {closestLines.map(({ line, distanceDeg }, idx) => (
-              <div
+              <button
                 key={idx}
-                className="flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] p-2 transition-colors hover:border-cyan-300/30"
+                type="button"
+                className="flex w-full items-center justify-between gap-2 rounded-md border border-[color:var(--line-soft)] px-2.5 py-2 text-left text-sm hover:border-[color:var(--line-bright)]"
                 onClick={() => {
                   setSelectedLine(line);
                   setSelectedSanctuary(null);
                 }}
               >
-                <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: line.color }} />
-                  <span className="text-[10px] readable-body font-bold">{line.lineTypeName}</span>
-                </div>
-                <span className="data-readout text-[9px]">{distanceDeg}° orb</span>
-              </div>
+                <span className="flex items-center gap-2 font-medium text-[color:var(--text-primary)]">
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: line.color }} aria-hidden="true" />
+                  {lineLabel(line)}
+                </span>
+                <span className="text-[color:var(--text-muted)]">{distanceDeg}° away</span>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Panel 3: Sanctuary Node Dossier */}
-        <div className="rounded-[var(--radius-md)] border border-emerald-300/10 border-l-2 border-l-emerald-500 bg-emerald-300/[0.025] p-3 space-y-2">
-          <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-2">
-            <span className="ui-eyebrow">Sanctuary Dossier</span>
-            {selectedSanctuary && (
-              <span className="text-emerald-400 font-bold text-[10px]">
-                {selectedSanctuary.elevationMeters}m Alt
-              </span>
-            )}
-          </div>
+        {/* Selected notable place */}
+        <div className="curious-box space-y-2">
+          <p className="ui-eyebrow">Notable place</p>
           {selectedSanctuary ? (
-            <div className="space-y-1 text-[11px]">
-              <div className="font-bold text-report-title font-serif">{selectedSanctuary.name}</div>
-              <div className="ui-eyebrow text-emerald-400">{selectedSanctuary.archetype}</div>
-              <p className="text-gray-300 text-[10px] leading-snug">{selectedSanctuary.description}</p>
-              <div className="text-[9px] text-gray-500 pt-2 border-t border-[color:var(--line-soft)]">
-                Tradition: {selectedSanctuary.tradition}
-              </div>
-            </div>
+            <>
+              <p className="text-base font-semibold text-[color:var(--text-primary)]">{selectedSanctuary.name}</p>
+              <p className="readable-body text-sm">{selectedSanctuary.description}</p>
+              <dl className="trad-facts">
+                <dt>Height above sea level</dt>
+                <dd>{selectedSanctuary.elevationMeters} m</dd>
+                <dt>Tradition</dt>
+                <dd>{selectedSanctuary.tradition}</dd>
+              </dl>
+              <details>
+                <summary className="cursor-pointer text-sm text-[color:var(--text-secondary)]">Traditional associations</summary>
+                <p className="readable-muted text-sm mt-2">{selectedSanctuary.archetype}</p>
+              </details>
+            </>
           ) : (
-            <div className="text-[10px] text-gray-500 space-y-1">
-              <p className="italic">Select a Sanctuary Node to view its ancient astronomical alignment and initiate 3D flight.</p>
-              <div className="flex flex-wrap gap-1 pt-1">
-                {SANCTUARY_NODES.slice(0, 4).map((s, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => flyToSanctuary(s)}
-                    className="nav-tab border border-[color:var(--line-soft)] !px-2 !py-1 text-[9px]"
-                  >
-                    {s.name.split(',')[0]}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <p className="readable-muted text-sm">
+              Choose a place from the list below, or click its dot on the map, to move the map there and read about it.
+            </p>
           )}
         </div>
       </div>
 
-      {/* Open-source geospatial stacks (TGOLD research catalog) */}
-      <p className="readable-muted text-[10px] pt-2 border-t border-[color:var(--line-soft)]">
-        Open maps: {OPEN_SOURCE_MAP_CATALOG.slice(0, 4).map((p) => p.name).join(' · ')} — member Google satellite when subscribed.
-      </p>
-
-      {/* Quick Sanctuary Jump Navigation Ribbon */}
-      <div className="pt-3 border-t border-[color:var(--line-soft)] flex flex-wrap items-center gap-1.5 text-[10px]">
-        <span className="ui-eyebrow">3D Flight Portals:</span>
-        {SANCTUARY_NODES.map((s, idx) => (
-          <button
-            key={idx}
-            onClick={() => flyToSanctuary(s)}
-            className={`nav-tab border !px-2 !py-1 text-[10px] ${
-              selectedSanctuary?.name === s.name
-                ? 'nav-tab-active border-cyan-300/30 bg-cyan-300/[0.07]'
-                : 'border-transparent'
-            }`}
-          >
-            {s.name.split(',')[0]}
-          </button>
-        ))}
+      {/* Notable places list */}
+      <div className="pt-3 border-t border-[color:var(--line-soft)] space-y-2">
+        <p className="field-label">Notable places</p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {SANCTUARY_NODES.map((s, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => flyToSanctuary(s)}
+              className={`explore-tab ${selectedSanctuary?.name === s.name ? 'explore-tab-active' : ''}`}
+            >
+              {s.name.split(',')[0]}
+            </button>
+          ))}
+        </div>
       </div>
+
+      <p className="readable-muted text-xs">Street map data © OpenStreetMap contributors.</p>
     </div>
   );
 };

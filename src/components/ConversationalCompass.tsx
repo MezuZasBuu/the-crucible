@@ -1,7 +1,5 @@
 /**
- * The Crucible — Conversational Compass (Hermetic Intelligence)
- * High Density Theme: #0a0a0a surfaces, #222 borders, sharp corners,
- * border-l-2 assistant messages, and condensed prompt bar.
+ * The Crucible — "Ask about today": a question-and-answer box over the day's calculations.
  */
 
 import React, { useState } from 'react';
@@ -21,7 +19,7 @@ export const ConversationalCompass: React.FC<ConversationalCompassProps> = ({ ct
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: `The Crucible Compass is initialized.\nSynchronic alignment: ${ctx.mayan.tzolkin.formatted} (Kin ${ctx.mayan.kinNumber}), Chinese ${ctx.chinese.yearPillar.stemPinYin}-${ctx.chinese.yearPillar.branchPinYin} (${ctx.chinese.yearPillar.zodiacAnimal}), Universal Day ${ctx.numerology.universalDay}, Life Path ${ctx.numerology.lifePathNumber}.\nReady to interpret multi-tradition cross-correlations.`,
+      content: `Hello. Ask me anything about this day.\nIn the Maya calendar it is ${ctx.mayan.tzolkin.formatted} (day ${ctx.mayan.kinNumber} of 260). In the Chinese calendar it falls in a year of the ${ctx.chinese.yearPillar.zodiacAnimal}. Its numerology day number is ${ctx.numerology.universalDay}.\nType a question below, or tap one of the suggestions.`,
       timestamp: new Date().toLocaleTimeString()
     }
   ]);
@@ -61,83 +59,74 @@ export const ConversationalCompass: React.FC<ConversationalCompassProps> = ({ ct
       const data = await response.json();
       const assistantMsg: Message = {
         role: 'assistant',
-        content: data.reply || 'The Crucible generated an empty response.',
+        content: data.reply || 'No answer came back this time. Please try asking again.',
         timestamp: new Date().toLocaleTimeString()
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err: any) {
       console.error('Compass error:', err);
-      setError(err.message || 'Failed to connect to the Crucible backend compass.');
+      setError(err.message || 'Could not reach the answering service.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const SUGGESTIONS = [
-    'Sacred initiatory task for today\'s configuration',
-    'Synthesize Maya Tzolk\'in with Chinese Year pillar',
-    'Explain highest Twelve Callings affinity & gemstone',
-    'Which astrocartography lines offer the strongest creative elevation?'
+    'What is today good for?',
+    'What should I be careful about today?',
+    "Explain today's calling in simple terms",
+    'Why do the Maya and Chinese calendars say different things today?',
+    "What does the Moon's phase mean right now?"
   ];
 
   return (
-    <div className="bg-[#0a0a0a] border border-[#222] p-3 rounded-sm flex flex-col h-[560px] font-mono shadow-xl">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#222] pb-2 mb-2.5">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rotate-45 border border-cyan-400 bg-cyan-950/80" />
-          <div>
-            <h3 className="text-xs font-bold tracking-wider text-white uppercase font-cinzel">
-              Conversational Compass
-            </h3>
-            <p className="text-[9px] text-gray-500 uppercase">
-              Hermetic Reasoning Matrix
-            </p>
-          </div>
+    <div className="instrument-panel flex flex-col gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="panel-title">Ask about today</h3>
+          <p className="readable-muted mt-1">
+            Ask a question in your own words and get a plain answer based on today's readings.
+          </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() =>
-              setMessages([
-                {
-                  role: 'assistant',
-                  content: 'Compass ledger reset. Synchronized to active temporal state.',
-                  timestamp: new Date().toLocaleTimeString()
-                }
-              ])
-            }
-            className="text-[9px] uppercase text-gray-400 hover:text-white px-2 py-0.5 rounded-sm bg-[#111] border border-[#222] transition-colors"
-          >
-            Clear Ledger
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() =>
+            setMessages([
+              {
+                role: 'assistant',
+                content: 'Conversation cleared. Ask a new question whenever you like.',
+                timestamp: new Date().toLocaleTimeString()
+              }
+            ])
+          }
+          className="cta-ghost"
+        >
+          Clear conversation
+        </button>
       </div>
 
-      {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 text-xs">
+      {/* Conversation */}
+      <div
+        className="space-y-3 max-h-[460px] min-h-[160px] overflow-y-auto pr-1"
+        role="log"
+        aria-live="polite"
+        aria-label="Conversation"
+      >
         {messages.map((m, idx) => (
-          <div
-            key={idx}
-            className={`flex flex-col ${
-              m.role === 'user' ? 'items-end' : 'items-start'
-            }`}
-          >
+          <div key={idx} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div
-              className={`max-w-[90%] rounded-sm p-2.5 leading-relaxed ${
+              className={`max-w-[92%] sm:max-w-[80%] rounded-xl px-4 py-3 border ${
                 m.role === 'user'
-                  ? 'bg-[#151515] text-cyan-200 border border-[#333]'
-                  : 'bg-[#0d0d0d] border border-[#222] border-l-2 border-l-cyan-500 text-gray-200'
+                  ? 'bg-[color:var(--surface-well)] border-[color:var(--line-soft)]'
+                  : 'bg-white border-[color:var(--line-soft)]'
               }`}
             >
-              <div className="flex items-center justify-between gap-3 text-[9px] text-gray-500 mb-1 border-b border-[#1a1a1a] pb-0.5">
-                <span className="font-bold uppercase tracking-wider text-cyan-500">
-                  {m.role === 'user' ? 'Inquirer' : 'The Crucible Compass'}
-                </span>
-                <span className="text-[8px] text-gray-600">{m.timestamp}</span>
+              <div className="flex items-center justify-between gap-3 text-xs text-[color:var(--text-muted)] mb-1">
+                <span className="font-semibold">{m.role === 'user' ? 'You' : 'Answer'}</span>
+                <span>{m.timestamp}</span>
               </div>
-              <div className="whitespace-pre-wrap font-sans text-xs text-gray-100 font-normal leading-relaxed">
+              <div className="whitespace-pre-wrap break-words text-base leading-relaxed text-[color:var(--text-primary)]">
                 {m.content}
               </div>
             </div>
@@ -145,35 +134,38 @@ export const ConversationalCompass: React.FC<ConversationalCompassProps> = ({ ct
         ))}
 
         {isLoading && (
-          <div className="flex items-center gap-2 text-cyan-400 text-[10px] p-2 bg-[#0d0d0d] border border-[#222] border-l-2 border-cyan-500 rounded-sm">
-            <span className="animate-spin text-sm">⚙</span>
-            <span className="uppercase tracking-wider">Synthesizing hermetic nodes across the matrix...</span>
-          </div>
+          <p className="text-sm text-[color:var(--text-muted)]" role="status">
+            Writing an answer…
+          </p>
         )}
 
         {error && (
-          <div className="p-2 bg-red-950/40 border border-red-900 text-red-300 text-[10px] rounded-sm">
-            Fault: {error}
-          </div>
+          <p className="text-sm text-[color:var(--el-fire)]" role="alert">
+            Sorry, that question could not be answered just now. Please try again. ({error})
+          </p>
         )}
       </div>
 
-      {/* Quick Suggestions */}
-      <div className="py-2 border-t border-[#222] flex flex-wrap gap-1">
-        {SUGGESTIONS.map((s, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleSend(s)}
-            disabled={isLoading}
-            className="text-[9px] px-2 py-0.5 rounded-sm bg-[#111] hover:bg-[#181818] hover:border-cyan-800 text-gray-400 hover:text-cyan-300 border border-[#222] transition-colors text-left truncate max-w-full"
-          >
-            {s}
-          </button>
-        ))}
+      {/* Suggested questions */}
+      <div>
+        <p className="text-xs text-[color:var(--text-muted)] mb-2">Try one of these</p>
+        <div className="flex flex-wrap gap-2">
+          {SUGGESTIONS.map((s, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => handleSend(s)}
+              disabled={isLoading}
+              className="explore-tab !h-auto !py-2 text-left !leading-snug !whitespace-normal max-w-full disabled:opacity-50"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Input Box */}
-      <div className="pt-2 flex items-center gap-2">
+      {/* Question box */}
+      <div className="flex flex-wrap items-center gap-2">
         <input
           type="text"
           value={inputPrompt}
@@ -181,18 +173,24 @@ export const ConversationalCompass: React.FC<ConversationalCompassProps> = ({ ct
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSend();
           }}
-          placeholder="Enter inquiry to query the esoteric framework..."
-          className="flex-1 bg-[#080808] border border-[#222] rounded-sm px-2.5 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500 font-sans"
+          placeholder="Type your question…"
+          aria-label="Your question"
+          className="field-input flex-1 min-w-[12rem]"
           disabled={isLoading}
         />
         <button
+          type="button"
           onClick={() => handleSend()}
           disabled={isLoading || !inputPrompt.trim()}
-          className="px-3 py-1.5 rounded-sm bg-[#141414] hover:bg-[#202020] border border-[#333] hover:border-cyan-500 text-cyan-400 text-[10px] uppercase font-bold tracking-wider disabled:opacity-40 transition-colors"
+          className="cta-primary"
         >
-          Consult
+          Ask
         </button>
       </div>
+
+      <p className="field-help">
+        Answers are written by AI from today's calculations. They are for reflection, not advice.
+      </p>
     </div>
   );
 };

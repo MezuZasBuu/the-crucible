@@ -7,7 +7,6 @@ import { CrucibleProfile } from '../types';
 import { executeCrucibleCalculation } from '../engine/crucibleCore';
 import { loadProfiles } from '../engine/crucibleProfile';
 import { CompatibilityReport, computeCompatibility } from '../engine/compatibility';
-import { EpistemicBadge } from './EpistemicBadge';
 
 interface Props {
   correlationKey: 'GMT_584283' | 'GMT_584285' | 'SPINDEN_489384';
@@ -22,6 +21,29 @@ function radarPoints(scores: number[], cx: number, cy: number, r: number): strin
       return `${cx + rr * Math.cos(angle)},${cy + rr * Math.sin(angle)}`;
     })
     .join(' ');
+}
+
+const AREA_LABEL: Record<string, string> = {
+  work: 'Work',
+  life: 'Daily life',
+  love: 'Love',
+  business: 'Business',
+  friendship: 'Friendship'
+};
+
+const AREA_PLAIN: Record<string, string> = {
+  work: 'How your working styles and pace fit together.',
+  life: 'How your everyday rhythms and long-term directions line up.',
+  love: 'How your emotional pace and ways of giving fit together.',
+  business: 'How well your strengths cover each other when building something.',
+  friendship: 'How easy it is to enjoy each other’s company without an agenda.'
+};
+
+function scoreWord(score: number): string {
+  if (score >= 75) return 'Strong match';
+  if (score >= 55) return 'Good match';
+  if (score >= 40) return 'Mixed';
+  return 'Takes more effort';
 }
 
 export const CompatibilityAtlasPanel: React.FC<Props> = ({ correlationKey }) => {
@@ -59,42 +81,54 @@ export const CompatibilityAtlasPanel: React.FC<Props> = ({ correlationKey }) => 
 
   const axisOrder = report?.axes || [];
   const polyA = report ? radarPoints(axisOrder.map((x) => x.score), 150, 140, 100) : '';
-  // Slight visual offset for B by using same scores with soft second ring — actually need B's own scores
-  // For true two-polygon we'd need per-profile axis vectors; for now show shared field as ivory fill of min scores
-  const polyShared = report
-    ? radarPoints(axisOrder.map((x) => x.score * 0.92), 150, 140, 100)
-    : '';
+  const labelFor = (axis: string, fallback: string) => AREA_LABEL[axis] || fallback;
+  const strongest = report ? [...report.axes].sort((x, y) => y.score - x.score)[0] : null;
+  const samePerson = Boolean(idA) && idA === idB;
+
+  const personCard = (
+    tag: string,
+    name: string,
+    profile: CrucibleProfile | undefined,
+    color: string
+  ) => (
+    <div className="curious-box text-center lg:col-span-3">
+      <p className="text-xs font-semibold" style={{ color }}>{tag}</p>
+      <h3 className="text-lg font-semibold text-[color:var(--text-primary)] mt-1 break-words">{name}</h3>
+      <dl className="trad-facts mt-3 text-left">
+        <dt>Born</dt>
+        <dd>{profile?.birth.dateString || 'Not set'}</dd>
+        <dt>Place</dt>
+        <dd>{profile?.birth.location.city || 'Not set'}</dd>
+      </dl>
+    </div>
+  );
 
   return (
-    <div className="instrument-panel instrument-panel-solar motion-enter space-y-6">
+    <div className="instrument-panel motion-enter space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="ui-eyebrow">Compatibility Atlas</p>
-          <h2 className="panel-title mt-1">Two signatures · five fields</h2>
-          <p className="font-garamond italic text-[17px] text-[color:var(--text-secondary)] mt-2 max-w-2xl leading-snug">
-            Compare saved profiles across Work, Life, Love, Business, and Friendship — comparative analogy, not destiny.
+        <div className="min-w-0">
+          <p className="ui-eyebrow">Compatibility</p>
+          <h2 className="panel-title mt-1">Compare two people</h2>
+          <p className="readable-body mt-2 max-w-2xl">
+            Pick two saved people to see how their charts and calendars compare in five areas: work, daily life,
+            love, business and friendship. A comparison for curiosity, not a verdict.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <EpistemicBadge epistemicClass="COMPARATIVE_ANALOGY" />
-          <button type="button" onClick={refresh} className="cta-ghost">
-            Refresh profiles
-          </button>
-        </div>
+        <button type="button" onClick={refresh} className="cta-ghost">
+          Reload saved people
+        </button>
       </div>
 
       {list.length < 2 ? (
-        <div className="rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-6">
-          <p className="text-[color:var(--text-secondary)] text-sm leading-relaxed">
-            Save at least <strong className="text-[color:var(--solar-bright)]">two profiles</strong> in the Profile tab
-            (birth date, place, name), then return here to compare compatibility.
-          </p>
-        </div>
+        <p className="chart-note">
+          You need at least <strong>two saved people</strong> to compare. Add each person's name, birth date and
+          birth place in the saved people section on this page, then come back here.
+        </p>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="space-y-1.5">
-              <span className="ui-eyebrow text-[color:var(--solar)]">Profile A</span>
+            <label className="space-y-1.5 block">
+              <span className="field-label">First person</span>
               <select
                 className="field-input w-full"
                 value={idA}
@@ -107,8 +141,8 @@ export const CompatibilityAtlasPanel: React.FC<Props> = ({ correlationKey }) => 
                 ))}
               </select>
             </label>
-            <label className="space-y-1.5">
-              <span className="ui-eyebrow text-[color:var(--temporal)]">Profile B</span>
+            <label className="space-y-1.5 block">
+              <span className="field-label">Second person</span>
               <select
                 className="field-input w-full"
                 value={idB}
@@ -123,71 +157,58 @@ export const CompatibilityAtlasPanel: React.FC<Props> = ({ correlationKey }) => 
             </label>
           </div>
 
+          {samePerson && (
+            <p className="chart-note">You have picked the same person twice. Choose a different second person to compare.</p>
+          )}
+
           {report && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              <div className="lg:col-span-3 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-5">
-                <div className="w-10 h-10 rotate-45 border border-[color:var(--solar)] bg-black/40 mx-auto mb-4 flex items-center justify-center">
-                  <span className="-rotate-45 text-[color:var(--solar-bright)] font-cinzel text-sm">A</span>
-                </div>
-                <h3 className="font-cinzel text-center text-lg text-[color:var(--solar-bright)]">{report.profileALabel}</h3>
-                <p className="text-center text-xs text-[color:var(--text-muted)] mt-2 font-mono data-readout">
-                  {profileA?.birth.dateString || '—'}
-                </p>
-                <p className="text-center text-sm text-[color:var(--text-secondary)] mt-3">
-                  {profileA?.birth.location.city || 'Birth place unset'}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+              {personCard('First person', report.profileALabel, profileA, 'var(--solar-deep)')}
 
               <div className="lg:col-span-6 flex flex-col items-center justify-center">
-                <div className="relative">
-                  <svg viewBox="0 0 300 280" className="w-full max-w-[340px]">
-                    {[0.25, 0.5, 0.75, 1].map((t) => (
-                      <polygon
-                        key={t}
-                        points={radarPoints([100, 100, 100, 100, 100], 150, 140, 100 * t)}
-                        fill="none"
-                        stroke="rgba(255,255,255,0.08)"
-                        strokeWidth="1"
-                      />
-                    ))}
-                    {axisOrder.map((ax, i) => {
-                      const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
-                      const x = 150 + 112 * Math.cos(angle);
-                      const y = 140 + 112 * Math.sin(angle);
-                      return (
-                        <g key={ax.axis}>
-                          <line x1="150" y1="140" x2={150 + 100 * Math.cos(angle)} y2={140 + 100 * Math.sin(angle)} stroke="rgba(255,255,255,0.1)" />
-                          <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="#aab3bf" fontSize="11" fontFamily="Plus Jakarta Sans">
-                            {ax.label}
-                          </text>
-                        </g>
-                      );
-                    })}
-                    <polygon points={polyShared} fill="rgba(241,238,231,0.12)" stroke="rgba(241,238,231,0.55)" strokeWidth="1.5" />
-                    <polygon points={polyA} fill="rgba(216,173,90,0.18)" stroke="#d8ad5a" strokeWidth="2" />
-                    <circle cx="150" cy="140" r="4" fill="#62c7da" className="motion-glow" />
-                  </svg>
-                </div>
+                <svg
+                  viewBox="0 0 300 280"
+                  className="w-full max-w-[340px]"
+                  role="img"
+                  aria-label={`Match scores by area: ${axisOrder
+                    .map((ax) => `${labelFor(ax.axis, ax.label)} ${ax.score}`)
+                    .join(', ')}`}
+                >
+                  {[0.25, 0.5, 0.75, 1].map((t) => (
+                    <polygon
+                      key={t}
+                      points={radarPoints([100, 100, 100, 100, 100], 150, 140, 100 * t)}
+                      fill="none"
+                      stroke="rgba(27,31,59,0.12)"
+                      strokeWidth="1"
+                    />
+                  ))}
+                  {axisOrder.map((ax, i) => {
+                    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
+                    const x = 150 + 118 * Math.cos(angle);
+                    const y = 140 + 114 * Math.sin(angle);
+                    return (
+                      <g key={ax.axis}>
+                        <line x1="150" y1="140" x2={150 + 100 * Math.cos(angle)} y2={140 + 100 * Math.sin(angle)} stroke="rgba(27,31,59,0.12)" />
+                        <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="currentColor" fontSize="12" className="text-[color:var(--text-secondary)]">
+                          {labelFor(ax.axis, ax.label)}
+                        </text>
+                      </g>
+                    );
+                  })}
+                  <polygon points={polyA} fill="rgba(217,181,106,0.28)" stroke="#a9812f" strokeWidth="2" />
+                </svg>
                 <div className="mt-2 text-center">
-                  <div className="ui-eyebrow">Overall field</div>
-                  <div className="font-cinzel text-4xl text-white mt-1" style={{ textShadow: '0 0 24px rgba(216,173,90,0.35)' }}>
+                  <p className="text-xs text-[color:var(--text-muted)]">Overall match score</p>
+                  <p className="text-4xl font-semibold text-[color:var(--text-primary)] leading-tight">
                     {report.overall}
-                  </div>
+                    <span className="text-base font-normal text-[color:var(--text-muted)]"> out of 100</span>
+                  </p>
+                  <p className="text-sm text-[color:var(--text-secondary)]">{scoreWord(report.overall)}</p>
                 </div>
               </div>
 
-              <div className="lg:col-span-3 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-5">
-                <div className="w-10 h-10 rotate-45 border border-[color:var(--temporal)] bg-black/40 mx-auto mb-4 flex items-center justify-center">
-                  <span className="-rotate-45 text-[color:var(--temporal-bright)] font-cinzel text-sm">B</span>
-                </div>
-                <h3 className="font-cinzel text-center text-lg text-[color:var(--temporal-bright)]">{report.profileBLabel}</h3>
-                <p className="text-center text-xs text-[color:var(--text-muted)] mt-2 font-mono data-readout">
-                  {profileB?.birth.dateString || '—'}
-                </p>
-                <p className="text-center text-sm text-[color:var(--text-secondary)] mt-3">
-                  {profileB?.birth.location.city || 'Birth place unset'}
-                </p>
-              </div>
+              {personCard('Second person', report.profileBLabel, profileB, 'var(--temporal-deep)')}
             </div>
           )}
 
@@ -195,22 +216,59 @@ export const CompatibilityAtlasPanel: React.FC<Props> = ({ correlationKey }) => 
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 {report.axes.map((ax) => (
-                  <div key={ax.axis} className="rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-4">
+                  <div key={ax.axis} className="curious-box">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-sm font-semibold text-white">{ax.label}</span>
-                      <span className="font-cinzel text-xl text-[color:var(--solar-bright)]">{ax.score}</span>
+                      <span className="text-sm font-semibold text-[color:var(--text-primary)]">{labelFor(ax.axis, ax.label)}</span>
+                      <span className="text-xl font-semibold text-[color:var(--solar-deep)]">{ax.score}</span>
                     </div>
-                    <div className="score-track mt-3">
+                    <div className="score-track mt-2" role="img" aria-label={`${ax.score} out of 100`}>
                       <div className="score-fill" style={{ width: `${ax.score}%` }} />
                     </div>
-                    <p className="text-[12px] text-[color:var(--text-muted)] mt-3 leading-snug">{ax.summary}</p>
+                    <p className="text-xs font-medium text-[color:var(--text-secondary)] mt-2">{scoreWord(ax.score)}</p>
+                    <p className="text-xs text-[color:var(--text-muted)] mt-1 leading-snug">
+                      {AREA_PLAIN[ax.axis] || ax.summary}
+                    </p>
+                    {ax.tensions.length > 0 && (
+                      <p className="text-xs text-[color:var(--el-fire)] mt-2 leading-snug">
+                        Worth talking about: {ax.tensions.join('; ').toLowerCase()}.
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
-              <p className="font-garamond italic text-[17px] text-[color:var(--text-secondary)] leading-relaxed">
-                {report.narrative}
+
+              <p className="trad-meaning">
+                <strong>In plain words:</strong> {report.profileALabel} and {report.profileBLabel} score{' '}
+                {report.overall} out of 100 overall
+                {strongest ? `, and their strongest area is ${labelFor(strongest.axis, strongest.label).toLowerCase()}` : ''}.
+                Scores are out of 100; higher means the two sets of calendar signs fit together more easily.
               </p>
-              <p className="text-[12px] text-[color:var(--text-muted)]">{report.epistemicNote}</p>
+
+              <details>
+                <summary className="text-sm text-[color:var(--text-secondary)] cursor-pointer">
+                  Technical details: what each score is based on
+                </summary>
+                <div className="mt-3 space-y-3">
+                  {report.axes.map((ax) => (
+                    <div key={ax.axis} className="text-sm text-[color:var(--text-secondary)]">
+                      <p className="font-semibold text-[color:var(--text-primary)]">{labelFor(ax.axis, ax.label)}</p>
+                      <p>{ax.summary}</p>
+                      {ax.sharedSignals.length > 0 && (
+                        <ul className="list-disc pl-5 mt-1">
+                          {ax.sharedSignals.map((s) => (
+                            <li key={s}>{s}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </details>
+
+              <p className="text-xs text-[color:var(--text-muted)]">
+                These scores compare calendar signs, elements and numbers from several traditions. They are a
+                starting point for conversation and do not predict how any relationship will go.
+              </p>
             </>
           )}
         </>

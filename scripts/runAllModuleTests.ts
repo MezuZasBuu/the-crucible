@@ -219,7 +219,7 @@ async function main() {
       assert(!!overview.theme && overview.theme.length > 4, 'theme');
       assert(!!overview.practice, 'practice');
       assert(!!overview.localContext.sunrise && !!overview.localContext.sunset, 'daylight');
-      assert(overview.localContext.cityLabel.includes('World'), 'city');
+      assert(overview.localContext.cityLabel.toLowerCase().includes('world'), 'city');
       assert(bearingIsPlainLanguage(overview), 'plain language');
       assert(overview.calculationId === ctx.calculationId, 'calc id');
       const again = synthesizeDailyBearing(ctx, 'overview', null);

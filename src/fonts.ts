@@ -19,7 +19,7 @@ import '@fontsource/noto-sans-symbols/symbols-400.css';
 import '@fontsource/noto-sans-symbols/symbols-500.css';
 import '@fontsource/noto-sans-symbols-2/symbols-400.css';
 
-import '@fontsource/noto-serif-sc/chinese-simplified-600.css';
+import '@fontsource/noto-serif-sc/600.css';
 import '@fontsource/noto-serif-devanagari/devanagari-600.css';
 import '@fontsource/noto-serif-hebrew/hebrew-600.css';
 import '@fontsource/noto-serif-ethiopic/ethiopic-600.css';

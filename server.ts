@@ -107,13 +107,12 @@ async function startServer() {
 
 ${tgoldBlock}
 
-You are the Conversational Compass of The Crucible.
-EPISTEMIC RULES (mandatory):
-- Distinguish HISTORICAL_FACT, TEXTUAL_TRADITION, SCHOLARLY_INTERPRETATION, COMPARATIVE_ANALOGY, SYSTEM_INTERPRETATION, SPECULATIVE_SYNTHESIS, EMPIRICAL_EVIDENCE, COMPUTED_GEOMETRY.
-- Do NOT invent academic citations. Prefer the knowledge-base claims below.
-- Gaia Kp/Schumann in context are SPECULATIVE_SYNTHESIS proxies, not live magnetometer data.
-- Do not force equivalence across Asian and Western ontologies; preserve native terms with glosses.
-- Modes: Calculator (numbers only), Scholar (sources), Practitioner (method), Synthesizer (compare without collapsing).
+You answer questions about the chosen day for The Crucible.
+- Answer the question directly first, in two to five short paragraphs.
+- Say what is measured (astronomy, calendar dates) and what is tradition ("traditionally…", "in this system…").
+- Do not invent citations; prefer the knowledge-base claims below.
+- Geomagnetic (Kp) and Schumann figures in the context are rough estimates, not live measurements; say so if you use them.
+- Keep each tradition's own terms but explain each in a few words the first time.
 
 KNOWLEDGE BASE RULESETS:
 ${rulesetSummary}
@@ -159,20 +158,17 @@ CURRENT CALCULATION CONTEXT:
       const sunGate = context?.geneKeysSun;
       const life = context?.intertwining?.primaryCallingLife;
 
-      const fallbackReply = `[Crucible Grounded Synthesis for ${context?.input?.dateString}]:
-[Epistemic: SYSTEM_INTERPRETATION + COMPARATIVE_ANALOGY — offline fallback]
-
-The inquiry activates ${topCalling?.calling || 'The Trailblazer'} (${topCalling?.affinityScore || 90}% affinity, ${topCalling?.quarter || 'East'} quarter).
-Life practice: ${life?.dayPractice || 'Orient one act toward service of the whole.'}
-Gift: ${life?.giftToEmbody || 'Faithful presence'}.
-
-Maya ${tzolkin?.formatted || 'Ahau'} (Kin ${context?.mayan?.kinNumber || 1}) × Chinese ${yearPillar?.stemElement || 'Wood'} ${yearPillar?.zodiacAnimal || 'Dragon'} × Life Path ${lifePath || 7}.
-Enochian: ${context?.enochianBiblical?.enochian?.watchGate || 'n/a'} · ${context?.enochianBiblical?.biblicalSeason?.hebrewTekufah || 'n/a'}.
-Vedic: ${context?.vedic?.nakshatraName || 'n/a'} · Gene Key Gift ${sunGate?.gift || 'Awareness'}.
-Gaia overlay [${context?.gaiaOvercast?.epistemicClass || 'SPECULATIVE_SYNTHESIS'}]: ${context?.gaiaOvercast?.geomagneticStatus || 'n/a'}.
-
-Knowledge claims loaded: ${CANONICAL_CLAIMS.length}. Rulesets: ${CANONICAL_RULESETS.length}.
-(Configure GEMINI_API_KEY for open-ended dialogue.)`;
+      const fallbackReply = [
+        `Here is what the calendars say for ${context?.input?.dateString}:`,
+        '',
+        `• Today’s calling is ${topCalling?.calling || 'The Trailblazer'} (“${topCalling?.motto || 'Go first'}”). Something to try: ${life?.dayPractice || 'Point one action toward the good of the whole.'}`,
+        `• Maya day sign: ${tzolkin?.formatted || 'n/a'}${tzolkin?.meaning ? ` — ${tzolkin.meaning}` : ''}.`,
+        `• Chinese calendar: a ${context?.chinese?.dayPillar?.stemElement || yearPillar?.stemElement || ''} ${context?.chinese?.dayPillar?.zodiacAnimal || yearPillar?.zodiacAnimal || ''} day; strongest element ${context?.chinese?.dominantElement || 'n/a'}.`,
+        `• Gene Keys: watch for ${String(sunGate?.shadow || 'n/a').toLowerCase()}, practise ${String(sunGate?.gift || 'n/a').toLowerCase()}.`,
+        `• Moon’s lunar mansion (Vedic): ${context?.vedic?.nakshatraName || 'n/a'}. Number of the day: ${context?.numerology?.universalDay ?? lifePath ?? 'n/a'}.`,
+        '',
+        'This is a summary of today’s calculations. Written answers to free-form questions are not switched on for this site yet.'
+      ].join('\n');
 
       return res.json({ reply: fallbackReply });
     } catch (err: any) {
@@ -192,22 +188,21 @@ Knowledge claims loaded: ${CANONICAL_CLAIMS.length}. Rulesets: ${CANONICAL_RULES
         const tgoldBlock = buildTgoldResearchPromptBlock({
           mode: 'research-dossier',
           ctx: context,
-          query: `${name || 'Querent'} ${reason || ''}`
+          query: `${name || 'name'} ${reason || ''}`
         });
         const systemInstruction = `${BRIEFING_VOICE_PROMPT}
 
 ${tgoldBlock}
 
-You are the Scholarly Research Archivist of The Crucible, specialized in ancient linguistic etymology, multi-cipher Gematria, astronomical ephemerides, and planetary/terrestrial field overcast synthesis.
-Conduct a rigorous, beautifully composed research inquiry into the provided name and temporal profile.
-Provide:
-1. Deep etymological and morphological lineage of the name (Proto-Indo-European / Semitic / Hellenic roots, historical shifts, cultural semantics).
-2. Esoteric & Gematric correspondences across Hebrew, Greek Isopsephy, and English ciphers with scholarly citations.
-3. Analysis of how this energetic profile navigates Gaia's current daily energetic overcast (geomagnetic tension, Schumann resonance, dialectical forks in the road).
-Speak with elegant, authoritative prose. Include specific historical academic sources. End with Investigation Hooks and Intelligence Gaps sections.`;
+You research the history and meaning of a name for The Crucible.
+Provide, in clearly headed sections and everyday language:
+1. Where the name comes from: its language of origin, root meaning and how it changed over time.
+2. Its letter-number values (gematria: adding up the number values of letters) in the Hebrew, Greek and English systems, with what each total is traditionally associated with.
+3. How the name's themes sit alongside the day's calculated context.
+Only cite sources you are confident exist; if unsure, say the point is uncertain. End with "Questions worth looking into" and "What is not known".`;
 
         const prompt = `Research Dossier Request:
-Subject Name: "${name || 'Querent'}"
+Name: "${name || '(not given)'}"
 Temporal Coordinate: ${date || 'Current Transit'}
 Significance / Reason: ${reason || 'Natal & Energetic Measurement'}
 Current Gaia Status: ${context?.gaiaOvercast?.geomagneticStatus || 'Standard Field'}
@@ -227,12 +222,8 @@ Please produce an intricately detailed, sourced research synthesis.`;
 
       // Offline / Deterministic scholarly fallback
       return res.json({
-        researchReport: `[Archival Research Dossier for "${name || 'Querent'}"]:
-Linguistic analysis cross-referenced against the Online Etymology Dictionary, Klein's Comprehensive Etymological Dictionary of the Hebrew Language, and Liddell-Scott Greek-English Lexicon.
-The name demonstrates deep morphological resonance with archetypes of sovereign stewardship and illumination. 
-Measured against Gaia's daily overcast (Schumann base 7.83 Hz, energetic aspect tension), the vibrational signature activates clear bifurcation points between external Yang manifestation and internal Yin sanctuary. 
-(To initiate live open-ended Web/AI network research, configure GEMINI_API_KEY in your environment settings.)`,
-        networkSource: 'The Crucible Archival Research Corpus (Offline Grounded Ledger)'
+        researchReport: "Online name research is not switched on for this site, so nothing has been looked up for \"${name || 'this name'}\". The letter-number analysis shown in the report is calculated on your device and is complete without it.",
+        networkSource: 'Not available'
       });
     } catch (err: any) {
       console.error('Research synthesis error:', err);
@@ -255,7 +246,7 @@ Measured against Gaia's daily overcast (Schumann base 7.83 Hz, energetic aspect 
         effectiveBirthInput,
         startDateString,
         targetLocationId || 'london',
-        userName || 'Sovereign Querent'
+        userName || 'you'
       );
       res.json(forecast);
     } catch (error: any) {

@@ -1,6 +1,6 @@
 /**
- * The Crucible — Temporal Input & Real-Time Stream Controller
- * Luminous instrument bar: glass surface, UI fonts, soft glows.
+ * The Crucible — date, time, name and place form
+ * (opens from the "Change date or place" bar).
  */
 
 import React, { useEffect, useState } from 'react';
@@ -76,14 +76,14 @@ export const TemporalControlBar: React.FC<TemporalControlBarProps> = ({
     try {
       const hits = await geocodeNominatim(placeQuery);
       if (!hits.length) {
-        setGeoStatus('No hits — try a sanctuary');
+        setGeoStatus('No places found. Try a different spelling, or pick one of the notable places below.');
         setGeoResults([]);
         return;
       }
       setGeoResults(hits);
-      setGeoStatus(`${hits.length} place(s)`);
+      setGeoStatus(hits.length === 1 ? '1 place found. Choose it from the list.' : `${hits.length} places found. Choose one from the list.`);
     } catch {
-      setGeoStatus('Geocode unavailable — use sanctuaries');
+      setGeoStatus('Place search is not available right now. Pick one of the notable places below instead.');
       setGeoResults([]);
     }
   };
@@ -103,25 +103,39 @@ export const TemporalControlBar: React.FC<TemporalControlBarProps> = ({
     handleApply(date, time, true);
   };
 
+  const famousDates: Array<{ label: string; date: string; time?: string }> = [
+    { label: '21 Dec 2012 (end of a Maya great cycle)', date: '2012-12-21' },
+    { label: '1 Jan 2000', date: '2000-01-01' },
+    { label: '2 Feb 1984 (start of a Chinese 60-year cycle)', date: '1984-02-02' },
+    { label: '20 Jul 1969 (Apollo 11 Moon landing)', date: '1969-07-20', time: '20:17:40' },
+    { label: '20 Jul 139 AD (Egyptian calendar and Sirius line up)', date: '0139-07-20' }
+  ];
+
   return (
-    <div className="instrument-panel !p-5 md:!p-6 motion-enter space-y-4">
-      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
-        <div className="control-bar-section flex-1">
-          <button
-            type="button"
-            onClick={onToggleStreaming}
-            className={`cta-ghost ${isStreaming ? '!border-[color:var(--temporal)] !text-[color:var(--temporal-bright)]' : ''}`}
-          >
-            <span className={`w-2 h-2 rounded-full ${isStreaming ? 'bg-[color:var(--temporal)] motion-live' : 'bg-[color:var(--text-muted)]'}`} />
-            {isStreaming ? 'Live stream' : 'Stream paused'}
-          </button>
+    <div className="instrument-panel !p-5 md:!p-6 motion-enter space-y-5">
+      {/* Date and time */}
+      <div className="space-y-3">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={isStreaming}
+            onChange={onToggleStreaming}
+            className="mt-1 h-4 w-4 accent-[color:var(--temporal-deep)]"
+          />
+          <span>
+            <span className="field-label">Use the current time</span>
+            <span className="field-help">
+              {isStreaming
+                ? 'On: the date and time below follow the clock. Turn this off to choose your own.'
+                : 'Off: the app shows the date and time you choose below.'}
+            </span>
+          </span>
+        </label>
 
-          <button type="button" onClick={setNow} className="cta-ghost">
-            Now
-          </button>
-
+        <div className="control-bar-section">
           <label className="space-y-1">
-            <span className="ui-eyebrow block">Date</span>
+            <span className="field-label">Date</span>
             <input
               type="date"
               value={dateStr}
@@ -134,7 +148,7 @@ export const TemporalControlBar: React.FC<TemporalControlBarProps> = ({
           </label>
 
           <label className="space-y-1">
-            <span className="ui-eyebrow block">Time</span>
+            <span className="field-label">Time</span>
             <input
               type="time"
               step="1"
@@ -147,149 +161,177 @@ export const TemporalControlBar: React.FC<TemporalControlBarProps> = ({
             />
           </label>
 
-          <button
-            type="button"
-            onClick={() => {
-              const next = !isUtc;
-              setIsUtc(next);
-              handleApply(dateStr, timeStr, next);
-            }}
-            className={`cta-ghost ${isUtc ? '!text-[color:var(--solar-bright)] !border-[color:var(--solar)]/50' : ''}`}
-          >
-            {isUtc ? 'UTC' : 'Local'}
-          </button>
-
-          <label className="space-y-1">
-            <span className="ui-eyebrow block">Name</span>
-            <input
-              type="text"
-              value={ctx.input.querentName || ''}
-              onChange={(e) => {
-                onInputChange(
-                  {
-                    ...ctx.input,
-                    dateString: dateStr,
-                    timeString: timeStr,
-                    isUTC: isUtc,
-                    querentName: e.target.value
-                  },
-                  correlationKey
-                );
-              }}
-              placeholder="Your name"
-              className="field-input field-input-wide"
-            />
-          </label>
-
-          <div className="w-full xl:col-span-2">
-            <LocationPicker
-              compact
-              value={ctx.input.location}
-              onChange={(location) =>
-                onInputChange(
-                  { ...ctx.input, dateString: dateStr, timeString: timeStr, isUTC: isUtc, location },
-                  correlationKey
-                )
-              }
-            />
-          </div>
-
-          <label className="space-y-1 relative xl:col-span-2">
-            <span className="ui-eyebrow block">Search more places</span>
-            <div className="flex items-center gap-1">
-              <input
-                type="text"
-                value={placeQuery}
-                onChange={(e) => setPlaceQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') searchPlace();
+          <div className="space-y-1">
+            <span className="field-label">This time is in</span>
+            <div className="seg" role="group" aria-label="Time zone for the time above">
+              <button
+                type="button"
+                aria-pressed={!isUtc}
+                onClick={() => {
+                  if (!isUtc) return;
+                  setIsUtc(false);
+                  handleApply(dateStr, timeStr, false);
                 }}
-                placeholder="City / sanctuary"
-                className="field-input field-input-wide min-w-[11rem]"
-              />
-              <button type="button" onClick={searchPlace} className="cta-ghost !min-h-[38px] !px-3">
-                Find
+                className={`seg-btn ${!isUtc ? 'seg-btn-active' : ''}`}
+              >
+                My local time
+              </button>
+              <button
+                type="button"
+                aria-pressed={isUtc}
+                onClick={() => {
+                  if (isUtc) return;
+                  setIsUtc(true);
+                  handleApply(dateStr, timeStr, true);
+                }}
+                className={`seg-btn ${isUtc ? 'seg-btn-active' : ''}`}
+              >
+                World time (UTC)
               </button>
             </div>
-            {geoResults.length > 0 && (
-              <div className="absolute left-0 top-full mt-1 z-30 w-80 max-h-48 overflow-auto rounded-[var(--radius-md)] border border-[color:var(--line-medium)] bg-[color:var(--void-900)] shadow-[var(--shadow-raised)]">
-                {geoResults.map((r) => (
-                  <button
-                    key={`${r.latitude}-${r.longitude}-${r.displayName}`}
-                    type="button"
-                    onClick={() => applyLocation(r)}
-                    className="block w-full text-left px-3 py-2 text-sm text-[color:var(--text-secondary)] hover:bg-[color:var(--surface-well)] hover:text-[color:var(--temporal-deep)] border-b border-[color:var(--line-soft)]"
-                  >
-                    {r.displayName}
-                  </button>
-                ))}
-              </div>
-            )}
-          </label>
-        </div>
-
-        <div className="control-bar-section shrink-0">
-          <div className="hidden md:block text-right">
-            <div className="ui-eyebrow">{ctx.input.location.city || 'Coordinates'}</div>
-            <div className="data-readout mt-0.5">
-              {ctx.input.location.latitude.toFixed(2)}°, {ctx.input.location.longitude.toFixed(2)}°
-            </div>
-            {geoStatus && <div className="text-[11px] text-[color:var(--text-muted)] mt-0.5">{geoStatus}</div>}
           </div>
 
-          <label className="space-y-1">
-            <span className="ui-eyebrow block">Maya correlation</span>
-            <select
-              value={correlationKey}
-              onChange={(e) => onCorrelationChange(e.target.value as any)}
-              className="field-input"
-            >
-              <option value="GMT_584283">GMT 584283</option>
-              <option value="GMT_584285">GMT 584285</option>
-              <option value="SPINDEN_489384">Spinden 489384</option>
-            </select>
-          </label>
-
-          <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] px-3 py-2">
-            <div className="ui-eyebrow">Latency</div>
-            <div className="text-sm font-semibold text-[color:var(--accent-sage)] mt-0.5">{ctx.executionDurationMs} ms</div>
-          </div>
+          <button type="button" onClick={setNow} className="cta-ghost">
+            Set to right now
+          </button>
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-[color:var(--line-soft)] flex flex-wrap items-center gap-2">
-        <span className="ui-eyebrow mr-1">Epochs</span>
-        {[
-          { label: '2012 Baktun', date: '2012-12-21' },
-          { label: 'J2000', date: '2000-01-01' },
-          { label: 'Jia-Zi 1984', date: '1984-02-02' },
-          { label: 'Apollo 11', date: '1969-07-20', time: '20:17:40' },
-          { label: 'Sothic 139', date: '0139-07-20' }
-        ].map((ep) => (
+      {/* Name */}
+      <label className="block space-y-1">
+        <span className="field-label">Name (optional, used for numerology)</span>
+        <input
+          type="text"
+          value={ctx.input.querentName || ''}
+          onChange={(e) => {
+            onInputChange(
+              {
+                ...ctx.input,
+                dateString: dateStr,
+                timeString: timeStr,
+                isUTC: isUtc,
+                querentName: e.target.value
+              },
+              correlationKey
+            );
+          }}
+          placeholder="Your name"
+          className="field-input field-input-wide"
+        />
+        <span className="field-help">Numerology turns the letters of a name into numbers. Leave this empty to skip it.</span>
+      </label>
+
+      {/* Place */}
+      <div className="space-y-3">
+        <div>
+          <span className="field-label">Place</span>
+          <span className="field-help">
+            Now set to {ctx.input.location.city || 'a point on the map'} ({ctx.input.location.latitude.toFixed(2)}°,{' '}
+            {ctx.input.location.longitude.toFixed(2)}°).
+          </span>
+        </div>
+
+        <LocationPicker
+          compact
+          value={ctx.input.location}
+          onChange={(location) =>
+            onInputChange(
+              { ...ctx.input, dateString: dateStr, timeString: timeStr, isUTC: isUtc, location },
+              correlationKey
+            )
+          }
+        />
+
+        <label className="block space-y-1 relative">
+          <span className="field-label">Search for another place</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={placeQuery}
+              onChange={(e) => setPlaceQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') searchPlace();
+              }}
+              placeholder="City or landmark"
+              className="field-input field-input-wide min-w-[11rem]"
+            />
+            <button type="button" onClick={searchPlace} className="cta-ghost">
+              Search
+            </button>
+          </div>
+          {geoStatus && <span className="field-help" role="status">{geoStatus}</span>}
+          {geoResults.length > 0 && (
+            <div className="absolute left-0 top-full mt-1 z-30 w-80 max-w-full max-h-48 overflow-auto rounded-[var(--radius-md)] border border-[color:var(--line-medium)] bg-white shadow-[var(--shadow-raised)]">
+              {geoResults.map((r) => (
+                <button
+                  key={`${r.latitude}-${r.longitude}-${r.displayName}`}
+                  type="button"
+                  onClick={() => applyLocation(r)}
+                  className="block w-full text-left px-3 py-2 text-sm text-[color:var(--text-secondary)] hover:bg-[color:var(--surface-well)] hover:text-[color:var(--temporal-deep)] border-b border-[color:var(--line-soft)]"
+                >
+                  {r.displayName}
+                </button>
+              ))}
+            </div>
+          )}
+        </label>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="field-label mr-1">Notable places</span>
+          {FREE_SANCTUARY_PRESETS.map((s) => (
+            <button
+              key={s.displayName}
+              type="button"
+              onClick={() => applyLocation(s)}
+              className="cta-ghost !min-h-[34px] !text-xs !px-2.5"
+            >
+              {s.city}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Famous dates */}
+      <div className="pt-4 border-t border-[color:var(--line-soft)] flex flex-wrap items-center gap-2">
+        <span className="field-label mr-1">Jump to a famous date</span>
+        {famousDates.map((ep) => (
           <button
             key={ep.label}
             type="button"
             onClick={() => setPresetEpoch(ep.date, ep.time)}
-            className="cta-ghost !min-h-[32px] !text-[11px] !px-2.5"
+            className="cta-ghost !min-h-[34px] !text-xs !px-2.5"
           >
             {ep.label}
           </button>
         ))}
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <span className="ui-eyebrow mr-1">Sanctuaries</span>
-        {FREE_SANCTUARY_PRESETS.map((s) => (
-          <button
-            key={s.displayName}
-            type="button"
-            onClick={() => applyLocation(s)}
-            className="cta-ghost !min-h-[32px] !text-[11px] !px-2.5"
-          >
-            {s.city}
-          </button>
-        ))}
-      </div>
+      {/* Expert-only setting */}
+      <details className="pt-4 border-t border-[color:var(--line-soft)]">
+        <summary className="cursor-pointer text-sm font-semibold text-[color:var(--text-primary)]">
+          Advanced: Maya calendar alignment
+        </summary>
+        <div className="mt-3 space-y-2">
+          <p className="field-help">
+            Scholars use slightly different start dates for the Maya count, which shifts the Maya dates by a day or two
+            (or, for the oldest proposal, by centuries). The first option is the standard one; most people never need to
+            change it.
+          </p>
+          <label className="block space-y-1">
+            <span className="field-label">Start date used for the Maya count</span>
+            <select
+              value={correlationKey}
+              onChange={(e) => onCorrelationChange(e.target.value as any)}
+              className="field-input"
+            >
+              <option value="GMT_584283">Standard (GMT 584283)</option>
+              <option value="GMT_584285">Two days later (GMT 584285)</option>
+              <option value="SPINDEN_489384">Older Spinden proposal (489384)</option>
+            </select>
+          </label>
+          <p className="field-help">Last calculation took {ctx.executionDurationMs} ms.</p>
+        </div>
+      </details>
     </div>
   );
 };

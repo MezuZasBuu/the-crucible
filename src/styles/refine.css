@@ -791,3 +791,36 @@ button.scroll-card:hover { border-color: var(--line-bright); }
 .card-more { margin-top: 0.9rem; font: 600 0.84rem/1 var(--font-ui); color: var(--temporal-deep); }
 .detail-sheet.scroll-card { padding: clamp(1.25rem, 3vw, 2rem); }
 .ladder-card { border-radius: 12px; }
+
+/* ---------- Layout fixes ---------- */
+.slide-card-panel { flex: 0 0 100%; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+.gallery-shell, .gallery-track-wrap { min-width: 0; max-width: 100%; }
+.gallery-caption { font-size: 0.78rem; letter-spacing: 0.06em; }
+.guide-section svg { flex: none; margin-top: 2px; }
+.guide-sections { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+@media (max-width: 640px) {
+  .card-featured-inner { padding-inline: 1.15rem; }
+  .gallery-nav { display: none; }
+}
+
+/* ---------- Segmented control wrapping ---------- */
+.seg { flex-wrap: wrap; max-width: 100%; border-radius: 22px; }
+.seg-btn { white-space: nowrap; }
+
+/* ---------- Print: only the report ---------- */
+@media print {
+  body { background: #fff !important; }
+  .app-rail, .mobile-tabbar, .instrument-header, .app-footer, .no-print { display: none !important; }
+  body:has(.printable-report) .app-shell > *:not(:has(.printable-report)) { display: none !important; }
+  .guide-overlay { position: static !important; background: none !important; backdrop-filter: none !important; padding: 0 !important; display: block !important; }
+  .guide-sheet { max-height: none !important; width: 100% !important; box-shadow: none !important; overflow: visible !important; }
+  .guide-body, .printable-report { overflow: visible !important; max-height: none !important; }
+  .instrument-panel, .trad-card, .scroll-card { box-shadow: none !important; break-inside: avoid; }
+}
+
+@media (max-width: 640px) {
+  .chart-table th, .chart-table td { padding-inline: 0.3rem; }
+  .chart-table { font-size: 0.86rem; }
+  .chart-planet-cell, .chart-sign-cell { gap: 0.3rem; }
+  .instrument-panel { padding: 1rem; }
+}

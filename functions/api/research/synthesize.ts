@@ -19,7 +19,7 @@ export async function onRequestPost(context: { request: Request; env: { GEMINI_A
       const systemInstruction = `${tgoldBlockForMode('research-dossier')}
 
 You are the Scholarly Research Archivist of The Crucible. Provide etymology, gematria, and field overlay as comparative analogy—not destiny. End with Investigation Hooks and Intelligence Gaps.`;
-      const prompt = `Research Dossier for "${name || 'Querent'}" on ${date || 'current'}. Reason: ${reason || 'natal measurement'}. Gaia: ${calc?.gaiaOvercast?.geomagneticStatus || 'n/a'}. Provide etymology, gematria notes, and field overlay.`;
+      const prompt = `Name research for "${name || 'this name'}" on ${date || 'current'}. Reason: ${reason || 'natal measurement'}. Gaia: ${calc?.gaiaOvercast?.geomagneticStatus || 'n/a'}. Provide etymology, gematria notes, and field overlay.`;
       const geminiRes = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
@@ -45,11 +45,8 @@ You are the Scholarly Research Archivist of The Crucible. Provide etymology, gem
     }
 
     return Response.json({
-      researchReport: `[Archival Research Dossier for "${name || 'Querent'}"]:
-Linguistic and calendrical cross-reference under The Crucible offline ledger.
-Measured against Gaia's daily overcast proxies, the signature activates bifurcation between Yang manifestation and Yin sanctuary.
-(Configure GEMINI_API_KEY on Cloudflare Pages for live research.)`,
-      networkSource: 'The Crucible Archival Research Corpus (Offline)'
+      researchReport: "Online name research is not switched on for this site, so nothing has been looked up for \"${name || 'this name'}\". The letter-number analysis shown in the report is calculated on your device and is complete without it.",
+      networkSource: 'Not available'
     });
   } catch (err: any) {
     return Response.json({ error: err.message || 'Research failure' }, { status: 500 });

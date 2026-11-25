@@ -96,24 +96,24 @@ export const VEDIC_NAKSHATRAS = [
 
 // Active Major Asteroids & Minor Spheres
 export const MAJOR_ASTEROIDS = [
-  { id: 'ceres', name: 'Ceres', symbol: '⚳', theme: 'Mother of the Harvest & Earth Stewardship', counsel: 'Sow unconditional nourishment where famine of the spirit threatens.' },
-  { id: 'pallas', name: 'Pallas Athena', symbol: '⚴', theme: 'Strategic Wisdom, Justice & Pattern Recognition', counsel: 'Wield the shield of dispassionate logic; see five moves ahead.' },
-  { id: 'juno', name: 'Juno', symbol: '⚵', theme: 'Sacred Covenant, Sovereign Partnership & Loyalty', counsel: 'Honor the contracts that protect individual sovereignty.' },
-  { id: 'vesta', name: 'Vesta', symbol: '⚶', theme: 'Keeper of the Sacred Flame & Dedicated Focus', counsel: 'Tend your innermost altar; do not let external chaos extinguish the spark.' },
-  { id: 'chiron', name: 'Chiron', symbol: '⚷', theme: 'The Rainbow Bridge & Alchemical Wound Transmutation', counsel: 'The fracture is where the medicine enters; teach what you needed to learn.' },
-  { id: 'astraea', name: 'Astraea', symbol: '⚖', theme: 'The Golden Age of Truth & Divine Equilibrium', counsel: 'Anchor pristine moral integrity even when society vacillates.' }
+  { id: 'ceres', name: 'Ceres', symbol: '⚳', theme: 'Nourishment and care for the land', counsel: 'Feed something that needs it — a person, a project, a garden.' },
+  { id: 'pallas', name: 'Pallas Athena', symbol: '⚴', theme: 'Strategy, fairness and seeing patterns', counsel: 'Step back and think a few moves ahead.' },
+  { id: 'juno', name: 'Juno', symbol: '⚵', theme: 'Commitment and loyal partnership', counsel: 'Honour an agreement that protects both sides.' },
+  { id: 'vesta', name: 'Vesta', symbol: '⚶', theme: 'Devotion and focus', counsel: 'Protect time for the one thing you care most about.' },
+  { id: 'chiron', name: 'Chiron', symbol: '⚷', theme: 'Healing through an old hurt', counsel: 'Share something you learned the hard way.' },
+  { id: 'astraea', name: 'Astraea', symbol: '⚖', theme: 'Honesty and fair dealing', counsel: 'Keep your standards even when others let theirs slip.' }
 ];
 
 // Other Moons of the Solar System Telemetry
 export const SOLAR_SYSTEM_MOONS = [
-  { system: 'Jupiter', moon: 'Io', symbol: '🌋', energeticQuality: 'Hyper-volcanic tidal stress, raw planetary ignition, breaking stale crusts.' },
-  { system: 'Jupiter', moon: 'Europa', symbol: '❄️', energeticQuality: 'Subsurface oceanic depth, hidden reservoirs of living water, impenetrable icy shield.' },
-  { system: 'Jupiter', moon: 'Ganymede', symbol: '🛡️', energeticQuality: 'Magnetic shield generation, immense sovereign gravity, the master of solar moons.' },
-  { system: 'Jupiter', moon: 'Callisto', symbol: '☄️', energeticQuality: 'Ancient unblemished record, stoic resilience, bearing scars without compromise.' },
-  { system: 'Saturn', moon: 'Titan', symbol: '🌫️', energeticQuality: 'Dense hydrocarbon atmosphere, primordial prebiotic crucible, golden fog of potential.' },
-  { system: 'Saturn', moon: 'Enceladus', symbol: '💧', energeticQuality: 'Cryovolcanic geysers of pure saline ice, luminous purity spraying into Saturnian rings.' },
-  { system: 'Earth', moon: 'Kamoʻoalewa (Quasi-Moon)', symbol: '🛰️', energeticQuality: 'Earth’s perennial quasi-satellite, resonant companion holding silent orbital vigil.' },
-  { system: 'Mars', moon: 'Phobos & Deimos', symbol: '⚔️', energeticQuality: 'Flight and panic transmuted into hyper-alert vigilance and sovereign courage.' }
+  { system: 'Jupiter', moon: 'Io', symbol: '🌋', energeticQuality: 'The most volcanic world known — an image of pressure breaking through.' },
+  { system: 'Jupiter', moon: 'Europa', symbol: '❄️', energeticQuality: 'An ocean hidden under ice — an image of depth beneath a calm surface.' },
+  { system: 'Jupiter', moon: 'Ganymede', symbol: '🛡️', energeticQuality: 'The largest moon, with its own magnetic field — an image of quiet strength.' },
+  { system: 'Jupiter', moon: 'Callisto', symbol: '☄️', energeticQuality: 'An ancient, heavily cratered surface — an image of endurance.' },
+  { system: 'Saturn', moon: 'Titan', symbol: '🌫️', energeticQuality: 'A thick orange haze over lakes — an image of things still forming.' },
+  { system: 'Saturn', moon: 'Enceladus', symbol: '💧', energeticQuality: 'Geysers of ice spraying into space — an image of something fresh breaking out.' },
+  { system: 'Earth', moon: 'Kamoʻoalewa (Quasi-Moon)', symbol: '🛰️', energeticQuality: 'A small asteroid that keeps pace with Earth — an image of a steady companion.' },
+  { system: 'Mars', moon: 'Phobos & Deimos', symbol: '⚔️', energeticQuality: 'Named “fear” and “dread” — an image of nerves turned into alertness.' }
 ];
 
 // Active Constellations & Deep Sky Portals
@@ -283,7 +283,7 @@ export function generateFourteenDayForecast(
   birthDateInput: TemporalInput,
   startDateString?: string,
   targetLocationId: string = 'london',
-  userName: string = 'Sovereign Querent'
+  userName: string = 'you'
 ): LongTermResonanceForecast {
   // Normalize base start date
   let baseDate: Date;
@@ -426,52 +426,51 @@ export function generateFourteenDayForecast(
     const isPeakResonanceDay = resonanceScore >= 88 || dayCtx.mayan.isGalacticPortalDay;
 
     // Resonance Archetype
-    let resonanceArchetype = 'Dynamic Harmonization';
-    if (resonanceScore >= 90) resonanceArchetype = 'Golden Sothic Portal & Direct Manifestation';
-    else if (resonanceScore >= 82) resonanceArchetype = 'Generative Alchemical Convergence';
-    else if (resonanceScore >= 72) resonanceArchetype = 'Reflective Strategic Consolidation';
-    else resonanceArchetype = 'Challenging Threshold & Karmic Cleansing';
+    let resonanceArchetype = 'A mixed day';
+    if (resonanceScore >= 90) resonanceArchetype = 'A stand-out day — good for acting on plans';
+    else if (resonanceScore >= 82) resonanceArchetype = 'A supportive day — things come together';
+    else if (resonanceScore >= 72) resonanceArchetype = 'A steady day — good for review and tidying up';
+    else resonanceArchetype = 'A demanding day — go gently and clear what is in the way';
 
     // Geographical Resonance with the selected City/Country/Continent
     const localLines = dayCtx.astrocartographyLines
       .filter((l) => Math.abs(l.subSolarLongitude - location.lng) < 45)
       .map((l) => `${l.planetName} ${l.lineType}`);
 
-    const regionalVector = `Meridian alignment over ${location.name} (${location.geodeticMeridian}) receiving ${dayCtx.chinese.dominantElement} elemental currents.`;
+    const regionalVector = `Seen from ${location.name}; the strongest Chinese element that day is ${dayCtx.chinese.dominantElement.toLowerCase()}.`;
 
     // Birth Synastry
     const harmoniousInteractions: string[] = [
-      `Transit ${sun.zodiacSign} Sun illuminates Natal ${birthCtx.synthesis.topCalling.calling} calling quarter.`,
-      `Day Stem ${dayCtx.chinese.dayPillar.stemElement} forms a generative bridge with Natal ${birthStemElem}.`,
-      `Mayan Kin ${dayCtx.mayan.kinNumber} (${dayCtx.mayan.tzolkin.formatted}) weaves harmonically with your Natal Kin ${birthCtx.mayan.kinNumber}.`
+      `The Sun in ${sun.zodiacSign} that day supports your birth calling, ${birthCtx.synthesis.topCalling.calling}.`,
+      `The day’s Chinese element (${dayCtx.chinese.dayPillar.stemElement.toLowerCase()}) works alongside your birth element (${String(birthStemElem).toLowerCase()}).`,
+      `The Maya day sign (${dayCtx.mayan.tzolkin.formatted}) sits comfortably with your birth day sign (${birthCtx.mayan.tzolkin.formatted}).`
     ];
 
     const karmicTensionWindows: string[] = [
       retrogrades.length > 0
-        ? `Stationed retrogrades in ${retrogrades.join(', ')} caution against hasty signatures or premature disclosures.`
-        : 'All spheres direct; clear path for outbound declarations.',
-      `Vedic Tithi ${vedic.tithiName} asks for mindful speech during midday hours.`
+        ? `${retrogrades.join(', ')} ${retrogrades.length === 1 ? 'appears' : 'appear'} to move backward (retrograde) — traditionally a reason to double-check before signing or announcing anything.`
+        : 'No planets are retrograde, which astrologers read as a clear run for new announcements.',
+      `The Vedic lunar day (${vedic.tithiName}) traditionally calls for careful speech.`
     ];
 
     const actionableOpportunities: string[] = [
-      `Harness the ${dayCtx.mayan.galacticTone.power} power of Galactic Tone ${dayCtx.mayan.galacticTone.name} for deep work.`,
-      `Focus upon the Gift frequency of Gene Key ${dayCtx.geneKeysSun.gate} (${dayCtx.geneKeysSun.gift}) to transcend ${dayCtx.geneKeysSun.shadow}.`,
-      `Leverage ${location.name}'s ${location.leyLineNode} energy field for meditative grounding.`
+      `The Maya day number ${dayCtx.mayan.galacticTone.number} is linked with “${dayCtx.mayan.galacticTone.power.toLowerCase()}” — a good theme for focused work.`,
+      `Gene Key ${dayCtx.geneKeysSun.gate}: practise ${dayCtx.geneKeysSun.gift.toLowerCase()} when you notice ${dayCtx.geneKeysSun.shadow.toLowerCase()}.`,
+      `Take a quiet moment somewhere that matters to you in ${location.name}.`
     ];
 
     // Novelistic Forecast Narrative for the day
-    const dailyNovelisticForecast = `On this ${dayOfWeek}, the celestial architecture of Gaia is governed by Maya Kin ${dayCtx.mayan.kinNumber} (${dayCtx.mayan.tzolkin.formatted}), anchored in the ${dayCtx.dreamspell.wavespell.name} wavespell. 
-The day unfolds beneath the ${dayCtx.chinese.dayPillar.stemElement} ${dayCtx.chinese.dayPillar.zodiacAnimal} pillar of the Chinese Sexagenary ledger, bathing ${location.name} in concentrated ${dayCtx.chinese.dominantElement} currents. 
-Across the sidereal canopy, the Moon traverses ${vedic.nakshatraName} Nakshatra (Pada ${vedic.nakshatraPada}) under the celestial auspices of ${vedic.nakshatraDeity}, radiating the ${vedic.nakshatraShakti}. 
-For ${userName}, whose birth signature resonates at Life Path ${birthCtx.numerology.lifePathNumber} and Kin ${birthCtx.mayan.kinNumber}, today registers a Synchronic Resonance Score of ${resonanceScore}%. 
-${isPeakResonanceDay ? 'This is a sovereign gateway day marked by heightened lucidity and high-yield energetic transits.' : 'The day advises disciplined consolidation, aligning internal contemplation with steady, measured manifest steps.'}`;
+    const dailyNovelisticForecast = `${dayOfWeek} is ${dayCtx.mayan.tzolkin.formatted} in the Maya calendar (${dayCtx.mayan.tzolkin.meaning.split('/')[0].trim().toLowerCase()}) and a ${dayCtx.chinese.dayPillar.stemElement} ${dayCtx.chinese.dayPillar.zodiacAnimal} day in the Chinese calendar.
+The Sun is in ${sun.zodiacSign} and the Moon is in ${moon.zodiacSign} (${moonPhase.toLowerCase()}). In Indian astrology the Moon sits in the lunar mansion ${vedic.nakshatraName}, linked with ${String(vedic.nakshatraShakti).toLowerCase()}.
+For ${userName}, the match score is ${resonanceScore}%.
+${isPeakResonanceDay ? 'This is one of the stronger days in the fortnight — a good candidate for something you want to go well.' : 'This is an ordinary working day — better for steady progress than for big launches.'}`;
 
-    // Dialectical Fork
+    // Two ways to approach the day
     const dialecticalFork = {
-      title: `The Fork of ${dayCtx.mayan.tzolkin.signName} vs. ${dayCtx.chinese.dayPillar.stemElement} ${dayCtx.chinese.dayPillar.zodiacAnimal}`,
-      pathA: `Direct Manifest Action: Projecting sovereign intent outward through the ${dayCtx.mayan.tzolkin.formatted} frequency, claiming territory with bold initiative.`,
-      pathB: `Yielding Attunement: Holding quiet sanctuary within ${location.name}'s geodetic field, observing external cross-currents settle before stepping forward.`,
-      synthesis: `The Golden Mean: Act decisively on essential covenants while remaining internally serene and impervious to peripheral turbulence.`
+      title: `Two ways to use ${dayOfWeek}`,
+      pathA: `Act: the Maya day sign ${dayCtx.mayan.tzolkin.formatted} favours taking the initiative and stating plainly what you want.`,
+      pathB: `Wait: the Chinese ${dayCtx.chinese.dayPillar.stemElement} ${dayCtx.chinese.dayPillar.zodiacAnimal} day favours watching how things settle before you move.`,
+      synthesis: `A middle path: act on the one thing that really matters and let the rest wait.`
     };
 
     const dayBearing = synthesizeDailyBearing(dayCtx, 'overview', birthProfile, 'personal');
@@ -562,8 +561,8 @@ ${isPeakResonanceDay ? 'This is a sovereign gateway day marked by heightened luc
         targetLocationName: location.name,
         locationType: location.type,
         coordinates: { lat: location.lat, lng: location.lng },
-        localGeodeticZenith: `${location.geodeticMeridian} (Ley Line: ${location.leyLineNode})`,
-        powerLinesIntersecting: localLines.length > 0 ? localLines : ['Solar Midheaven (MC)', 'Jupiter Ascendant (ASC)'],
+        localGeodeticZenith: `${location.name} · ${location.leyLineNode}`,
+        powerLinesIntersecting: localLines.length > 0 ? localLines : [],
         regionalOvercastVector: regionalVector,
         resonanceAffinity: Math.round((resonanceScore + 15) % 30 + 70)
       },
@@ -605,7 +604,7 @@ ${isPeakResonanceDay ? 'This is a sovereign gateway day marked by heightened luc
     mostIntenseDayIndex: minIndex,
     portalDayIndices,
     wavespellPassage: `Transits traverse Kin ${entries[0].mayan.kinNumber} through Kin ${entries[13].mayan.kinNumber} across the Dreamspell matrix.`,
-    strategicSummary: `For ${userName} (Natal Kin ${birthCtx.mayan.kinNumber}), the upcoming two-week arc provides an extraordinary window for strategic alignment. Focus your major energetic initiatives on Day ${peakIndex + 1}, honor the introspective quiet of Day ${minIndex + 1}, and ground all insights into the ${location.name} meridian.`
+    strategicSummary: `Over these two weeks the strongest day is day ${peakIndex + 1} — a good choice for anything you want to go well. The quietest is day ${minIndex + 1}, better kept for rest and review. Scores are for ${userName}, seen from ${location.name}.`
   };
 
   return {

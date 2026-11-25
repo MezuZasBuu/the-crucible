@@ -346,7 +346,8 @@ export function calculateSynthesis(
 
     // Element match with Chinese (Western Air is read against Chinese Metal; Wood leans Earth)
     const chineseAsWestern: Record<string, string> = { Fire: 'Fire', Water: 'Water', Earth: 'Earth', Metal: 'Air', Wood: 'Earth' };
-    if (chineseAsWestern[chineseElement] === t.element) {
+    // Uses the day's own element (not the hour's) so the calling stays the same all day.
+    if (chineseAsWestern[chinese.dayPillar.stemElement] === t.element) {
       score += 20;
     }
 

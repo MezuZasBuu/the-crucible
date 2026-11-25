@@ -90,8 +90,8 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
               <strong style={{ color: 'var(--text-primary)' }}>{selected.affinityScore}%</strong>
             </div>
             <p className="readable-muted mt-2">
-              The match comes from today’s Maya direction ({ctx.mayan.tzolkin.direction}), the strongest Chinese element (
-              {ctx.chinese.dominantElement}) and today’s number ({ctx.numerology.universalDay}). It changes daily — it is a
+              The match comes from today’s Maya direction ({ctx.mayan.tzolkin.direction}), the Chinese calendar’s element for the day (
+              {ctx.chinese.dayPillar.stemElement}) and today’s number ({ctx.numerology.universalDay}). It changes daily — it is a
               role to try on, not a label for who you are.
               {!isTop && (
                 <>
