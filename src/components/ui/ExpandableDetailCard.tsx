@@ -68,19 +68,19 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
         const data = await res.json();
         if (!res.ok) {
           if (data.code === 'AUTH_REQUIRED') {
-            throw new Error('Sign in on the You tab (guest or Google) to unlock deep readings.');
+            throw new Error('Sign in under My chart to get a longer, in-depth reading.');
           }
           if (data.code === 'QUOTA_EXCEEDED') {
-            throw new Error(data.error || 'Daily deep reading limit reached.');
+            throw new Error(data.error || 'You have used today’s in-depth readings. The summary below is still available.');
           }
-          throw new Error(data.error || 'Deep reading failed');
+          throw new Error(data.error || 'The in-depth reading is unavailable right now.');
         }
         if (cancelled) return;
         setDeepText(data.expandedText || body);
         setDeepSource(data.source || null);
       })
       .catch((err: Error) => {
-        if (!cancelled) setDeepError(err.message || 'Could not load deep reading');
+        if (!cancelled) setDeepError(err.message || 'The in-depth reading is unavailable right now.');
       })
       .finally(() => {
         if (!cancelled) setDeepLoading(false);
@@ -104,7 +104,7 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
           <p className="scroll-label readable-muted">{label}</p>
           <div className="readable-body text-[1.0625rem] mt-2 leading-snug">{preview}</div>
         </div>
-        <p className="readable-muted text-[0.9rem] mt-4">Tap to open</p>
+        <p className="card-more">Read more <span aria-hidden>→</span></p>
       </button>
 
       {open && (
@@ -125,7 +125,7 @@ export const ExpandableDetailCard: React.FC<ExpandableDetailCardProps> = ({
             {deepLoading && (
               <p className="readable-body flex items-center gap-2 mt-4 text-[1rem]">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Opening the full read…
+                Writing a longer reading…
               </p>
             )}
             {deepError && <p className="readable-body text-[color:var(--solar-deep)] mt-4">{deepError}</p>}

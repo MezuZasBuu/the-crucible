@@ -27,6 +27,7 @@
     "@fontsource/noto-serif-sc": "^5.3.1",
     "@google/genai": "^2.4.0",
     "@tailwindcss/vite": "^4.1.14",
+    "@types/tz-lookup": "^6.1.2",
     "@vis.gl/react-google-maps": "^1.10.0",
     "@vitejs/plugin-react": "^5.0.4",
     "astronomy-engine": "^2.1.19",
@@ -37,6 +38,7 @@
     "motion": "^12.23.24",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "tz-lookup": "^6.1.25",
     "vite": "^6.2.3"
   },
   "devDependencies": {

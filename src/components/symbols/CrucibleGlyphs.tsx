@@ -13,7 +13,7 @@ interface GlyphProps {
   color?: string;
 }
 
-export const MayanGlyphIcon: React.FC<GlyphProps> = ({ name, size = 32, className = '', color = '#00f0ff' }) => {
+export const MayanGlyphIcon: React.FC<GlyphProps> = ({ name, size = 32, className = '', color = '#25706a' }) => {
   const normalized = name.toLowerCase();
 
   return (
@@ -26,7 +26,7 @@ export const MayanGlyphIcon: React.FC<GlyphProps> = ({ name, size = 32, classNam
       className={`inline-block transition-transform hover:scale-110 ${className}`}
     >
       {/* Outer rounded cartouche */}
-      <rect x="3" y="3" width="42" height="42" rx="10" stroke={color} strokeWidth="2" strokeOpacity="0.8" fill="#0d111a" fillOpacity="0.8" />
+      <rect x="3" y="3" width="42" height="42" rx="10" stroke={color} strokeWidth="2" strokeOpacity="0.8" fill="#fffdf8" fillOpacity="1" />
       <circle cx="24" cy="24" r="16" stroke={color} strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.4" />
 
       {/* Distinct vector patterns based on Mayan glyph name */}

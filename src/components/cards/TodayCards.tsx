@@ -32,22 +32,22 @@ export const ReadingModeToggle: React.FC<{
   onChange: (mode: ReadingMode) => void;
   onNeedAccount?: () => void;
 }> = ({ mode, hasProfile, onChange, onNeedAccount }) => (
-  <div className="flex flex-wrap gap-2" role="tablist" aria-label="Reading mode">
+  <div className="seg" role="tablist" aria-label="Reading mode">
     <button
       type="button"
       role="tab"
       aria-selected={mode === 'world'}
       onClick={() => onChange('world')}
-      className={`nav-tab border inline-flex items-center gap-1.5 ${mode === 'world' ? 'nav-tab-active border-[color:var(--line-medium)]' : 'border-transparent'}`}
+      className={`seg-btn ${mode === 'world' ? 'seg-btn-active' : ''}`}
     >
       <Globe2 className="w-4 h-4" />
-      Today&apos;s world energy
+      For everyone
     </button>
     <button
       type="button"
       role="tab"
       aria-selected={mode === 'personal'}
-      disabled={!hasProfile}
+      title={!hasProfile ? 'Add your birth details under My chart to unlock this' : undefined}
       onClick={() => {
         if (!hasProfile) {
           onNeedAccount?.();
@@ -55,10 +55,10 @@ export const ReadingModeToggle: React.FC<{
         }
         onChange('personal');
       }}
-      className={`nav-tab border inline-flex items-center gap-1.5 ${mode === 'personal' ? 'nav-tab-active border-[color:var(--line-medium)]' : 'border-transparent'} ${!hasProfile ? 'opacity-55' : ''}`}
+      className={`seg-btn ${mode === 'personal' ? 'seg-btn-active' : ''} ${!hasProfile ? 'seg-btn-locked' : ''}`}
     >
       <UserRound className="w-4 h-4" />
-      Your chart energy
+      For me
     </button>
   </div>
 );
@@ -87,7 +87,6 @@ export const OverviewSlideCard: React.FC<{
       onIndexChange={onSlideIndexChange}
       panelCount={FOCUSES.length}
       labels={FOCUSES.map((f) => f.label)}
-      autoAdvanceMs={6000}
     >
       {bearings.map(({ id, bearing }) => {
         const theme = id === 'overview' && heroBearing ? heroBearing.theme : bearing.theme;
@@ -96,12 +95,12 @@ export const OverviewSlideCard: React.FC<{
         return (
         <SlidePanel key={id} className="card-featured-inner">
           <p className="scroll-label readable-muted">
-            {mode === 'world' ? 'World energy' : 'Your chart × today'}
+            {mode === 'world' ? 'Today, for everyone' : 'Today, for you'}
           </p>
           <FadeInText
-            text={theme}
+            text={theme.charAt(0).toUpperCase() + theme.slice(1)}
             as="h2"
-            className="detail-title text-[clamp(1.35rem,2.8vw,2.1rem)] tracking-[0.02em] mt-2"
+            className="hero-theme mt-2"
           />
           <StoryProse text={summary} className="mt-4 text-[1.0625rem] leading-relaxed max-w-3xl" />
           <StoryProse text={`*Practice:* ${practice}`} className="mt-5 text-[1rem] font-medium" />
@@ -142,7 +141,6 @@ export const AtmosphereTriad: React.FC<{
       onIndexChange={onAtmosphereIndexChange}
       panelCount={ATMOSPHERE_META.length}
       labels={ATMOSPHERE_META.map((m) => m.label)}
-      autoAdvanceMs={4000}
     >
       {ATMOSPHERE_META.map(({ key, label, domainKey }) => (
         <SlidePanel key={key}>

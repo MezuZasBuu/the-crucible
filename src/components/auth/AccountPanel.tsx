@@ -1,12 +1,11 @@
 /**
- * Account sign-in — anonymous guest or Google. Required for Cursor deep readings.
+ * Account sign-in — anonymous guest or Google. Required for in-depth AI readings.
  */
 
 import React, { useState } from 'react';
 import { Loader2, LogIn, LogOut, Shield, UserRound } from 'lucide-react';
 import { useAuth } from '../../firebase/AuthProvider';
 import { DEEP_READING_DAILY_LIMITS } from '../../engine/authGate';
-import { isFirebaseConfigured } from '../../firebase/config';
 
 export const AccountPanel: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const { configured, ready, user, tier, isAnonymous, signInGuest, signInGoogle, signOut } = useAuth();
@@ -14,16 +13,33 @@ export const AccountPanel: React.FC<{ compact?: boolean }> = ({ compact = false 
   const [error, setError] = useState<string | null>(null);
 
   if (!configured) {
+    if (compact) {
+      return (
+        <span className="guest-chip" title="You are using The Crucible as a guest. Your details stay on this device.">
+          <UserRound className="w-4 h-4" />
+          Guest
+        </span>
+      );
+    }
     return (
-      <div className="instrument-panel">
-        <p className="ui-eyebrow">Account</p>
-        <h3 className="panel-title mt-1">Sign-in not configured yet</h3>
-        <p className="readable-body mt-3">
-          Add Firebase keys to enable private accounts and Cursor deep readings. Today&apos;s deterministic readings still work without auth.
-        </p>
-          <p className="readable-muted text-[0.95rem] mt-2">
-            Setup guide: <code className="text-[0.9em]">docs/FIREBASE_SETUP.md</code> (owner: mezuai000@gmail.com)
+      <div className="instrument-panel empty-state">
+        <span className="empty-state-icon">
+          <Shield className="w-6 h-6" />
+        </span>
+        <div>
+          <p className="ui-eyebrow">Account</p>
+          <h3 className="panel-title mt-1">You’re browsing as a guest</h3>
+          <p className="readable-body mt-2">
+            Everything works without an account. Any birth details you save are kept on this device only and are never
+            sent anywhere.
           </p>
+          {import.meta.env.DEV && (
+            <p className="readable-muted text-[0.85rem] mt-2">
+              Developer note: sign-in is switched off because no Firebase keys are set. See{' '}
+              <code className="text-[0.9em]">docs/FIREBASE_SETUP.md</code>.
+            </p>
+          )}
+        </div>
       </div>
     );
   }
@@ -91,7 +107,7 @@ export const AccountPanel: React.FC<{ compact?: boolean }> = ({ compact = false 
           <p className="ui-eyebrow">Your account</p>
           <h3 className="panel-title mt-1">{user ? label : 'Sign in for private readings'}</h3>
           <p className="readable-body mt-3 max-w-2xl">
-            Charts and deep Cursor readings are tied to your account — not shared across users. Guest sessions are anonymous; Google sign-in saves your identity across devices.
+            Your charts and in-depth readings belong to your account and are not shared with anyone. A guest session is anonymous; signing in with Google keeps your charts across devices.
           </p>
         </div>
         <Shield className="w-5 h-5 text-[color:var(--accent-sage)] shrink-0 mt-1" />
@@ -99,12 +115,11 @@ export const AccountPanel: React.FC<{ compact?: boolean }> = ({ compact = false 
 
       <div className="rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] px-4 py-3 readable-body">
         <p>
-          Tier: <strong>{tier}</strong> · Deep readings today: up to <strong>{limit}</strong>
-          {user ? ` · UID ${user.uid.slice(0, 8)}…` : ''}
+          Plan: <strong>{tier}</strong> · In-depth readings available today: <strong>{limit}</strong>
         </p>
         {isAnonymous && user && (
           <p className="readable-muted text-[0.95rem] mt-2">
-            Link Google to keep this session and raise your daily deep-reading pool.
+            Sign in with Google to keep this session and get more in-depth readings per day.
           </p>
         )}
       </div>
@@ -136,9 +151,6 @@ export const AccountPanel: React.FC<{ compact?: boolean }> = ({ compact = false 
         )}
       </div>
 
-      {!isFirebaseConfigured() && (
-        <p className="readable-muted text-[0.95rem]">Firebase env vars missing at build time.</p>
-      )}
     </div>
   );
 };

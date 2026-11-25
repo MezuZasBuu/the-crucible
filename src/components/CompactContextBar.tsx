@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { ChevronDown, MapPin } from 'lucide-react';
+import { CalendarDays, ChevronDown, Clock, MapPin } from 'lucide-react';
 import { CompleteCalculationContext, TemporalInput } from '../types';
 import { TemporalControlBar } from './TemporalControlBar';
 import { LocalReadingContext } from '../types';
@@ -32,33 +32,36 @@ export const CompactContextBar: React.FC<CompactContextBarProps> = ({
 
   return (
     <div className="space-y-3">
-      <LocationPicker
-        value={ctx.input.location}
-        onChange={(location) => onInputChange({ ...ctx.input, location })}
-      />
-
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-[color:var(--surface-raised)] px-4 py-3 text-left shadow-[var(--shadow-raised)]"
+        aria-expanded={open}
+        className="context-bar"
       >
-        <div className="min-w-0 flex items-start gap-3">
-          <MapPin className="w-4 h-4 mt-0.5 text-[color:var(--temporal)] shrink-0" />
-          <div className="min-w-0">
-            <p className="readable-body font-semibold">{local.dateLabel}</p>
-            <p className="readable-muted text-[0.98rem] mt-0.5">
-              Global sky · local overlay: {local.cityLabel} · {local.localTime}
-            </p>
-          </div>
-        </div>
-        <span className="cta-ghost !min-h-9 shrink-0">
-          {open ? 'Hide' : 'Time & date'}
+        <span className="context-bar-item">
+          <CalendarDays className="w-4 h-4" />
+          {local.dateLabel}
+        </span>
+        <span className="context-bar-item">
+          <Clock className="w-4 h-4" />
+          {local.localTime}
+        </span>
+        <span className="context-bar-item">
+          <MapPin className="w-4 h-4" />
+          {local.cityLabel}
+        </span>
+        <span className="context-bar-action">
+          {open ? 'Done' : 'Change date or place'}
           <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
         </span>
       </button>
 
       {open && (
-        <div className="advanced-drawer">
+        <div className="advanced-drawer space-y-4">
+          <LocationPicker
+            value={ctx.input.location}
+            onChange={(location) => onInputChange({ ...ctx.input, location })}
+          />
           <TemporalControlBar
             ctx={ctx}
             onInputChange={onInputChange}

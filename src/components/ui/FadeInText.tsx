@@ -21,13 +21,14 @@ export const FadeInText: React.FC<FadeInTextProps> = ({
   return (
     <Tag className={`readable-text ${className}`}>
       {words.map((word, index) => (
+        <React.Fragment key={`${word}-${index}`}>
         <span
-          key={`${word}-${index}`}
           className="fade-word"
           style={{ animationDelay: `${delayMs + index * 45}ms` }}
         >
-          {word}{' '}
-        </span>
+          {word}
+        </span>{' '}
+        </React.Fragment>
       ))}
     </Tag>
   );

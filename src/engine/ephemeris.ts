@@ -23,33 +23,33 @@ export interface CelestialAspect {
 }
 
 export const ZODIAC_SIGNS = [
-  { name: 'Aries', symbol: '♈', element: 'Fire', modality: 'Cardinal', ruler: 'Mars' },
-  { name: 'Taurus', symbol: '♉', element: 'Earth', modality: 'Fixed', ruler: 'Venus' },
-  { name: 'Gemini', symbol: '♊', element: 'Air', modality: 'Mutable', ruler: 'Mercury' },
-  { name: 'Cancer', symbol: '♋', element: 'Water', modality: 'Cardinal', ruler: 'Moon' },
-  { name: 'Leo', symbol: '♌', element: 'Fire', modality: 'Fixed', ruler: 'Sun' },
-  { name: 'Virgo', symbol: '♍', element: 'Earth', modality: 'Mutable', ruler: 'Mercury' },
-  { name: 'Libra', symbol: '♎', element: 'Air', modality: 'Cardinal', ruler: 'Venus' },
-  { name: 'Scorpio', symbol: '♏', element: 'Water', modality: 'Fixed', ruler: 'Pluto & Mars' },
-  { name: 'Sagittarius', symbol: '♐', element: 'Fire', modality: 'Mutable', ruler: 'Jupiter' },
-  { name: 'Capricorn', symbol: '♑', element: 'Earth', modality: 'Cardinal', ruler: 'Saturn' },
-  { name: 'Aquarius', symbol: '♒', element: 'Air', modality: 'Fixed', ruler: 'Uranus & Saturn' },
-  { name: 'Pisces', symbol: '♓', element: 'Water', modality: 'Mutable', ruler: 'Neptune & Jupiter' }
+  { name: 'Aries', symbol: '♈\uFE0E', element: 'Fire', modality: 'Cardinal', ruler: 'Mars' },
+  { name: 'Taurus', symbol: '♉\uFE0E', element: 'Earth', modality: 'Fixed', ruler: 'Venus' },
+  { name: 'Gemini', symbol: '♊\uFE0E', element: 'Air', modality: 'Mutable', ruler: 'Mercury' },
+  { name: 'Cancer', symbol: '♋\uFE0E', element: 'Water', modality: 'Cardinal', ruler: 'Moon' },
+  { name: 'Leo', symbol: '♌\uFE0E', element: 'Fire', modality: 'Fixed', ruler: 'Sun' },
+  { name: 'Virgo', symbol: '♍\uFE0E', element: 'Earth', modality: 'Mutable', ruler: 'Mercury' },
+  { name: 'Libra', symbol: '♎\uFE0E', element: 'Air', modality: 'Cardinal', ruler: 'Venus' },
+  { name: 'Scorpio', symbol: '♏\uFE0E', element: 'Water', modality: 'Fixed', ruler: 'Pluto & Mars' },
+  { name: 'Sagittarius', symbol: '♐\uFE0E', element: 'Fire', modality: 'Mutable', ruler: 'Jupiter' },
+  { name: 'Capricorn', symbol: '♑\uFE0E', element: 'Earth', modality: 'Cardinal', ruler: 'Saturn' },
+  { name: 'Aquarius', symbol: '♒\uFE0E', element: 'Air', modality: 'Fixed', ruler: 'Uranus & Saturn' },
+  { name: 'Pisces', symbol: '♓\uFE0E', element: 'Water', modality: 'Mutable', ruler: 'Neptune & Jupiter' }
 ];
 
 const PLANET_DEFINITIONS: Array<{ id: string; name: string; symbol: string; body?: Astronomy.Body; title: string }> = [
-  { id: 'sun', name: 'Sun', symbol: '☉', body: Astronomy.Body.Sun, title: 'The Radiant Heart of Sovereign Will' },
-  { id: 'moon', name: 'Moon', symbol: '☽', body: Astronomy.Body.Moon, title: 'The Silver Mirror of Memory and Tide' },
-  { id: 'mercury', name: 'Mercury', symbol: '☿', body: Astronomy.Body.Mercury, title: 'The Winged Scribe of Crossroads' },
-  { id: 'venus', name: 'Venus', symbol: '♀', body: Astronomy.Body.Venus, title: 'The Rose of Concord and Sacred Desire' },
-  { id: 'mars', name: 'Mars', symbol: '♂', body: Astronomy.Body.Mars, title: 'The Iron Torch of Pioneering Courage' },
-  { id: 'jupiter', name: 'Jupiter', symbol: '♃', body: Astronomy.Body.Jupiter, title: 'The Great Benefic and Sovereign Architect' },
-  { id: 'saturn', name: 'Saturn', symbol: '♄', body: Astronomy.Body.Saturn, title: 'The Keeper of the Threshold and Ancient Stone' },
-  { id: 'uranus', name: 'Uranus', symbol: '♅', body: Astronomy.Body.Uranus, title: 'The Lightning of Promethean Awakening' },
-  { id: 'neptune', name: 'Neptune', symbol: '♆', body: Astronomy.Body.Neptune, title: 'The Mystic Ocean of Dissolving Form' },
-  { id: 'pluto', name: 'Pluto', symbol: '♇', body: Astronomy.Body.Pluto, title: 'The Lord of the Deep and Alchemical Crucible' },
-  { id: 'chiron', name: 'Chiron', symbol: '⚷', title: 'The Wounded Centaur and Master Healer' },
-  { id: 'north_node', name: 'North Node', symbol: '☊', title: 'The Dragon’s Head of Evolutionary Destiny' }
+  { id: 'sun', name: 'Sun', symbol: '☉\uFE0E', body: Astronomy.Body.Sun, title: 'The Radiant Heart of Sovereign Will' },
+  { id: 'moon', name: 'Moon', symbol: '☽\uFE0E', body: Astronomy.Body.Moon, title: 'The Silver Mirror of Memory and Tide' },
+  { id: 'mercury', name: 'Mercury', symbol: '☿\uFE0E', body: Astronomy.Body.Mercury, title: 'The Winged Scribe of Crossroads' },
+  { id: 'venus', name: 'Venus', symbol: '♀\uFE0E', body: Astronomy.Body.Venus, title: 'The Rose of Concord and Sacred Desire' },
+  { id: 'mars', name: 'Mars', symbol: '♂\uFE0E', body: Astronomy.Body.Mars, title: 'The Iron Torch of Pioneering Courage' },
+  { id: 'jupiter', name: 'Jupiter', symbol: '♃\uFE0E', body: Astronomy.Body.Jupiter, title: 'The Great Benefic and Sovereign Architect' },
+  { id: 'saturn', name: 'Saturn', symbol: '♄\uFE0E', body: Astronomy.Body.Saturn, title: 'The Keeper of the Threshold and Ancient Stone' },
+  { id: 'uranus', name: 'Uranus', symbol: '♅\uFE0E', body: Astronomy.Body.Uranus, title: 'The Lightning of Promethean Awakening' },
+  { id: 'neptune', name: 'Neptune', symbol: '♆\uFE0E', body: Astronomy.Body.Neptune, title: 'The Mystic Ocean of Dissolving Form' },
+  { id: 'pluto', name: 'Pluto', symbol: '♇\uFE0E', body: Astronomy.Body.Pluto, title: 'The Lord of the Deep and Alchemical Crucible' },
+  { id: 'chiron', name: 'Chiron', symbol: '⚷\uFE0E', title: 'The Wounded Centaur and Master Healer' },
+  { id: 'north_node', name: 'North Node', symbol: '☊\uFE0E', title: 'The Dragon’s Head of Evolutionary Destiny' }
 ];
 
 const DEG = Math.PI / 180;

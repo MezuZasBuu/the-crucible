@@ -14,7 +14,8 @@ import {
 import { saveInsight } from '../engine/savedInsights';
 import { getTgoldResearchMetadata } from '../engine/tgold';
 import { useAuth } from '../firebase/AuthProvider';
-import { ExploreFrontButton, OverviewSlideCard, ReadingModeToggle } from './cards/TodayCards';
+import { OverviewSlideCard, ReadingModeToggle } from './cards/TodayCards';
+import { TodayAtAGlance } from './cards/TodayAtAGlance';
 import { WorldEnergyGallery } from './cards/WorldEnergyGallery';
 import { ExpandableDetailCard } from './ui/ExpandableDetailCard';
 import { StoryProse } from './ui/StoryProse';
@@ -27,6 +28,8 @@ interface TodayScreenProps {
   onOpenCompass: () => void;
   onOpenYou: () => void;
   onOpenExplore: () => void;
+  dateLabel: string;
+  placeLabel: string;
 }
 
 export const TodayScreen: React.FC<TodayScreenProps> = ({
@@ -36,7 +39,9 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
   onOpenCodex,
   onOpenCompass,
   onOpenYou,
-  onOpenExplore
+  onOpenExplore,
+  dateLabel,
+  placeLabel
 }) => {
   const { tier } = useAuth();
   const [overviewIndex, setOverviewIndex] = useState(0);
@@ -100,6 +105,8 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
 
   return (
     <div className="space-y-5 md:space-y-6 parchment-surface">
+      <TodayAtAGlance ctx={ctx} dateLabel={dateLabel} placeLabel={placeLabel} onOpenTraditions={onOpenExplore} />
+
       <ReadingModeToggle
         mode={mode}
         hasProfile={canUsePersonal}
@@ -114,12 +121,8 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
         </p>
       )}
 
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        <ExploreFrontButton onClick={onOpenExplore} />
-      </div>
-
       <ExpandableDetailCard
-        label="Today's report"
+        label="Today's reading"
         title={`Full reading · ${ctx.input.dateString}`}
         body={fullReport}
         preview={
@@ -156,13 +159,13 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ExpandableDetailCard
-          label="Local overlay"
+          label="Where you are"
           title={`How the day lands · ${bearing.localContext.cityLabel}`}
-          body={`Local clock ${bearing.localContext.localTime}. Daylight ${bearing.localContext.sunrise}–${bearing.localContext.sunset}. The global sky stays the same — this only shifts *how it feels on the ground*. Moon: ${bearing.localContext.moonPhase}.`}
+          body={`Local clock ${bearing.localContext.localTime}. Daylight ${bearing.localContext.sunrise}–${bearing.localContext.sunset}. The sky is the same everywhere — your location only changes sunrise, sunset and the local clock. Moon: ${bearing.localContext.moonPhase}.`}
           deepReading={{
             domainKey: 'regional',
             seedText: `Regional overlay: ${bearing.localContext.cityLabel}.`,
-            cardTitle: 'Local overlay',
+            cardTitle: 'Where you are',
             ...deepBase
           }}
           preview={
@@ -173,15 +176,15 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
         />
 
         <ExpandableDetailCard
-          label={canUsePersonal ? 'Your lens' : 'Member charts'}
-          title={canUsePersonal ? 'Your pattern × today' : 'Personal chart (members)'}
+          label={canUsePersonal ? 'You and today' : 'Make it personal'}
+          title={canUsePersonal ? 'Your chart and today' : 'Add your birth chart'}
           body={
             canUsePersonal
               ? mode === 'personal'
                 ? bearing.domains.personalAlignment ||
                   'Your saved chart is wide to today’s sky — nothing tight is pressing; treat it as ambient weather.'
-                : 'Switch to *Your chart energy* above to compare today’s sky with your saved pattern.'
-              : 'Sign in with Google on the You tab to unlock personal chart overlays, natal wheel, and astrocartography.'
+                : 'Switch to *For me* above to compare today’s sky with your saved pattern.'
+              : 'Add your birth date and place under *My chart* to see how today compares with your own birth chart.'
           }
           preview={
             canUsePersonal ? (
@@ -189,13 +192,13 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
                 {profile?.displayName || profile?.querentName}
               </p>
             ) : (
-              <p className="readable-body text-[1.0625rem]">World energy — member charts available when signed in.</p>
+              <p className="readable-body text-[1.0625rem]">Add your birth details to see how today fits your own chart.</p>
             )
           }
           extra={
             !canUsePersonal ? (
               <button type="button" className="cta-ghost mt-3" onClick={onOpenYou}>
-                Sign in for your chart
+                Go to My chart
               </button>
             ) : undefined
           }
@@ -204,7 +207,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
 
       <ExpandableDetailCard
         label="Watch for"
-        title="The friction cue"
+        title="What to watch for today"
         body={bearing.watchFor}
         deepReading={{
           domainKey: 'watchFor',
@@ -217,7 +220,7 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
 
       <div>
         <button type="button" onClick={() => setWhyOpen((v) => !v)} className="cta-ghost">
-          {whyOpen ? 'Hide the weave' : 'See what shaped this read'}
+          {whyOpen ? 'Hide the sources' : 'Where does this reading come from?'}
         </button>
         {whyOpen && (
           <ul className="mt-4 space-y-3">
@@ -244,18 +247,15 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({
           }}
         >
           {saved ? <Check className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
-          {saved ? 'Saved' : 'Save insight'}
+          {saved ? 'Saved' : 'Save this reading'}
         </button>
         <button type="button" className="cta-ghost" onClick={onOpenCompass}>
-          Ask about this
+          Ask a question
           <ArrowRight className="w-4 h-4" />
-        </button>
-        <button type="button" className="cta-explore" onClick={onOpenExplore}>
-          Explore
         </button>
         <button type="button" className="cta-ghost" onClick={onOpenCodex}>
           <BookMarked className="w-4 h-4" />
-          Open Codex
+          Full report
         </button>
       </div>
     </div>

@@ -1,16 +1,17 @@
 /**
- * Primary destinations — Pattern-style destinations, not a systems ledger.
+ * Primary destinations — four plain-language sections.
  */
 
 import React from 'react';
 import { CalendarRange, Compass, Sparkles, UserRound } from 'lucide-react';
 import { PrimaryDestination } from '../../app/viewModel';
+import { BrandMark } from '../shell/BrandMark';
 
-const ITEMS: Array<{ id: PrimaryDestination; label: string; icon: React.ReactNode }> = [
-  { id: 'TODAY', label: 'Today', icon: <Sparkles className="w-4 h-4" /> },
-  { id: 'YOU', label: 'You', icon: <UserRound className="w-4 h-4" /> },
-  { id: 'TIMELINE', label: 'Timeline', icon: <CalendarRange className="w-4 h-4" /> },
-  { id: 'EXPLORE', label: 'Explore', icon: <Compass className="w-4 h-4" /> }
+const ITEMS: Array<{ id: PrimaryDestination; label: string; short: string; hint: string; icon: React.ReactNode }> = [
+  { id: 'TODAY', label: 'Today', short: 'Today', hint: 'The reading for today', icon: <Sparkles className="w-[18px] h-[18px]" /> },
+  { id: 'YOU', label: 'My chart', short: 'My chart', hint: 'Your birth chart', icon: <UserRound className="w-[18px] h-[18px]" /> },
+  { id: 'TIMELINE', label: 'Next 14 days', short: '14 days', hint: 'Day-by-day outlook', icon: <CalendarRange className="w-[18px] h-[18px]" /> },
+  { id: 'EXPLORE', label: 'Traditions', short: 'Traditions', hint: 'Calendars, map, questions', icon: <Compass className="w-[18px] h-[18px]" /> }
 ];
 
 interface AppNavigationProps {
@@ -19,45 +20,49 @@ interface AppNavigationProps {
 }
 
 export const AppNavRail: React.FC<AppNavigationProps> = ({ current, onChange }) => (
-  <nav
-    aria-label="Primary"
-    className="hidden lg:flex flex-col w-[4.75rem] xl:w-48 shrink-0 border-r border-[color:var(--line-soft)] bg-[color:var(--void-900)]/80 py-5 px-2 xl:px-3 gap-1 sticky top-0 h-screen"
-  >
-    {ITEMS.map((item) => (
-      <button
-        key={item.id}
-        type="button"
-        onClick={() => onChange(item.id)}
-        className={`flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 min-h-11 text-left transition-colors ${
-          current === item.id
-            ? 'bg-[color:var(--surface-raised)] text-[color:var(--text-primary)] shadow-[var(--shadow-raised)]'
-            : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)] hover:bg-[color:var(--surface-well)]'
-        }`}
-      >
-        {item.icon}
-        <span className="hidden xl:inline font-semibold text-sm">{item.label}</span>
-      </button>
-    ))}
+  <nav aria-label="Primary" className="app-rail hidden lg:flex">
+    <div className="app-rail-brand">
+      <BrandMark size={40} />
+      <div className="hidden xl:block min-w-0">
+        <p className="brand-wordmark brand-wordmark-ink">The Crucible</p>
+        <p className="app-rail-tag">Many calendars, one day</p>
+      </div>
+    </div>
+    <div className="app-rail-items">
+      {ITEMS.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          onClick={() => onChange(item.id)}
+          aria-current={current === item.id ? 'page' : undefined}
+          title={item.hint}
+          className={`app-rail-item ${current === item.id ? 'app-rail-item-active' : ''}`}
+        >
+          <span className="app-rail-icon">{item.icon}</span>
+          <span className="hidden xl:block min-w-0 text-left">
+            <span className="app-rail-label">{item.label}</span>
+            <span className="app-rail-hint">{item.hint}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+    <p className="app-rail-foot hidden xl:block">For reflection, not prediction.</p>
   </nav>
 );
 
 export const MobileTabBar: React.FC<AppNavigationProps> = ({ current, onChange }) => (
-  <nav
-    aria-label="Primary"
-    className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-[color:var(--line-soft)] bg-[color:var(--void-850)]/95 backdrop-blur-md px-2 py-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))]"
-  >
+  <nav aria-label="Primary" className="mobile-tabbar lg:hidden">
     <div className="grid grid-cols-4 gap-1">
       {ITEMS.map((item) => (
         <button
           key={item.id}
           type="button"
           onClick={() => onChange(item.id)}
-          className={`flex flex-col items-center gap-1 rounded-[var(--radius-sm)] py-2 text-[11px] font-semibold ${
-            current === item.id ? 'text-[color:var(--text-primary)]' : 'text-[color:var(--text-muted)]'
-          }`}
+          aria-current={current === item.id ? 'page' : undefined}
+          className={`mobile-tab ${current === item.id ? 'mobile-tab-active' : ''}`}
         >
           {item.icon}
-          {item.label}
+          {item.short}
         </button>
       ))}
     </div>

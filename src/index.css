@@ -1,59 +1,122 @@
 @import "tailwindcss";
 
+@theme {
+  /* Legacy dark-theme utility colours remapped to readable ink-on-paper tones. */
+  --color-gray-100: #4a4f63;
+  --color-gray-200: #4a4f63;
+  --color-gray-300: #565b70;
+  --color-gray-400: #666b80;
+  --color-gray-500: #7b8093;
+  --color-gray-600: #8d91a3;
+  --color-cyan-200: #2b6777;
+  --color-cyan-300: #2b6777;
+  --color-cyan-400: #26606f;
+  --color-cyan-500: #1f5665;
+  --color-sky-300: #2c6494;
+  --color-sky-400: #2c6494;
+  --color-amber-200: #94691a;
+  --color-amber-300: #94691a;
+  --color-amber-400: #8a6016;
+  --color-amber-500: #7d5612;
+  --color-yellow-200: #8a6a16;
+  --color-yellow-300: #8a6a16;
+  --color-yellow-400: #8a6a16;
+  --color-orange-300: #a85a1e;
+  --color-orange-400: #a85a1e;
+  --color-emerald-200: #2c7458;
+  --color-emerald-300: #2c7458;
+  --color-emerald-400: #276b50;
+  --color-emerald-500: #216047;
+  --color-green-300: #3a7646;
+  --color-green-400: #3a7646;
+  --color-teal-300: #25706a;
+  --color-rose-200: #a2445a;
+  --color-rose-300: #a2445a;
+  --color-rose-400: #983c52;
+  --color-red-300: #a8402f;
+  --color-red-400: #a8402f;
+  --color-purple-300: #6a4a9c;
+  --color-purple-400: #6a4a9c;
+  --color-violet-300: #5f4aa0;
+  --color-indigo-300: #4650a0;
+  --color-indigo-400: #4650a0;
+  --color-stone-200: #5c5a55;
+  --color-stone-300: #5c5a55;
+}
+
 @layer base {
   :root {
-    --font-display: 'Cinzel', serif;
-    --font-ui: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
-    --font-prose: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
-    --font-data: 'JetBrains Mono', monospace;
+    --font-display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
+    --font-wordmark: 'Cinzel', 'Fraunces Variable', serif;
+    --font-ui: 'Inter Variable', 'Inter', system-ui, sans-serif, 'Noto Sans Symbols', 'Noto Sans Symbols 2';
+    --font-prose: 'Inter Variable', 'Inter', system-ui, sans-serif, 'Noto Sans Symbols', 'Noto Sans Symbols 2';
+    --font-data: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+    --font-glyph: 'Noto Sans Symbols', 'Noto Sans Symbols 2', 'Segoe UI Symbol', serif;
+    --font-script: 'Noto Serif SC', 'Noto Serif Devanagari', 'Noto Serif Hebrew', 'Noto Serif Ethiopic',
+      'Noto Sans Egyptian Hieroglyphs', 'Fraunces Variable', serif;
 
     --font-cinzel: var(--font-display);
     --font-garamond: var(--font-prose);
     --font-mono: var(--font-data);
     --font-sans: var(--font-ui);
 
-    /* Parchment scroll palette */
-    --void-950: #ebe3d4;
-    --void-900: #f2ebe0;
-    --void-850: #faf6ef;
-    --surface-glass: rgba(255, 252, 247, 0.92);
-    --surface-raised: #fffdf9;
-    --surface-well: rgba(255, 255, 255, 0.55);
+    /* Paper */
+    --void-950: #efe9dd;
+    --void-900: #f4efe5;
+    --void-850: #faf7f0;
+    --surface-glass: rgba(255, 253, 248, 0.92);
+    --surface-raised: #fffdf8;
+    --surface-well: rgba(255, 255, 255, 0.6);
 
-    --line-soft: rgba(44, 36, 25, 0.1);
-    --line-medium: rgba(44, 36, 25, 0.16);
-    --line-bright: rgba(44, 36, 25, 0.28);
+    /* Ink (night-sky indigo) */
+    --ink-950: #101327;
+    --ink-900: #171a33;
+    --ink-800: #20244a;
+    --ink-700: #2c3160;
+    --ink-line: rgba(217, 181, 106, 0.22);
+    --ink-text: #f1ead9;
+    --ink-text-muted: #a9adc6;
 
-    --text-primary: #2c2419;
-    --text-secondary: #5c4f42;
-    --text-muted: #8a7b6a;
+    --line-soft: rgba(27, 31, 59, 0.1);
+    --line-medium: rgba(27, 31, 59, 0.17);
+    --line-bright: rgba(27, 31, 59, 0.3);
 
-    --solar: #b8862e;
-    --solar-bright: #d4a84b;
-    --solar-deep: #7a5a1a;
-    --temporal: #4a7c8c;
-    --temporal-bright: #5f96a8;
-    --temporal-deep: #2f4f5c;
+    --text-primary: #1b1f3b;
+    --text-secondary: #474c66;
+    --text-muted: #747991;
 
-    --accent-terracotta: #c4715b;
-    --accent-sage: #6d8f6a;
-    --accent-indigo: #5c6b8a;
-    --accent-ochre: #c9a227;
-    --accent-rose: #b87d8a;
-    --accent-slate: #6b6560;
+    --solar: #a9812f;
+    --solar-bright: #d9b56a;
+    --solar-deep: #7c5a17;
+    --temporal: #2f7284;
+    --temporal-bright: #3f8799;
+    --temporal-deep: #1f5362;
 
-    --glow-solar: 0 4px 24px rgba(184, 134, 46, 0.12);
-    --glow-temporal: 0 4px 24px rgba(74, 124, 140, 0.1);
-    --shadow-panel: 0 1px 0 rgba(44, 36, 25, 0.06), 0 8px 32px rgba(44, 36, 25, 0.08);
-    --shadow-raised: 0 2px 12px rgba(44, 36, 25, 0.06);
+    --accent-terracotta: #b9614a;
+    --accent-sage: #5c8663;
+    --accent-indigo: #4d5a94;
+    --accent-ochre: #c39a2b;
+    --accent-rose: #ad6a7d;
+    --accent-slate: #666a7e;
+
+    /* Classical elements */
+    --el-fire: #b8483a;
+    --el-earth: #7d7a2f;
+    --el-air: #a8842a;
+    --el-water: #2f6f9a;
+
+    --glow-solar: 0 4px 24px rgba(169, 129, 47, 0.14);
+    --glow-temporal: 0 4px 24px rgba(47, 114, 132, 0.12);
+    --shadow-panel: 0 1px 0 rgba(27, 31, 59, 0.04), 0 10px 30px -12px rgba(27, 31, 59, 0.16);
+    --shadow-raised: 0 1px 2px rgba(27, 31, 59, 0.06), 0 4px 14px -6px rgba(27, 31, 59, 0.12);
 
     --blur-panel: 12px;
     --blur-header: 16px;
 
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-panel: 12px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-panel: 16px;
 
     --motion-fast: 160ms;
     --motion-medium: 280ms;
@@ -64,13 +127,17 @@
 
   body {
     font-family: var(--font-ui);
-    font-size: 1.02rem;
+    font-size: 1rem;
     line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv11', 'ss03';
     color: var(--text-primary);
     background-color: var(--void-950);
     background-image:
       url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
-      linear-gradient(175deg, #f7f0e4 0%, #ebe3d4 45%, #e4d9c8 100%);
+      radial-gradient(1200px 600px at 85% -10%, rgba(217, 181, 106, 0.16), transparent 60%),
+      radial-gradient(900px 500px at -5% 110%, rgba(47, 114, 132, 0.1), transparent 60%),
+      linear-gradient(180deg, #f7f3ea 0%, #efe9dd 100%);
     background-attachment: fixed;
     overflow-x: hidden;
     min-height: 100vh;
@@ -91,23 +158,6 @@
 .crucible-atmosphere {
   position: relative;
   isolation: isolate;
-}
-
-.crucible-atmosphere::before {
-  content: '';
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  opacity: 0.5;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 3px,
-      rgba(44, 36, 25, 0.02) 3px,
-      rgba(44, 36, 25, 0.02) 4px
-    );
 }
 
 /* Glass instrument panel */
@@ -160,19 +210,19 @@
   font-family: var(--font-ui);
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  color: var(--text-muted);
 }
 
 .panel-title {
   font-family: var(--font-display);
   font-size: clamp(1.15rem, 1.6vw, 1.5rem);
-  font-weight: 600;
+  font-weight: 560;
+  font-variation-settings: 'opsz' 60;
+  line-height: 1.2;
   color: var(--text-primary);
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+  letter-spacing: -0.01em;
 }
 
 .data-readout {
@@ -189,10 +239,10 @@
   gap: 0.625rem;
   min-height: 44px;
   padding: 0.75rem 1.15rem;
-  border: 1px solid var(--text-primary);
-  border-radius: var(--radius-md);
-  background: var(--text-primary);
-  color: var(--surface-raised);
+  border: 1px solid var(--ink-900);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--ink-800), var(--ink-900));
+  color: var(--ink-text);
   font: 600 0.8125rem/1 var(--font-ui);
   letter-spacing: 0.02em;
   box-shadow: var(--shadow-raised);
@@ -211,10 +261,10 @@
   min-height: 40px;
   padding: 0.55rem 0.95rem;
   border: 1px solid var(--line-medium);
-  border-radius: var(--radius-md);
-  background: var(--surface-well);
+  border-radius: 999px;
+  background: var(--surface-raised);
   color: var(--text-secondary);
-  font: 600 0.78rem/1 var(--font-ui);
+  font: 600 0.8rem/1 var(--font-ui);
   transition: border-color var(--motion-fast), color var(--motion-fast), background var(--motion-fast);
 }
 
@@ -236,11 +286,11 @@
 
 .nav-tab:hover {
   color: var(--text-primary);
-  background: rgba(44, 36, 25, 0.05);
+  background: rgba(27, 31, 59, 0.05);
 }
 
 .nav-tab-active {
-  background: rgba(44, 36, 25, 0.06);
+  background: rgba(27, 31, 59, 0.06);
   color: var(--text-primary);
   font-weight: 700;
 }
@@ -286,7 +336,7 @@
 .score-track {
   height: 6px;
   border-radius: 999px;
-  background: rgba(44, 36, 25, 0.08);
+  background: rgba(27, 31, 59, 0.08);
   overflow: hidden;
 }
 
@@ -306,8 +356,8 @@
 .crucible-radar-grid {
   background-image:
     radial-gradient(circle at center, rgba(74, 124, 140, 0.06) 0, transparent 70%),
-    linear-gradient(to right, rgba(44, 36, 25, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(44, 36, 25, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(27, 31, 59, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(27, 31, 59, 0.04) 1px, transparent 1px);
   background-size: 100% 100%, 24px 24px, 24px 24px;
 }
 
@@ -319,11 +369,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(44, 36, 25, 0.18);
+  background: rgba(27, 31, 59, 0.18);
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(44, 36, 25, 0.28);
+  background: rgba(27, 31, 59, 0.28);
 }
 
 @keyframes spin-slow {
@@ -383,7 +433,7 @@
   margin-bottom: 0.5rem;
 }
 
-.scroll-body { font-size: 1rem; color: var(--text-primary); line-height: 1.6; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 1px 8px rgba(44, 36, 25, 0.08); }
+.scroll-body { font-size: 1rem; color: var(--text-primary); line-height: 1.6; }
 
 .scroll-metric {
   padding: 0.85rem 1rem;
@@ -398,7 +448,7 @@
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.25;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+ 
 }
 
 .scroll-metric-sub {
@@ -414,7 +464,7 @@
   line-height: 1.65;
   color: var(--text-primary);
   white-space: pre-wrap;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+ 
 }
 
 .scroll-sheet {
@@ -550,12 +600,12 @@
 .readable-body,
 .readable-text {
   color: var(--text-primary);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 1px 8px rgba(44, 36, 25, 0.08);
+ 
 }
 
 .readable-muted {
   color: var(--text-secondary);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 6px rgba(44, 36, 25, 0.06);
+ 
 }
 
 @keyframes fade-word-in {
@@ -641,7 +691,7 @@
   height: 0.45rem;
   border-radius: 999px;
   border: none;
-  background: rgba(44, 36, 25, 0.18);
+  background: rgba(27, 31, 59, 0.18);
   transition: transform var(--motion-fast), background var(--motion-fast);
   cursor: pointer;
 }
@@ -800,7 +850,7 @@
   align-items: flex-end;
   justify-content: center;
   padding: 1rem;
-  background: rgba(44, 36, 25, 0.35);
+  background: rgba(27, 31, 59, 0.35);
   backdrop-filter: blur(6px);
 }
 
@@ -838,7 +888,7 @@
   font-size: clamp(1.25rem, 2.4vw, 1.75rem);
   font-weight: 700;
   color: var(--text-primary);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 10px rgba(44, 36, 25, 0.1);
+ 
   line-height: 1.25;
 }
 
@@ -846,7 +896,7 @@
   font-size: 1.08rem;
   line-height: 1.65;
   color: var(--text-primary);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 1px 8px rgba(44, 36, 25, 0.08);
+ 
 }
 
 .detail-close {
@@ -875,7 +925,7 @@
   font: 700 0.92rem/1 var(--font-ui);
   letter-spacing: 0.01em;
   box-shadow: var(--shadow-raised);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+ 
   transition: transform var(--motion-fast), box-shadow var(--motion-fast);
 }
 
@@ -888,7 +938,7 @@
 .kin-cell {
   width: 100%;
   min-height: 2.75rem;
-  border: 1px solid rgba(44, 36, 25, 0.14);
+  border: 1px solid rgba(27, 31, 59, 0.14);
   border-radius: var(--radius-sm);
   padding: 0.2rem 0.15rem;
   display: flex;
@@ -907,13 +957,13 @@
 .kin-cell-number {
   font: 700 0.95rem/1 var(--font-ui);
   color: var(--text-primary);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85), 0 1px 6px rgba(44, 36, 25, 0.12);
+ 
 }
 
 .kin-cell-tone {
   font: 600 0.72rem/1 var(--font-data);
   color: var(--text-secondary);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+ 
 }
 
 .kin-cell-red {
