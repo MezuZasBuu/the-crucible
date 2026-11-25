@@ -26,7 +26,7 @@ function activeTraditions(ctx?: CompleteCalculationContext): string[] {
   }
   if (ctx.numerology) out.add('Pythagorean Hermeticism');
   if (ctx.geneKeysSun) out.add('Gene Keys');
-  if (ctx.synthesis?.topResonatingTribe) out.add('Hebraic Kabbalistic / Patriarchal');
+  if (ctx.synthesis?.topCalling) out.add('Twelve Callings');
   if (ctx.vedic) out.add('Vedic');
   return [...out];
 }

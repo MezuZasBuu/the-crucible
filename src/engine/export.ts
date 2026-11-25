@@ -58,9 +58,9 @@ export function generateCSVReport(ctx: CompleteCalculationContext): string {
     ['Numerology', 'Chaldean Vibration', ctx.numerology.chaldeanVibration.toString(), 'Ancient vibrational root', ctx.rulesetHash],
 
     // Archetype
-    ['Archetype', 'Top Resonating Tribe', ctx.synthesis.topResonatingTribe.tribe, `Affinity: ${ctx.synthesis.topResonatingTribe.affinityScore}% | ${ctx.synthesis.topResonatingTribe.archetypeRole}`, ctx.rulesetHash],
-    ['Archetype', 'Tribe Life Meaning', ctx.intertwining.primaryTribeLife.lifeRepresents.slice(0, 180), ctx.intertwining.primaryTribeLife.dayPractice, ctx.rulesetHash],
-    ['Archetype', 'Tribe Gift / Shadow', ctx.intertwining.primaryTribeLife.giftToEmbody, ctx.intertwining.primaryTribeLife.shadowToWatch, ctx.rulesetHash],
+    ['Archetype', 'Top Calling', ctx.synthesis.topCalling.calling, `Affinity: ${ctx.synthesis.topCalling.affinityScore}% | ${ctx.synthesis.topCalling.archetypeRole}`, ctx.rulesetHash],
+    ['Archetype', 'Calling Life Meaning', ctx.intertwining.primaryCallingLife.lifeRepresents.slice(0, 180), ctx.intertwining.primaryCallingLife.dayPractice, ctx.rulesetHash],
+    ['Archetype', 'Calling Gift / Shadow', ctx.intertwining.primaryCallingLife.giftToEmbody, ctx.intertwining.primaryCallingLife.shadowToWatch, ctx.rulesetHash],
     ['Intertwining', 'Direction Thread', ctx.intertwining.intertwiningThreads[0]?.nodes.join(' → ') || '', ctx.intertwining.intertwiningThreads[0]?.meaning || '', ctx.rulesetHash],
     ['Intertwining', 'Season Thread', ctx.intertwining.intertwiningThreads[1]?.nodes.join(' → ') || '', ctx.intertwining.intertwiningThreads[1]?.meaning || '', ctx.rulesetHash],
     ['Archetype', 'Dominant Polarity', ctx.synthesis.dominantPolarity, `Harmonic Index: ${ctx.synthesis.harmonicResonanceIndex}/100`, ctx.rulesetHash]

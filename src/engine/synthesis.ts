@@ -1,7 +1,7 @@
 /**
  * The Crucible — Archetypal & Cross-System Synthesis Engine
  * Synthesizes Mayan, Chinese, Historical Calendars, Numerology,
- * Gene Keys, and the Twelve Tribes Archetypal Matrix.
+ * Gene Keys, and the Twelve Callings circle.
  */
 
 import {
@@ -11,121 +11,173 @@ import {
   MayanResult,
   NumerologyResult,
   TemporalCoordinate,
-  TwelveTribeAffinity
+  CallingAffinity
 } from '../types';
-import { enrichTribeWithLife } from './crossSystemBridge';
+import { enrichCallingWithLife } from './crossSystemBridge';
 
-export const TWELVE_TRIBES: Array<Omit<TwelveTribeAffinity, 'affinityScore' | 'resonanceDescription'>> = [
+/**
+ * The Twelve Callings — the Crucible's own twelvefold circle of human vocation.
+ * Twelve roles stand around a shared centre, three in each compass quarter:
+ * East (Dawn — those who begin), South (Noon — those who act),
+ * West (Dusk — those who gather), North (Midnight — those who discern).
+ * Each calling carries a stone, an emblem, a zodiac sign, a gift, a shadow and a daily practice.
+ * It is an original comparative lens, not a claim about ancestry, religion or identity.
+ */
+export const CALLING_QUARTERS: Record<'East' | 'South' | 'West' | 'North', { phase: string; theme: string }> = {
+  East: { phase: 'Dawn', theme: 'those who begin' },
+  South: { phase: 'Noon', theme: 'those who act' },
+  West: { phase: 'Dusk', theme: 'those who gather' },
+  North: { phase: 'Midnight', theme: 'those who discern' }
+};
+
+export const TWELVE_CALLINGS: Array<Omit<CallingAffinity, 'affinityScore' | 'resonanceDescription'>> = [
   {
-    tribe: 'Judah (Yehudah)',
-    hebrewName: 'יְהוּדָה',
-    gemstone: 'Garnet / Carbuncle',
-    bannerSymbol: 'Lion of Sovereign Strength',
-    zodiacCorrespondence: 'Leo (Solar Fire)',
-    directionInCamp: 'East',
-    archetypeRole: 'The Sovereign King & Courageous Vanguard'
+    id: 'trailblazer',
+    calling: 'The Trailblazer',
+    motto: 'Go first',
+    gemstone: 'Garnet',
+    emblem: 'Rising sun',
+    emblemId: 'sunrise',
+    zodiacCorrespondence: 'Leo',
+    element: 'Fire',
+    quarter: 'East',
+    archetypeRole: 'Leads from the front and makes it safer for others to follow'
   },
   {
-    tribe: 'Issachar (Yissakhar)',
-    hebrewName: 'יִשָּׂשכָר',
-    gemstone: 'Sapphire / Lapis Lazuli',
-    bannerSymbol: 'Sun, Moon & Celestial Constellations',
-    zodiacCorrespondence: 'Cancer (Lunar Intuition)',
-    directionInCamp: 'East',
-    archetypeRole: 'The Astronomical Scholar & Discerner of Epochs'
+    id: 'stargazer',
+    calling: 'The Stargazer',
+    motto: 'Read the season',
+    gemstone: 'Sapphire',
+    emblem: 'Moon and stars',
+    emblemId: 'stars',
+    zodiacCorrespondence: 'Cancer',
+    element: 'Water',
+    quarter: 'East',
+    archetypeRole: 'Understands timing — when to plant, wait, or harvest'
   },
   {
-    tribe: 'Zebulun (Zevulun)',
-    hebrewName: 'זְבוּלֻן',
-    gemstone: 'Diamond / Rock Crystal',
-    bannerSymbol: 'Merchant Ship upon Waters',
-    zodiacCorrespondence: 'Gemini (Trade & Communication)',
-    directionInCamp: 'East',
-    archetypeRole: 'The Global Voyager, Patron & Harbor Builder'
+    id: 'wayfarer',
+    calling: 'The Wayfarer',
+    motto: 'Open the harbor',
+    gemstone: 'Rock crystal',
+    emblem: 'Ship under sail',
+    emblemId: 'ship',
+    zodiacCorrespondence: 'Gemini',
+    element: 'Air',
+    quarter: 'East',
+    archetypeRole: 'Connects people, places and ideas through travel and trade'
   },
   {
-    tribe: 'Reuben (Reuven)',
-    hebrewName: 'רְאוּבֵן',
-    gemstone: 'Ruby / Sardius',
-    bannerSymbol: 'Mandrake Blossom & Rising Waters',
-    zodiacCorrespondence: 'Aquarius (Water Bearer)',
-    directionInCamp: 'South',
-    archetypeRole: 'The Firstborn Passion, Human Potential & Awakening'
+    id: 'wellspring',
+    calling: 'The Wellspring',
+    motto: 'Begin again',
+    gemstone: 'Ruby',
+    emblem: 'Rising water',
+    emblemId: 'water',
+    zodiacCorrespondence: 'Aquarius',
+    element: 'Air',
+    quarter: 'South',
+    archetypeRole: 'Brings raw vitality and the honesty to start over'
   },
   {
-    tribe: 'Simeon (Shimon)',
-    hebrewName: 'שִׁמְעוֹן',
-    gemstone: 'Topaz / Chrysolite',
-    bannerSymbol: 'Sword & City Gate of Shechem',
-    zodiacCorrespondence: 'Pisces (Subconscious Depths)',
-    directionInCamp: 'South',
-    archetypeRole: 'The Intense Zealot, Hearer of Truth & Purifier'
+    id: 'listener',
+    calling: 'The Listener',
+    motto: 'Hear what is true',
+    gemstone: 'Topaz',
+    emblem: 'Open ear',
+    emblemId: 'ear',
+    zodiacCorrespondence: 'Pisces',
+    element: 'Water',
+    quarter: 'South',
+    archetypeRole: 'Hears what is really being said and clears away false stories'
   },
   {
-    tribe: 'Gad (Gad)',
-    hebrewName: 'גָּד',
-    gemstone: 'Agate / Jacinth',
-    bannerSymbol: 'Armed Troop / Tents of the Desert Camp',
-    zodiacCorrespondence: 'Aries (Pioneering Warrior)',
-    directionInCamp: 'South',
-    archetypeRole: 'The Resolute Vanguard, Tactician & Overcomer'
+    id: 'sentinel',
+    calling: 'The Sentinel',
+    motto: 'Hold the line',
+    gemstone: 'Agate',
+    emblem: 'Shield',
+    emblemId: 'shield',
+    zodiacCorrespondence: 'Aries',
+    element: 'Fire',
+    quarter: 'South',
+    archetypeRole: 'Protects what matters and stays steady in a crisis'
   },
   {
-    tribe: 'Ephraim / Joseph (Efrayim)',
-    hebrewName: 'אֶפְרַיִם',
-    gemstone: 'Onyx / Beryl',
-    bannerSymbol: 'Fatted Bull & Fruitful Bough by Fountain',
-    zodiacCorrespondence: 'Taurus (Material Manifestation)',
-    directionInCamp: 'West',
-    archetypeRole: 'The Prodigious Builder, Provider & Transmuter of Scarcity'
+    id: 'cultivator',
+    calling: 'The Cultivator',
+    motto: 'Make it grow',
+    gemstone: 'Onyx',
+    emblem: 'Sprouting seed',
+    emblemId: 'sprout',
+    zodiacCorrespondence: 'Taurus',
+    element: 'Earth',
+    quarter: 'West',
+    archetypeRole: 'Builds, provides, and turns scarcity into plenty'
   },
   {
-    tribe: 'Manasseh (Menashe)',
-    hebrewName: 'מְנַשֶּׁה',
+    id: 'memory_keeper',
+    calling: 'The Memory Keeper',
+    motto: 'Recover what was lost',
     gemstone: 'Amethyst',
-    bannerSymbol: 'Wild Ox / Unicorn Horn',
-    zodiacCorrespondence: 'Sagittarius (Expansive Horizon)',
-    directionInCamp: 'West',
-    archetypeRole: 'The Restorer of Forgotten Knowledge & Memory'
+    emblem: 'Hourglass',
+    emblemId: 'hourglass',
+    zodiacCorrespondence: 'Sagittarius',
+    element: 'Fire',
+    quarter: 'West',
+    archetypeRole: 'Restores forgotten knowledge and repairs the thread of lineage'
   },
   {
-    tribe: 'Benjamin (Binyamin)',
-    hebrewName: 'בִּנְיָמִין',
-    gemstone: 'Jasper / Multicolored Agate',
-    bannerSymbol: 'Ravenous Wolf of Morning Light',
-    zodiacCorrespondence: 'Scorpio (Transformative Stealth)',
-    directionInCamp: 'West',
-    archetypeRole: 'The Fierce Protector, Scribe & Temple Keeper'
+    id: 'flamekeeper',
+    calling: 'The Flamekeeper',
+    motto: 'Guard the flame',
+    gemstone: 'Jasper',
+    emblem: 'Hearth flame',
+    emblemId: 'flame',
+    zodiacCorrespondence: 'Scorpio',
+    element: 'Water',
+    quarter: 'West',
+    archetypeRole: 'Guards sacred boundaries and keeps the written word alive'
   },
   {
-    tribe: 'Dan (Dan)',
-    hebrewName: 'דָּן',
-    gemstone: 'Opal / Jacinth',
-    bannerSymbol: 'Horned Viper / Scales of Justice',
-    zodiacCorrespondence: 'Libra (Equilibrium & Law)',
-    directionInCamp: 'North',
-    archetypeRole: 'The Arbiter of Cosmic Law, Judge & Discernment'
+    id: 'arbiter',
+    calling: 'The Arbiter',
+    motto: 'Weigh it fairly',
+    gemstone: 'Opal',
+    emblem: 'Balanced scales',
+    emblemId: 'scales',
+    zodiacCorrespondence: 'Libra',
+    element: 'Air',
+    quarter: 'North',
+    archetypeRole: 'Judges fairly so the circle stays in balance'
   },
   {
-    tribe: 'Asher (Asher)',
-    hebrewName: 'אָשֵׁר',
-    gemstone: 'Peridot / Aquamarine',
-    bannerSymbol: 'Olive Tree of Royal Dainties',
-    zodiacCorrespondence: 'Virgo (Harvest & Healing)',
-    directionInCamp: 'North',
-    archetypeRole: 'The Gracious Host, Alchemist of Oil & Nourishment'
+    id: 'host',
+    calling: 'The Host',
+    motto: 'Set the table',
+    gemstone: 'Peridot',
+    emblem: 'Sheaf of grain',
+    emblemId: 'grain',
+    zodiacCorrespondence: 'Virgo',
+    element: 'Earth',
+    quarter: 'North',
+    archetypeRole: 'Nourishes and heals; makes an ordinary table feel special'
   },
   {
-    tribe: 'Naphtali (Naftali)',
-    hebrewName: 'נַפְתָּלִי',
-    gemstone: 'Carnelian / Emerald',
-    bannerSymbol: 'Swift Hind Giving Pleasant Words',
-    zodiacCorrespondence: 'Capricorn (Agile Mountain Climber)',
-    directionInCamp: 'North',
-    archetypeRole: 'The Swift Messenger of Joy & Eloquent Poet'
+    id: 'messenger',
+    calling: 'The Messenger',
+    motto: 'Carry good words',
+    gemstone: 'Carnelian',
+    emblem: 'Feather',
+    emblemId: 'feather',
+    zodiacCorrespondence: 'Capricorn',
+    element: 'Earth',
+    quarter: 'North',
+    archetypeRole: 'Carries good news quickly and speaks with warmth'
   }
 ];
 
+/** All 64 Gene Keys: shadow → gift → siddhi (Richard Rudd, The Gene Keys). */
 export const GENE_KEYS_CATALOG: Record<number, { name: string; shadow: string; gift: string; siddhi: string; center: string }> = {
   1: { name: 'Entropy to Freshness', shadow: 'Entropy', gift: 'Freshness', siddhi: 'Beauty', center: 'G Center' },
   2: { name: 'Returning to Oneness', shadow: 'Dislocation', gift: 'Orientation', siddhi: 'Unity', center: 'G Center' },
@@ -143,8 +195,53 @@ export const GENE_KEYS_CATALOG: Record<number, { name: string; shadow: string; g
   14: { name: 'Bounteous Radiance', shadow: 'Compromise', gift: 'Competence', siddhi: 'Bounteousness', center: 'Sacral' },
   15: { name: 'An Unquenchable Spring', shadow: 'Dullness', gift: 'Magnetism', siddhi: 'Florescence', center: 'G Center' },
   16: { name: 'Magical Genius', shadow: 'Indifference', gift: 'Versatility', siddhi: 'Mastery', center: 'Throat' },
+  17: { name: 'From Opinion to Far-Sightedness', shadow: 'Opinion', gift: 'Far-Sightedness', siddhi: 'Omniscience', center: '' },
+  18: { name: 'From Judgement to Integrity', shadow: 'Judgement', gift: 'Integrity', siddhi: 'Perfection', center: '' },
+  19: { name: 'From Co-Dependence to Sensitivity', shadow: 'Co-Dependence', gift: 'Sensitivity', siddhi: 'Sacrifice', center: '' },
+  20: { name: 'From Superficiality to Self-Assurance', shadow: 'Superficiality', gift: 'Self-Assurance', siddhi: 'Presence', center: '' },
+  21: { name: 'From Control to Authority', shadow: 'Control', gift: 'Authority', siddhi: 'Valour', center: '' },
+  22: { name: 'From Dishonour to Graciousness', shadow: 'Dishonour', gift: 'Graciousness', siddhi: 'Grace', center: '' },
+  23: { name: 'From Complexity to Simplicity', shadow: 'Complexity', gift: 'Simplicity', siddhi: 'Quintessence', center: '' },
+  24: { name: 'From Addiction to Invention', shadow: 'Addiction', gift: 'Invention', siddhi: 'Silence', center: '' },
   25: { name: 'The Myth of the Sacred Wound', shadow: 'Constriction', gift: 'Acceptance', siddhi: 'Universal Love', center: 'G Center' },
+  26: { name: 'From Pride to Artfulness', shadow: 'Pride', gift: 'Artfulness', siddhi: 'Invisibility', center: '' },
+  27: { name: 'From Selfishness to Altruism', shadow: 'Selfishness', gift: 'Altruism', siddhi: 'Selflessness', center: '' },
+  28: { name: 'From Purposelessness to Totality', shadow: 'Purposelessness', gift: 'Totality', siddhi: 'Immortality', center: '' },
+  29: { name: 'From Half-Heartedness to Commitment', shadow: 'Half-Heartedness', gift: 'Commitment', siddhi: 'Devotion', center: '' },
+  30: { name: 'From Desire to Lightness', shadow: 'Desire', gift: 'Lightness', siddhi: 'Rapture', center: '' },
+  31: { name: 'From Arrogance to Leadership', shadow: 'Arrogance', gift: 'Leadership', siddhi: 'Humility', center: '' },
+  32: { name: 'From Failure to Preservation', shadow: 'Failure', gift: 'Preservation', siddhi: 'Veneration', center: '' },
+  33: { name: 'From Forgetting to Mindfulness', shadow: 'Forgetting', gift: 'Mindfulness', siddhi: 'Revelation', center: '' },
+  34: { name: 'From Force to Strength', shadow: 'Force', gift: 'Strength', siddhi: 'Majesty', center: '' },
+  35: { name: 'From Hunger to Adventure', shadow: 'Hunger', gift: 'Adventure', siddhi: 'Boundlessness', center: '' },
+  36: { name: 'From Turbulence to Humanity', shadow: 'Turbulence', gift: 'Humanity', siddhi: 'Compassion', center: '' },
+  37: { name: 'From Weakness to Equality', shadow: 'Weakness', gift: 'Equality', siddhi: 'Tenderness', center: '' },
+  38: { name: 'From Struggle to Perseverance', shadow: 'Struggle', gift: 'Perseverance', siddhi: 'Honour', center: '' },
+  39: { name: 'From Provocation to Dynamism', shadow: 'Provocation', gift: 'Dynamism', siddhi: 'Liberation', center: '' },
+  40: { name: 'From Exhaustion to Resolve', shadow: 'Exhaustion', gift: 'Resolve', siddhi: 'Divine Will', center: '' },
   41: { name: 'The Prime Emanator', shadow: 'Fantasy', gift: 'Anticipation', siddhi: 'Emanation', center: 'Root' },
+  42: { name: 'From Expectation to Detachment', shadow: 'Expectation', gift: 'Detachment', siddhi: 'Celebration', center: '' },
+  43: { name: 'From Deafness to Insight', shadow: 'Deafness', gift: 'Insight', siddhi: 'Epiphany', center: '' },
+  44: { name: 'From Interference to Teamwork', shadow: 'Interference', gift: 'Teamwork', siddhi: 'Synarchy', center: '' },
+  45: { name: 'From Dominance to Synergy', shadow: 'Dominance', gift: 'Synergy', siddhi: 'Communion', center: '' },
+  46: { name: 'From Seriousness to Delight', shadow: 'Seriousness', gift: 'Delight', siddhi: 'Ecstasy', center: '' },
+  47: { name: 'From Oppression to Transmutation', shadow: 'Oppression', gift: 'Transmutation', siddhi: 'Transfiguration', center: '' },
+  48: { name: 'From Inadequacy to Resourcefulness', shadow: 'Inadequacy', gift: 'Resourcefulness', siddhi: 'Wisdom', center: '' },
+  49: { name: 'From Reaction to Revolution', shadow: 'Reaction', gift: 'Revolution', siddhi: 'Rebirth', center: '' },
+  50: { name: 'From Corruption to Equilibrium', shadow: 'Corruption', gift: 'Equilibrium', siddhi: 'Harmony', center: '' },
+  51: { name: 'From Agitation to Initiative', shadow: 'Agitation', gift: 'Initiative', siddhi: 'Awakening', center: '' },
+  52: { name: 'From Stress to Restraint', shadow: 'Stress', gift: 'Restraint', siddhi: 'Stillness', center: '' },
+  53: { name: 'From Immaturity to Expansion', shadow: 'Immaturity', gift: 'Expansion', siddhi: 'Superabundance', center: '' },
+  54: { name: 'From Greed to Aspiration', shadow: 'Greed', gift: 'Aspiration', siddhi: 'Ascension', center: '' },
+  55: { name: 'From Victimisation to Freedom', shadow: 'Victimisation', gift: 'Freedom', siddhi: 'Freedom', center: '' },
+  56: { name: 'From Distraction to Enrichment', shadow: 'Distraction', gift: 'Enrichment', siddhi: 'Intoxication', center: '' },
+  57: { name: 'From Unease to Intuition', shadow: 'Unease', gift: 'Intuition', siddhi: 'Clarity', center: '' },
+  58: { name: 'From Dissatisfaction to Vitality', shadow: 'Dissatisfaction', gift: 'Vitality', siddhi: 'Bliss', center: '' },
+  59: { name: 'From Dishonesty to Intimacy', shadow: 'Dishonesty', gift: 'Intimacy', siddhi: 'Transparency', center: '' },
+  60: { name: 'From Limitation to Realism', shadow: 'Limitation', gift: 'Realism', siddhi: 'Justice', center: '' },
+  61: { name: 'From Psychosis to Inspiration', shadow: 'Psychosis', gift: 'Inspiration', siddhi: 'Sanctity', center: '' },
+  62: { name: 'From Intellect to Precision', shadow: 'Intellect', gift: 'Precision', siddhi: 'Impeccability', center: '' },
+  63: { name: 'From Doubt to Inquiry', shadow: 'Doubt', gift: 'Inquiry', siddhi: 'Truth', center: '' },
   64: { name: 'The Aurora', shadow: 'Confusion', gift: 'Imagination', siddhi: 'Illumination', center: 'Head' }
 };
 
@@ -187,7 +284,7 @@ export function getGeneKeyFromLongitude(longDeg: number): GeneKeyGate {
 }
 
 /**
- * Synthesizes cross-system data into agreements, creative tensions, and 12-Tribe affinities.
+ * Synthesizes cross-system data into agreements, creative tensions, and Twelve Callings affinities.
  */
 export function calculateSynthesis(
   temporal: TemporalCoordinate,
@@ -238,22 +335,19 @@ export function calculateSynthesis(
     anomalies.push('Equilibrium state: Harmonic resonance between seasonal ingress and solar term.');
   }
 
-  // Twelve Tribes affinity scoring
-  const scores: TwelveTribeAffinity[] = TWELVE_TRIBES.map((t, idx) => {
+  // Twelve Callings affinity scoring
+  const scores: CallingAffinity[] = TWELVE_CALLINGS.map((t, idx) => {
     let score = 50; // baseline
 
     // Direction match with Mayan
-    if (t.directionInCamp === mayan.tzolkin.direction) {
+    if (t.quarter === mayan.tzolkin.direction) {
       score += 25;
     }
 
-    // Element match with Chinese
-    if (
-      (t.zodiacCorrespondence.includes('Fire') && chineseElement === 'Fire') ||
-      (t.zodiacCorrespondence.includes('Water') && chineseElement === 'Water') ||
-      (t.zodiacCorrespondence.includes('Earth') && chineseElement === 'Earth') ||
-      (t.zodiacCorrespondence.includes('Air') && chineseElement === 'Metal')
-    ) {
+    // Element match with Chinese (Western Air is read against Chinese Metal; Wood leans Earth)
+    const chineseAsWestern: Record<string, string> = { Fire: 'Fire', Water: 'Water', Earth: 'Earth', Metal: 'Air', Wood: 'Earth' };
+    // Uses the day's own element (not the hour's) so the calling stays the same all day.
+    if (chineseAsWestern[chinese.dayPillar.stemElement] === t.element) {
       score += 20;
     }
 
@@ -265,15 +359,15 @@ export function calculateSynthesis(
     // Cap at 98
     score = Math.min(98, Math.max(30, score));
 
-    return enrichTribeWithLife({
+    return enrichCallingWithLife({
       ...t,
       affinityScore: score,
-      resonanceDescription: `Resonates at ${score}% affinity via ${t.directionInCamp} orientation, ${t.gemstone} mineral frequency, and ${t.archetypeRole}.`
+      resonanceDescription: `${t.calling} scores ${score}% today: ${t.quarter} quarter, ${t.gemstone}, ${t.zodiacCorrespondence}. ${t.archetypeRole}.`
     });
   });
 
   scores.sort((a, b) => b.affinityScore - a.affinityScore);
-  const topTribe = scores[0];
+  const topCalling = scores[0];
 
   const harmonicResonanceIndex = Math.round(
     (scores[0].affinityScore + (mayan.isGalacticPortalDay ? 95 : 75) + (numerology.lifePathIsMaster ? 90 : 80)) / 3
@@ -286,8 +380,8 @@ export function calculateSynthesis(
     keyArchetypalThemes: themes,
     crossSystemAgreements: agreements,
     creativeTensionsOrAnomalies: anomalies,
-    twelveTribesScores: scores,
-    topResonatingTribe: topTribe,
-    recommendedFocus: `Integrate ${topTribe.tribe} stewardship through ${mayan.galacticTone.power.toLowerCase()} and grounding the ${chineseElement} matrix.`
+    callingScores: scores,
+    topCalling: topCalling,
+    recommendedFocus: `Practice the way of ${topCalling.calling} through ${mayan.galacticTone.power.toLowerCase()} and grounding the ${chineseElement} matrix.`
   };
 }

@@ -1,404 +1,342 @@
 /**
- * The Crucible — Dreamspell 13:20 Synchronometer Panel
- * José Argüelles 13-Moon 28-Day Synchronometer, 260 Galactic Signatures,
- * Wavespell, Castle of Time, Radial Plasmas, and Fifth Force 5-Kin Oracle.
- * Rendered with smooth novel-like prose and High Density styling.
+ * The Crucible — Dreamspell day details.
+ * Today's signature (symbol + number tone), the five-part pattern,
+ * the 28-day month, the 13-day cycle and the 52-day season.
  */
 
 import React, { useState } from 'react';
 import { CompleteCalculationContext } from '../types';
+import { MayaNumeral } from './symbols/CultureSymbols';
 
 interface DreamspellSynchronometerPanelProps {
   ctx: CompleteCalculationContext;
 }
 
+const COLOUR_INK: Record<string, string> = {
+  Red: '#b3261e',
+  White: '#6b6b76',
+  Blue: '#1f5fa8',
+  Yellow: '#9a6700'
+};
+
+/** One-line plain meaning for each of the four colours. */
+const COLOUR_GLOSS: Record<string, string> = {
+  Red: 'Red days are about starting things.',
+  White: 'White days are about refining and clearing away.',
+  Blue: 'Blue days are about change.',
+  Yellow: 'Yellow days are about ripening and sharing results.'
+};
+
+/** One-line plain meaning for each Earth family. */
+const EARTH_FAMILY_GLOSS: Record<string, string> = {
+  Polar: 'said to take in new ideas',
+  Cardinal: 'said to get things started',
+  Core: 'said to work from the heart of things',
+  Signal: 'said to sense what is coming',
+  Gateway: 'said to open new doors'
+};
+
+const SEASONS = [
+  { name: 'Red season', theme: 'Beginning', range: '1–52', color: '#b3261e', plain: 'A time for starting out and finding direction.' },
+  { name: 'White season', theme: 'Refining', range: '53–104', color: '#6b6b76', plain: 'A time for letting go of what is no longer needed.' },
+  { name: 'Blue season', theme: 'Changing', range: '105–156', color: '#1f5fa8', plain: 'A time of change, when effort reshapes things.' },
+  { name: 'Yellow season', theme: 'Giving', range: '157–208', color: '#9a6700', plain: 'A time for sharing what has been learned.' },
+  { name: 'Green season', theme: 'Bringing together', range: '209–260', color: '#2f7d5b', plain: 'A time for bringing everything together and celebrating.' }
+] as const;
+
+const WEEKDAYS = ['Dali', 'Seli', 'Gamma', 'Kali', 'Alfa', 'Limi', 'Silio'];
+
+type TabId = 'ORACLE' | 'THIRTEEN_MOON' | 'WAVESPELL' | 'CASTLE';
+
+const TABS: ReadonlyArray<{ id: TabId; label: string }> = [
+  { id: 'ORACLE', label: 'Five-part pattern' },
+  { id: 'THIRTEEN_MOON', label: 'Month and week' },
+  { id: 'WAVESPELL', label: '13-day cycle' },
+  { id: 'CASTLE', label: '52-day season' }
+];
+
+const PatternCell: React.FC<{
+  role: string;
+  gloss: string;
+  name: string;
+  kin: number;
+  tone: number;
+  main?: boolean;
+}> = ({ role, gloss, name, kin, tone, main }) => (
+  <div
+    className={`curious-box !p-3 flex flex-col items-center text-center gap-0.5 ${
+      main ? '!border-[color:var(--solar-deep)] !border-2' : ''
+    }`}
+  >
+    <span className="text-xs font-semibold text-[color:var(--text-muted)]">{role}</span>
+    <span className="text-sm font-semibold text-[color:var(--text-primary)] leading-tight">{name}</span>
+    <span className="flex items-center gap-1.5 text-xs text-[color:var(--text-secondary)]">
+      <MayaNumeral value={tone} size={18} title={`Number tone ${tone}`} />
+      <span>kin {kin}</span>
+    </span>
+    <span className="text-xs text-[color:var(--text-muted)]">{gloss}</span>
+  </div>
+);
+
 export const DreamspellSynchronometerPanel: React.FC<DreamspellSynchronometerPanelProps> = ({ ctx }) => {
-  const [activeTab, setActiveTab] = useState<'ORACLE' | 'THIRTEEN_MOON' | 'WAVESPELL' | 'CASTLE'>('ORACLE');
+  const [activeTab, setActiveTab] = useState<TabId>('ORACLE');
   const ds = ctx.dreamspell;
 
-  const getSealColor = (color: string) => {
-    switch (color) {
-      case 'Red': return { text: 'text-red-400', border: 'border-red-500/60', bg: 'bg-red-950/30', hex: '#ef4444' };
-      case 'White': return { text: 'text-slate-100', border: 'border-slate-400/60', bg: 'bg-slate-900/40', hex: '#f8fafc' };
-      case 'Blue': return { text: 'text-blue-400', border: 'border-blue-500/60', bg: 'bg-blue-950/30', hex: '#3b82f6' };
-      case 'Yellow': return { text: 'text-amber-300', border: 'border-amber-500/60', bg: 'bg-amber-950/30', hex: '#f59e0b' };
-      default: return { text: 'text-cyan-400', border: 'border-cyan-500/60', bg: 'bg-cyan-950/30', hex: '#06b6d4' };
-    }
-  };
-
-  const sealStyle = getSealColor(ds.solarSeal.color);
+  const colourInk = COLOUR_INK[ds.solarSeal.color] ?? 'var(--text-primary)';
+  const seasonIndex = ds.kin <= 52 ? 0 : ds.kin <= 104 ? 1 : ds.kin <= 156 ? 2 : ds.kin <= 208 ? 3 : 4;
+  const season = SEASONS[seasonIndex];
+  const monthPercent = Math.round((ds.thirteenMoon.dayOfMoon / 28) * 100);
 
   return (
-    <div className="instrument-panel instrument-panel-maya motion-enter text-xs">
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between border-b border-[color:var(--line-soft)] pb-4 mb-5 gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rotate-45 border border-emerald-300 bg-emerald-300/15 shadow-[0_0_16px_rgba(85,184,168,0.45)]" />
-          <div>
-            <h3 className="panel-title">
-              Dreamspell 13:20 Galactic Synchronometer
-            </h3>
-            <p className="font-garamond text-[15px] text-[color:var(--text-secondary)] italic mt-1">
-              Argüelles 13-Moon 28-Day Harmonic Matrix & The Fifth Force Oracle
+    <div className="instrument-panel motion-enter space-y-5">
+      {/* Today's signature */}
+      <div>
+        <p className="ui-eyebrow">Today’s signature</p>
+        <div className="trad-hero mt-2">
+          <span className="trad-hero-symbol" style={{ color: colourInk }}>
+            <MayaNumeral value={ds.galacticTone.number} size={30} title={`Number tone ${ds.galacticTone.number}`} />
+          </span>
+          <div className="min-w-0">
+            <p className="trad-hero-value">{ds.signature}</p>
+            <p className="trad-hero-sub">
+              Day number (kin) {ds.kin} of 260 · symbol: {ds.solarSeal.name} · number tone (1–13): {ds.galacticTone.number},{' '}
+              {ds.galacticTone.name}
             </p>
           </div>
         </div>
-
-        {/* Tabs */}
-        <div className="flex flex-wrap items-center gap-1 rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-1">
-          {(
-            [
-              { id: 'ORACLE', label: '5-Kin Oracle' },
-              { id: 'THIRTEEN_MOON', label: '13 Moons & Plasmas' },
-              { id: 'WAVESPELL', label: 'Wavespell & Family' },
-              { id: 'CASTLE', label: 'Castle of Time' }
-            ] as const
-          ).map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`nav-tab border ${
-                activeTab === tab.id
-                  ? 'nav-tab-active border-emerald-300/30 bg-emerald-300/[0.06] text-emerald-200'
-                  : 'border-transparent'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Top Banner: Galactic Signature & Novel-like Tale */}
-      <div className="p-4 rounded-[var(--radius-lg)] bg-emerald-300/[0.035] border border-emerald-300/15 mb-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--line-soft)] pb-3 mb-3">
-          <div>
-            <span className="ui-eyebrow text-emerald-300">
-              Galactic Signature of the Coordinate
-            </span>
-            <h4 className="font-cinzel text-lg font-semibold text-white tracking-wide mt-1">
-              {ds.signature}
-            </h4>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-[10px]">
-            <span className={`px-2 py-0.5 rounded-xs border uppercase font-medium ${sealStyle.bg} ${sealStyle.border} ${sealStyle.text}`}>
-              {ds.solarSeal.color} Seal #{ds.solarSeal.number} ({ds.solarSeal.mayaName})
-            </span>
-            <span className="px-2 py-0.5 rounded-xs border border-cyan-800 bg-cyan-950/30 text-cyan-300 uppercase font-medium">
-              Tone {ds.galacticTone.number} ({ds.galacticTone.name})
-            </span>
-            <span className="px-2 py-0.5 rounded-xs border border-purple-800 bg-purple-950/30 text-purple-300 uppercase font-medium">
-              {ds.earthFamily.name} Family
-            </span>
-          </div>
-        </div>
-
-        {/* Smooth Novel-Like Literary Narrative */}
-        <p className="font-garamond text-[17px] leading-relaxed text-[color:var(--text-secondary)] italic">
-          “{ds.poeticNarrative}”
+        <p className="trad-meaning mt-3">
+          <strong>In plain words:</strong> every Dreamspell day pairs one of 20 symbols with a number tone from 1 to 13.
+          Today’s symbol, {ds.solarSeal.name}, is linked with {ds.solarSeal.essence.toLowerCase()} and{' '}
+          {ds.solarSeal.power.toLowerCase()}; today’s tone, {ds.galacticTone.name}, is linked with{' '}
+          {ds.galacticTone.power.toLowerCase()}. These are themes to reflect on, not predictions.
         </p>
       </div>
 
-      {/* TAB 1: FIFTH FORCE 5-KIN ORACLE */}
+      {/* Tabs */}
+      <div className="explore-tabs" role="tablist" aria-label="Dreamspell details">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`explore-tab ${activeTab === tab.id ? 'explore-tab-active' : ''}`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab 1: five-part pattern */}
       {activeTab === 'ORACLE' && (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-          {/* Visual 5-Kin Cross Layout (7 cols) */}
-          <div className="md:col-span-7 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-4 flex flex-col items-center justify-center">
-            <div className="ui-eyebrow mb-3 text-center">
-              The Sacred Cross of the Fifth Force
-            </div>
-
-            {/* Cross Grid */}
-            <div className="grid grid-cols-3 gap-2 w-full max-w-[340px] text-center my-1">
-              {/* Row 1: Empty - Guide - Empty */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div className="md:col-span-7">
+            <p className="ui-eyebrow mb-2">Today’s five-part pattern</p>
+            <div className="grid grid-cols-3 gap-2 w-full max-w-[460px] mx-auto">
               <div />
-              <div className="p-3 rounded-[var(--radius-md)] border border-cyan-300/15 bg-cyan-300/[0.035] flex flex-col items-center">
-                <span className="text-[9px] uppercase text-cyan-400 font-bold">Guide Kin</span>
-                <span className="text-white font-garamond text-[14px] font-semibold mt-0.5">{ds.oracle.guide.name}</span>
-                <span className="text-[9px] text-gray-500">Kin {ds.oracle.guide.kin} • Tone {ds.oracle.guide.tone}</span>
-                <span className="text-[8px] text-gray-400 italic">Higher Self</span>
-              </div>
+              <PatternCell role="Guide" gloss="Points the way" name={ds.oracle.guide.name} kin={ds.oracle.guide.kin} tone={ds.oracle.guide.tone} />
               <div />
 
-              {/* Row 2: Antipode - Destiny - Analog */}
-              <div className="p-3 rounded-[var(--radius-md)] border border-red-400/20 bg-red-400/[0.035] flex flex-col items-center">
-                <span className="text-[9px] uppercase text-red-400 font-bold">Antipode</span>
-                <span className="text-white font-garamond text-[14px] font-semibold mt-0.5">{ds.oracle.antipode.name}</span>
-                <span className="text-[9px] text-gray-500">Kin {ds.oracle.antipode.kin} • Tone {ds.oracle.antipode.tone}</span>
-                <span className="text-[8px] text-gray-400 italic">Challenge / Strength</span>
-              </div>
+              <PatternCell role="Challenge" gloss="Tests and strengthens" name={ds.oracle.antipode.name} kin={ds.oracle.antipode.kin} tone={ds.oracle.antipode.tone} />
+              <PatternCell main role="Main symbol" gloss="Today itself" name={ds.oracle.destiny.name} kin={ds.oracle.destiny.kin} tone={ds.oracle.destiny.tone} />
+              <PatternCell role="Supporting partner" gloss="Works alongside" name={ds.oracle.analog.name} kin={ds.oracle.analog.kin} tone={ds.oracle.analog.tone} />
 
-              <div className="p-3 rounded-[var(--radius-md)] border border-emerald-300/50 bg-emerald-300/[0.08] flex flex-col items-center shadow-[0_0_28px_rgba(85,184,168,0.12)]">
-                <span className="text-[9px] uppercase text-emerald-400 font-bold">Destiny Kin</span>
-                <span className="text-white font-garamond text-[15px] font-semibold mt-0.5">{ds.oracle.destiny.name}</span>
-                <span className="data-readout text-emerald-300">Kin {ds.oracle.destiny.kin}</span>
-                <span className="text-[8px] text-emerald-400 uppercase">Center Presence</span>
-              </div>
-
-              <div className="p-3 rounded-[var(--radius-md)] border border-amber-300/20 bg-amber-300/[0.035] flex flex-col items-center">
-                <span className="text-[9px] uppercase text-amber-400 font-bold">Analog Kin</span>
-                <span className="text-white font-garamond text-[14px] font-semibold mt-0.5">{ds.oracle.analog.name}</span>
-                <span className="text-[9px] text-gray-500">Kin {ds.oracle.analog.kin} • Tone {ds.oracle.analog.tone}</span>
-                <span className="text-[8px] text-gray-400 italic">Solar Twin / Ally</span>
-              </div>
-
-              {/* Row 3: Empty - Occult - Empty */}
               <div />
-              <div className="p-3 rounded-[var(--radius-md)] border border-cyan-300/20 bg-cyan-300/[0.035] flex flex-col items-center">
-                <span className="text-[9px] uppercase text-cyan-300 font-bold">Occult Kin</span>
-                <span className="text-white font-garamond text-[14px] font-semibold mt-0.5">{ds.oracle.occult.name}</span>
-                <span className="text-[9px] text-gray-500">Kin {ds.oracle.occult.kin} • Tone {ds.oracle.occult.tone}</span>
-                <span className="text-[8px] text-gray-400 italic">Hidden Mystic Power</span>
-              </div>
+              <PatternCell role="Hidden strength" gloss="Helps from behind the scenes" name={ds.oracle.occult.name} kin={ds.oracle.occult.kin} tone={ds.oracle.occult.tone} />
               <div />
             </div>
           </div>
 
-          {/* Oracle Meanings & Actions (5 cols) */}
-          <div className="md:col-span-5 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-4 flex flex-col justify-between space-y-3">
-            <div>
-              <div className="ui-eyebrow text-white border-b border-[color:var(--line-soft)] pb-2 mb-3">
-                Oracle Matrix Dynamics
-              </div>
-              <div className="space-y-1.5 text-[11px]">
-                <div>
-                  <span className="text-gray-500 uppercase text-[9px]">Solar Tribe Essence:</span>{' '}
-                  <span className="text-white font-medium">{ds.solarSeal.essence}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500 uppercase text-[9px]">Primary Action:</span>{' '}
-                  <span className="text-white font-medium">{ds.solarSeal.action} through {ds.solarSeal.power}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500 uppercase text-[9px]">Chakra Anchor:</span>{' '}
-                  <span className="text-cyan-400 font-medium">{ds.solarSeal.chakra} Chakra</span>
-                </div>
-                <div>
-                  <span className="text-gray-500 uppercase text-[9px]">Galactic Ray:</span>{' '}
-                  <span className="text-amber-300 font-medium">{ds.galacticTone.ray}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-[var(--radius-md)] bg-white/[0.025] border border-[color:var(--line-soft)] font-garamond text-[15px] text-[color:var(--text-secondary)] italic">
-              “The Fifth Force reconciles dualities: the visible path guided from above, comforted from the right, sharpened from the left, and deeply rooted from the unseen depths.”
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: 13 MOONS & 7 RADIAL PLASMAS */}
-      {activeTab === 'THIRTEEN_MOON' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* 13 Moon Synchronometer Card */}
-          <div className="p-4 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] space-y-3">
-            <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-3">
-              <div>
-                <span className="text-[9px] uppercase text-emerald-400 font-bold">Current Moon Cycle</span>
-                <h4 className="font-cinzel text-xs font-bold text-white">
-                  Moon {ds.thirteenMoon.moonNumber}: {ds.thirteenMoon.moonName}
-                </h4>
-              </div>
-              <span className="data-readout">
-                Day {ds.thirteenMoon.dayOfMoon} of 28
-              </span>
-            </div>
-
-            <div className="space-y-1.5 text-[11px]">
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Animal Totem:</span>{' '}
-                <strong className="text-white">{ds.thirteenMoon.animalTotem}</strong>
-              </div>
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Service Question:</span>{' '}
-                <span className="text-amber-300 italic">“{ds.thirteenMoon.serviceQuestion}”</span>
-              </div>
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Heptad Week:</span>{' '}
-                <span className="text-white font-medium">Week {ds.thirteenMoon.weekNumber} of 4</span>
-              </div>
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Day Out of Time:</span>{' '}
-                <span className={ds.thirteenMoon.isDayOutOfTime ? 'text-green-400 font-bold' : 'text-gray-400'}>
-                  {ds.thirteenMoon.isDayOutOfTime ? 'YES (July 25 Green Day)' : 'Standard Moon Heptad'}
-                </span>
-              </div>
-            </div>
-
-            {/* 28 Day Progress Bar */}
-            <div className="pt-2">
-              <div className="flex justify-between text-[9px] text-gray-500 mb-1">
-                <span>Moon Progress</span>
-                <span>{Math.round((ds.thirteenMoon.dayOfMoon / 28) * 100)}%</span>
-              </div>
-              <div className="w-full h-1.5 bg-[#141414] rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 transition-all duration-500"
-                  style={{ width: `${(ds.thirteenMoon.dayOfMoon / 28) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 7 Radial Plasmas Card */}
-          <div className="p-4 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] space-y-3">
-            <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-3">
-              <div>
-                <span className="text-[9px] uppercase text-cyan-400 font-bold">Active Radial Plasma</span>
-                <h4 className="font-cinzel text-xs font-bold text-white">
-                  Plasma {ds.thirteenMoon.radialPlasma.name}
-                </h4>
-              </div>
-              <span className="text-[10px] text-cyan-300 font-bold">
-                {ds.thirteenMoon.radialPlasma.chakra} Chakra
-              </span>
-            </div>
-
-            <div className="space-y-1.5 text-[11px]">
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Quantum Function:</span>{' '}
-                <strong className="text-white">{ds.thirteenMoon.radialPlasma.quantumFunction}</strong>
-              </div>
-              <div className="p-3 rounded-[var(--radius-md)] bg-white/[0.025] border border-[color:var(--line-soft)] font-garamond text-[15px] text-[color:var(--text-secondary)] italic mt-2">
-                “{ds.thirteenMoon.radialPlasma.mantra}”
-              </div>
-            </div>
-
-            {/* 7 Plasmas Ticker */}
-            <div className="grid grid-cols-7 gap-1 pt-1 text-center text-[8px] uppercase">
-              {['Dali', 'Seli', 'Gamma', 'Kali', 'Alfa', 'Limi', 'Silio'].map((plasma, idx) => (
-                <div
-                  key={plasma}
-                  className={`py-1 rounded-xs border ${
-                    ds.thirteenMoon.radialPlasma.name === plasma
-                      ? 'bg-cyan-950/60 border-cyan-500 text-cyan-300 font-bold'
-                      : 'bg-white/[0.02] border-[color:var(--line-soft)] text-[color:var(--text-muted)]'
-                  }`}
-                >
-                  {plasma}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: WAVESPELL & EARTH FAMILY */}
-      {activeTab === 'WAVESPELL' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="p-4 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] space-y-3">
-            <div className="border-b border-[color:var(--line-soft)] pb-3">
-              <span className="text-[9px] uppercase text-amber-400 font-bold">13-Day Cosmic Wavespell</span>
-              <h4 className="font-cinzel text-xs font-bold text-white">
-                {ds.wavespell.name} (Kins {ds.wavespell.kinStart}–{ds.wavespell.kinEnd})
-              </h4>
-            </div>
-
-            <p className="font-garamond text-[15px] text-[color:var(--text-secondary)] italic leading-relaxed">
-              {ds.wavespell.teachings}
+          <div className="md:col-span-5 space-y-3">
+            <p className="readable-body">
+              Dreamspell surrounds each day’s main symbol with four others: a guide, a supporting partner, a challenge
+              and a hidden strength. The bars and dots show each one’s number tone.
             </p>
+            <dl className="trad-facts">
+              <dt>Symbol’s theme</dt>
+              <dd>{ds.solarSeal.essence}</dd>
+              <dt>What it does</dt>
+              <dd>
+                {ds.solarSeal.action} through {ds.solarSeal.power.toLowerCase()}
+              </dd>
+              <dt>Body centre (chakra)</dt>
+              <dd>{ds.solarSeal.chakra}</dd>
+              <dt>Tone’s theme</dt>
+              <dd>
+                {ds.galacticTone.action} · {ds.galacticTone.power}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      )}
 
-            <div className="pt-2 text-[11px] space-y-1">
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Position in Wavespell:</span>{' '}
-                <strong className="text-amber-300">Tone {ds.wavespell.positionInWavespell} of 13</strong>
+      {/* Tab 2: month and week */}
+      {activeTab === 'THIRTEEN_MOON' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="curious-box space-y-3">
+            <div>
+              <p className="ui-eyebrow">This month</p>
+              <h4 className="panel-title mt-1">
+                Month {ds.thirteenMoon.moonNumber} of 13: {ds.thirteenMoon.moonName}
+              </h4>
+            </div>
+            <dl className="trad-facts">
+              <dt>Day</dt>
+              <dd>{ds.thirteenMoon.dayOfMoon} of 28</dd>
+              <dt>Week</dt>
+              <dd>{ds.thirteenMoon.weekNumber} of 4</dd>
+              <dt>Month’s animal</dt>
+              <dd>{ds.thirteenMoon.animalTotem}</dd>
+              <dt>Question for the month</dt>
+              <dd>“{ds.thirteenMoon.serviceQuestion}”</dd>
+            </dl>
+            {ds.thirteenMoon.isDayOutOfTime && (
+              <p className="chart-note">
+                Today is the “Day Out of Time” (25 July): the one extra day that sits outside the 13 months, kept as a
+                day of rest and celebration.
+              </p>
+            )}
+            <div>
+              <div className="flex justify-between text-xs text-[color:var(--text-muted)] mb-1">
+                <span>How far through the month</span>
+                <span>{monthPercent}%</span>
               </div>
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Tone Quality:</span>{' '}
-                <span className="text-gray-300">{ds.galacticTone.power} • {ds.galacticTone.action}</span>
+              <div className="score-track">
+                <div className="score-fill" style={{ width: `${monthPercent}%` }} />
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] space-y-3">
-            <div className="border-b border-[color:var(--line-soft)] pb-3">
-              <span className="text-[9px] uppercase text-cyan-300 font-bold">Earth Family & Planetary Chakra</span>
-              <h4 className="font-cinzel text-xs font-bold text-white">
-                {ds.earthFamily.name} Earth Family
-              </h4>
+          <div className="curious-box space-y-3">
+            <div>
+              <p className="ui-eyebrow">Day of the week</p>
+              <h4 className="panel-title mt-1">{ds.thirteenMoon.radialPlasma.name}</h4>
+              <p className="readable-muted text-sm mt-1">
+                Dreamspell gives its seven weekdays their own names. Each is linked with a body centre (chakra).
+              </p>
             </div>
-
-            <div className="space-y-1.5 text-[11px]">
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Planetary Role:</span>{' '}
-                <span className="text-gray-200">{ds.earthFamily.role}</span>
-              </div>
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Chakric Alignment:</span>{' '}
-                <span className="text-cyan-200 font-bold">{ds.earthFamily.chakras} Center</span>
-              </div>
-              <div>
-                <span className="text-gray-500 uppercase text-[9px]">Color Clan:</span>{' '}
-                <span className="text-white font-medium">{ds.colorFamily.name}</span>
-              </div>
+            <div className="grid grid-cols-7 gap-1 text-center text-xs">
+              {WEEKDAYS.map((weekday) => {
+                const isToday = ds.thirteenMoon.radialPlasma.name === weekday;
+                return (
+                  <div
+                    key={weekday}
+                    className={`py-1.5 rounded-md border ${
+                      isToday
+                        ? 'border-[color:var(--temporal-deep)] text-[color:var(--temporal-deep)] font-semibold bg-white'
+                        : 'border-[color:var(--line-soft)] text-[color:var(--text-muted)]'
+                    }`}
+                  >
+                    {weekday}
+                  </div>
+                );
+              })}
             </div>
+            <dl className="trad-facts">
+              <dt>Body centre (chakra)</dt>
+              <dd>{ds.thirteenMoon.radialPlasma.chakra}</dd>
+              <dt>Theme</dt>
+              <dd>{ds.thirteenMoon.radialPlasma.quantumFunction}</dd>
+            </dl>
+            <details>
+              <summary className="text-sm cursor-pointer text-[color:var(--text-secondary)]">Traditional phrase for this weekday</summary>
+              <p className="readable-muted text-sm mt-2">“{ds.thirteenMoon.radialPlasma.mantra}”</p>
+            </details>
+          </div>
+        </div>
+      )}
 
-            <div className="p-3 rounded-[var(--radius-md)] bg-white/[0.025] border border-[color:var(--line-soft)] font-garamond text-[15px] text-[color:var(--text-secondary)] italic">
-              {ds.colorFamily.role}
+      {/* Tab 3: 13-day cycle and families */}
+      {activeTab === 'WAVESPELL' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="curious-box space-y-3">
+            <div>
+              <p className="ui-eyebrow">13-day cycle (wavespell)</p>
+              <h4 className="panel-title mt-1">{ds.wavespell.name}</h4>
+            </div>
+            <p className="readable-body">
+              The 260 days are divided into 20 cycles of 13 days. Each wavespell is named after the symbol of its first
+              day, which sets the theme for all 13.
+            </p>
+            <div className="flex items-center gap-3">
+              <MayaNumeral value={ds.wavespell.positionInWavespell} size={30} title={`Day ${ds.wavespell.positionInWavespell}`} />
+              <p className="text-sm text-[color:var(--text-primary)] font-medium">
+                Day {ds.wavespell.positionInWavespell} of 13
+              </p>
+            </div>
+            <div className="score-track">
+              <div className="score-fill" style={{ width: `${Math.round((ds.wavespell.positionInWavespell / 13) * 100)}%` }} />
+            </div>
+            <dl className="trad-facts">
+              <dt>Covers</dt>
+              <dd>
+                kin {ds.wavespell.kinStart}–{ds.wavespell.kinEnd}
+              </dd>
+              <dt>Today’s number tone</dt>
+              <dd>
+                {ds.galacticTone.number}, {ds.galacticTone.name} ({ds.galacticTone.action.toLowerCase()},{' '}
+                {ds.galacticTone.power.toLowerCase()})
+              </dd>
+            </dl>
+          </div>
+
+          <div className="curious-box space-y-3">
+            <div>
+              <p className="ui-eyebrow">Groups today’s symbol belongs to</p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[color:var(--text-primary)]">Earth family: {ds.earthFamily.name}</p>
+              <p className="readable-muted text-sm mt-0.5">
+                One of five groups of four symbols, {EARTH_FAMILY_GLOSS[ds.earthFamily.name] ?? 'each with a shared role'}.
+                Linked body centre (chakra): {ds.earthFamily.chakras}.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold" style={{ color: colourInk }}>
+                Colour family: {ds.solarSeal.color}
+              </p>
+              <p className="readable-muted text-sm mt-0.5">
+                The 20 symbols come in four colours, five of each. {COLOUR_GLOSS[ds.solarSeal.color] ?? ''}
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 4: CASTLE OF TIME */}
+      {/* Tab 4: 52-day season */}
       {activeTab === 'CASTLE' && (
-        <div className="p-4 rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] space-y-4">
-          <div className="flex flex-wrap items-center justify-between border-b border-[color:var(--line-soft)] pb-3">
-            <div>
-              <span className="text-[9px] uppercase tracking-wider text-cyan-400 font-bold">
-                Great Cycle of Five Castles
-              </span>
-              <h4 className="font-cinzel text-sm font-bold text-white">
-                {ds.castle.name} ({ds.castle.court})
-              </h4>
-            </div>
-
-            <span
-              className="px-2.5 py-0.5 rounded-xs border text-[10px] uppercase font-bold"
-              style={{ borderColor: ds.castle.color, color: ds.castle.color, backgroundColor: `${ds.castle.color}15` }}
-            >
-              Kins {ds.kin <= 52 ? '1-52' : ds.kin <= 104 ? '53-104' : ds.kin <= 156 ? '105-156' : ds.kin <= 208 ? '157-208' : '209-260'}
-            </span>
+        <div className="space-y-3">
+          <div>
+            <p className="ui-eyebrow">52-day season (castle)</p>
+            <h4 className="panel-title mt-1" style={{ color: season.color }}>
+              {season.name}: {season.theme.toLowerCase()}
+            </h4>
           </div>
-
-          <p className="font-garamond text-[16px] leading-relaxed text-[color:var(--text-secondary)] italic bg-white/[0.025] p-3 rounded-[var(--radius-md)] border border-[color:var(--line-soft)]">
-            “{ds.castle.meaning}”
+          <p className="readable-body">
+            The 260 days are also grouped into five seasons of 52 days, which Dreamspell calls castles. Today, kin{' '}
+            {ds.kin}, falls in the {season.name.toLowerCase()} (kin {season.range}). {season.plain}
           </p>
-
-          {/* 5 Castles Progress Strip */}
-          <div className="grid grid-cols-5 gap-2 pt-1 text-center text-[9px] uppercase">
-            {[
-              { name: 'Red East', court: 'Turning', range: '1-52', color: '#ef4444' },
-              { name: 'White North', court: 'Crossing', range: '53-104', color: '#f8fafc' },
-              { name: 'Blue West', court: 'Burning', range: '105-156', color: '#3b82f6' },
-              { name: 'Yellow South', court: 'Giving', range: '157-208', color: '#eab308' },
-              { name: 'Green Matrix', court: 'Enchantment', range: '209-260', color: '#10b981' }
-            ].map((c, idx) => {
-              const isActive =
-                (idx === 0 && ds.kin <= 52) ||
-                (idx === 1 && ds.kin > 52 && ds.kin <= 104) ||
-                (idx === 2 && ds.kin > 104 && ds.kin <= 156) ||
-                (idx === 3 && ds.kin > 156 && ds.kin <= 208) ||
-                (idx === 4 && ds.kin > 208);
-
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
+            {SEASONS.map((s, idx) => {
+              const isActive = idx === seasonIndex;
               return (
                 <div
-                  key={c.name}
-                  className={`p-2 rounded-xs border ${
-                    isActive
-                      ? 'border-cyan-300/50 bg-cyan-300/[0.07] font-bold text-white shadow-[0_0_20px_rgba(98,199,218,0.1)]'
-                      : 'border-[color:var(--line-soft)] bg-white/[0.02] text-[color:var(--text-muted)]'
-                  }`}
-                  style={{ borderTopColor: isActive ? c.color : undefined, borderTopWidth: isActive ? '2px' : '1px' }}
+                  key={s.name}
+                  className={`curious-box !p-2 ${isActive ? '!border-2' : ''}`}
+                  style={isActive ? { borderColor: s.color } : undefined}
                 >
-                  <div style={{ color: c.color }} className="font-bold">{c.name}</div>
-                  <div className="text-[8px] text-gray-400">{c.court}</div>
-                  <div className="text-[8px] text-gray-500">{c.range}</div>
+                  <div className="text-sm font-semibold" style={{ color: s.color }}>
+                    {s.name}
+                  </div>
+                  <div className="text-xs text-[color:var(--text-secondary)]">{s.theme}</div>
+                  <div className="text-xs text-[color:var(--text-muted)]">kin {s.range}</div>
+                  {isActive && <div className="text-xs font-semibold text-[color:var(--text-primary)] mt-0.5">Now</div>}
                 </div>
               );
             })}
           </div>
+          <p className="readable-muted text-sm">Dreamspell’s own name for this season: {ds.castle.name}.</p>
         </div>
       )}
     </div>

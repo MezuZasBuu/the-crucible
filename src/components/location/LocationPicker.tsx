@@ -59,7 +59,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({ value, onChange,
       {!compact && (
         <div className="flex items-center gap-2 mb-2">
           <MapPin className="w-4 h-4 text-[color:var(--temporal)]" />
-          <p className="ui-eyebrow">Where this lands on Earth (optional overlay)</p>
+          <p className="ui-eyebrow">Your location (optional — sets sunrise, sunset and the local clock)</p>
         </div>
       )}
       <div className="location-picker-grid">

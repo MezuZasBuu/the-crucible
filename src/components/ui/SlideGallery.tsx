@@ -22,7 +22,7 @@ export const SlideGallery: React.FC<SlideGalleryProps> = ({
   onIndexChange,
   panelCount,
   labels,
-  autoAdvanceMs = 6000,
+  autoAdvanceMs = 0,
   showArrows = true,
   className = '',
   children

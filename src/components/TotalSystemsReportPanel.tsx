@@ -1,44 +1,20 @@
 /**
- * The Crucible — Total Systems Synthesis & Dialectical Forks Dossier
- * 
- * Encompasses:
- * - Natal & Significant Time Measurement Input Station
- * - Gaia's Daily Energetic Overcast Profile
- * - Multi-Cipher Gematria on Names & Letter-by-Letter Matrix
- * - Etymological Root Research & Linguistic Lineage
- * - Fused Name-Definition Numerology & Literary Monograph
- * - Cross-System Dialectical Contradictions presented as Forks in the Road of Opportunity
- * - Machine-Readable JSON & JSONL Live Ledger with Download/Copy
- * - Sourced Research Citations & Live Network Synthesis
+ * The Crucible — Full report
+ *
+ * Enter a name and a date to get one long written report:
+ * summary, Earth and sky conditions, name analysis, places where
+ * traditions disagree, each tradition's reading, and a data file.
  */
 
-import React, { useState, useMemo } from 'react';
-import {
-  FileText,
-  Sparkles,
-  GitFork,
-  Globe,
-  Compass,
-  Download,
-  Copy,
-  Check,
-  Search,
-  Calendar,
-  Clock,
-  MapPin,
-  Flame,
-  Shield,
-  BookOpen,
-  Layers,
-  RotateCcw,
-  Zap,
-  Sun
-} from 'lucide-react';
+import React, { useState, useMemo, useRef } from 'react';
+import { Download, Copy, Check, Search, RotateCcw, Sun } from 'lucide-react';
 import { CompleteCalculationContext, LocationCoordinates, TemporalInput } from '../types';
 import { calculateGematriaEtymology, GematriaCipherResult } from '../engine/gematriaEtymology';
 import { buildTotalSystemsReport } from '../engine/gaiaOvercastForks';
 import { executeCrucibleCalculation } from '../engine/crucibleCore';
 import { DailyEnergyReportModal } from './DailyEnergyReportModal';
+import { PlanetGlyph } from './symbols/AstroGlyph';
+import { CultureHeader, CallingEmblem, Script, HANZI_ANIMALS } from './symbols/CultureSymbols';
 
 
 interface TotalSystemsReportPanelProps {
@@ -65,6 +41,7 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
   const [isResearching, setIsResearching] = useState<boolean>(false);
   const [networkResearchOutput, setNetworkResearchOutput] = useState<string | null>(null);
   const [isDailyReportModalOpen, setIsDailyReportModalOpen] = useState<boolean>(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   // Calculate the measured coordinate context (e.g. natal / event)
   const measuredContext = useMemo<CompleteCalculationContext>(() => {
@@ -98,7 +75,7 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
   const formattedJSON = useMemo(() => {
     const payload = {
       dossierMetadata: {
-        title: 'The Crucible Total Systems Synthesis & Dialectical Forks Dossier',
+        title: 'The Crucible — full report',
         timestamp: new Date().toISOString(),
         calculationId: measuredContext.calculationId,
         querentName: subjectName,
@@ -133,9 +110,9 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
         enochianBiblical: measuredContext.enochianBiblical,
         numerology: measuredContext.numerology,
         geneKeysSun: measuredContext.geneKeysSun,
-        twelveTribesTop: measuredContext.synthesis.topResonatingTribe,
+        topCalling: measuredContext.synthesis.topCalling,
         intertwining: {
-          primaryTribeLife: measuredContext.intertwining.primaryTribeLife,
+          primaryCallingLife: measuredContext.intertwining.primaryCallingLife,
           threads: measuredContext.intertwining.intertwiningThreads,
           systemNoteIds: measuredContext.intertwining.systemNotes.map((n) => n.systemId)
         }
@@ -232,837 +209,701 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
       if (data.researchReport) {
         setNetworkResearchOutput(data.researchReport);
       } else {
-        setNetworkResearchOutput('Research synthesis successfully completed and incorporated into local ledger.');
+        setNetworkResearchOutput('The online research finished, but no text came back. Please try again.');
       }
     } catch (err: any) {
       console.error('Research networking error:', err);
-      setNetworkResearchOutput(`Archival research fallback engaged: ${gematriaEtymology.etymology.etymologicalNarrative}`);
+      setNetworkResearchOutput(`Online research is not available right now. Here is what the built-in notes say about the name: ${gematriaEtymology.etymology.etymologicalNarrative}`);
     } finally {
       setIsResearching(false);
     }
   };
 
+  const handleCreateReport = (e: React.FormEvent) => {
+    e.preventDefault();
+    setActiveSection('OVERVIEW');
+    reportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const gaia = totalReport.gaiaOvercast;
+  const eb = measuredContext.enochianBiblical;
+  const calling = measuredContext.synthesis.topCalling;
+  const reportHeading = `${subjectName || 'No name entered yet'}${measurementReason ? ` — ${measurementReason}` : ''}`;
+  const yearAnimal = measuredContext.chinese.yearPillar.zodiacAnimal;
+
+  const sectionTabs = [
+    { id: 'OVERVIEW', label: 'Summary' },
+    { id: 'GAIA', label: 'Earth and sky conditions' },
+    { id: 'GEMATRIA', label: 'Name analysis' },
+    { id: 'FORKS', label: 'Where traditions disagree' },
+    { id: 'SYSTEMS', label: 'Each tradition' },
+    { id: 'JSON_DATA', label: 'Data file' }
+  ] as const;
+
   return (
-    <div className="space-y-5 motion-enter text-[color:var(--text-secondary)] parchment-surface">
-      {/* Top Banner & Orientation */}
-      <div className="instrument-panel">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[color:var(--line-soft)] pb-4 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 rotate-45 items-center justify-center rounded-[var(--radius-sm)] border border-cyan-300/25 bg-cyan-300/[0.07] shadow-[var(--glow-temporal)]">
-              <Sparkles className="w-5 h-5 text-cyan-400 -rotate-45" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="panel-title">
-                  Total Systems Synthesis & Dialectical Forks Dossier
-                </h2>
-                <span className="ui-eyebrow rounded-full border border-cyan-300/20 bg-cyan-300/[0.06] px-2 py-1 text-[color:var(--temporal-bright)]">
-                  Speculative Field Overlay Synced
-                </span>
-              </div>
-              <p className="text-xs text-gray-400 font-serif italic mt-0.5">
-                Measuring personal and event temporal coordinates against Earth's daily energetic canopy, transforming systemic contradictions into sovereign forks of opportunity.
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Stats Pill & Daily Report Trigger */}
-          <div className="flex flex-wrap items-center gap-2 text-[10px]">
-            <button
-              onClick={() => setIsDailyReportModalOpen(true)}
-              className="cta-primary min-h-0 px-3 py-2 text-[10px] group"
-              title="Open full comprehensive analysis on the energy of the day in full"
-            >
-              <Sun className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-45 transition-transform" />
-              <span>Today's Daily Report</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-            </button>
-
-            <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] px-3 py-2">
-              <span className="text-gray-500 uppercase mr-1">Speculative overlay:</span>
-              <span className="font-bold text-cyan-400">{totalReport.gaiaOvercast.geomagneticStatus}</span>
-            </div>
-            <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] px-3 py-2">
-              <span className="text-gray-500 uppercase mr-1">Schumann:</span>
-              <span className="font-bold text-emerald-400">{totalReport.gaiaOvercast.schumannFrequencyHz} Hz</span>
-            </div>
-            <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] px-3 py-2">
-              <span className="text-gray-500 uppercase mr-1">Aspect Tension:</span>
-              <span className="font-bold text-amber-400">{totalReport.gaiaOvercast.celestialAspectTensionScore}/100</span>
-            </div>
-          </div>
-
+    <div className="space-y-5 motion-enter">
+      {/* Input form */}
+      <form className="instrument-panel space-y-4" onSubmit={handleCreateReport}>
+        <div>
+          <p className="ui-eyebrow">Who and when</p>
+          <p className="readable-muted mt-1">
+            Enter a name and a date, such as a birthday or the day of an event. Leave the date empty to use the
+            day shown in Today.
+          </p>
         </div>
 
-        {/* INPUT STATION: Birthdata & Significant Time */}
-        <div className="rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-4">
-          <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-2 mb-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-cyan-400" />
-              <h3 className="ui-eyebrow text-[color:var(--temporal)]">
-                Temporal Measurement Station (Birthdata / Significant Coordinate)
-              </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <label className="block space-y-1">
+            <span className="field-label">Name</span>
+            <input
+              type="text"
+              value={subjectName}
+              onChange={(e) => setSubjectName(e.target.value)}
+              placeholder="For example, Alexander"
+              className="field-input w-full"
+            />
+            <span className="field-help">Used for the name analysis. Optional.</span>
+          </label>
+
+          <label className="block space-y-1">
+            <span className="field-label">Date</span>
+            <input
+              type="date"
+              value={inputDate}
+              onChange={(e) => setInputDate(e.target.value)}
+              className="field-input w-full"
+            />
+            <span className="field-help">A birthday or any other day that matters to you.</span>
+          </label>
+
+          <label className="block space-y-1">
+            <span className="field-label">Time</span>
+            <input
+              type="time"
+              step="1"
+              value={inputTime}
+              onChange={(e) => setInputTime(e.target.value)}
+              className="field-input w-full"
+            />
+            <span className="field-help">In universal time (UTC). Leave at noon if you do not know it.</span>
+          </label>
+
+          <label className="block space-y-1">
+            <span className="field-label">Place</span>
+            <input
+              type="text"
+              value={inputCity}
+              onChange={(e) => setInputCity(e.target.value)}
+              placeholder="For example, Alexandria"
+              className="field-input w-full"
+            />
+            <span className="field-help">The town or city. This is a label only.</span>
+          </label>
+
+          <div className="space-y-1">
+            <span className="field-label">Map position of the place</span>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                step="0.001"
+                value={inputLat}
+                onChange={(e) => setInputLat(parseFloat(e.target.value) || 0)}
+                className="field-input w-full"
+                aria-label="Latitude"
+                title="Latitude"
+              />
+              <input
+                type="number"
+                step="0.001"
+                value={inputLng}
+                onChange={(e) => setInputLng(parseFloat(e.target.value) || 0)}
+                className="field-input w-full"
+                aria-label="Longitude"
+                title="Longitude"
+              />
             </div>
-            <div className="flex items-center gap-2 text-[9px]">
-              <button
-                onClick={handleSyncToCurrent}
-                className="text-gray-400 hover:text-white transition-colors flex items-center gap-1 underline underline-offset-2"
-              >
-                <RotateCcw className="w-2.5 h-2.5" />
-                Load Real-Time Transit
-              </button>
-            </div>
+            <span className="field-help">Latitude, then longitude, in degrees. The calculations use these numbers.</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
-            {/* Subject Name */}
-            <div>
-              <label className="ui-eyebrow block mb-1">
-                Name / Subject
-              </label>
-              <input
-                type="text"
-                value={subjectName}
-                onChange={(e) => setSubjectName(e.target.value)}
-                placeholder="e.g. Alexander"
-                className="field-input w-full"
-              />
-            </div>
-
-            {/* Date */}
-            <div>
-              <label className="ui-eyebrow block mb-1">
-                Date (YYYY-MM-DD)
-              </label>
-              <input
-                type="date"
-                value={inputDate}
-                onChange={(e) => setInputDate(e.target.value)}
-                className="field-input w-full"
-              />
-            </div>
-
-            {/* Time */}
-            <div>
-              <label className="ui-eyebrow block mb-1">
-                Time (HH:MM:SS)
-              </label>
-              <input
-                type="time"
-                step="1"
-                value={inputTime}
-                onChange={(e) => setInputTime(e.target.value)}
-                className="field-input w-full"
-              />
-            </div>
-
-            {/* City / Landmark */}
-            <div>
-              <label className="ui-eyebrow block mb-1">
-                City / Location
-              </label>
-              <input
-                type="text"
-                value={inputCity}
-                onChange={(e) => setInputCity(e.target.value)}
-                placeholder="e.g. Alexandria"
-                className="field-input w-full"
-              />
-            </div>
-
-            {/* Latitude / Longitude */}
-            <div>
-              <label className="ui-eyebrow block mb-1">
-                Coordinates (Lat / Lng)
-              </label>
-              <div className="grid grid-cols-2 gap-1">
-                <input
-                  type="number"
-                  step="0.001"
-                  value={inputLat}
-                  onChange={(e) => setInputLat(parseFloat(e.target.value) || 0)}
-                  className="field-input w-full px-1.5 text-center"
-                />
-                <input
-                  type="number"
-                  step="0.001"
-                  value={inputLng}
-                  onChange={(e) => setInputLng(parseFloat(e.target.value) || 0)}
-                  className="field-input w-full px-1.5 text-center"
-                />
-              </div>
-            </div>
-
-            {/* Reason / Designation */}
-            <div>
-              <label className="ui-eyebrow block mb-1">
-                Measurement Focus
-              </label>
-              <input
-                type="text"
-                value={measurementReason}
-                onChange={(e) => setMeasurementReason(e.target.value)}
-                placeholder="e.g. Natal Chart"
-                className="field-input w-full"
-              />
-            </div>
-          </div>
-
-          {/* Preset Chips */}
-          <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-[color:var(--line-soft)] text-[9px]">
-            <span className="ui-eyebrow mr-1">Archetypal Presets:</span>
-            <button
-              onClick={() => handlePresetSelect('Alexander', '1988-08-08', 'Alexandria', 31.2001, 29.9187, 'Sovereign Guardian & Defender')}
-              className="nav-tab border border-[color:var(--line-soft)] !px-2 !py-1 text-[color:var(--temporal-bright)]"
-            >
-              Alexander (356 BCE Archetype)
-            </button>
-            <button
-              onClick={() => handlePresetSelect('Sophia', '1995-03-21', 'Athens', 37.9838, 23.7275, 'Sacred Wisdom & Gnosis')}
-              className="nav-tab border border-[color:var(--line-soft)] !px-2 !py-1 text-[color:var(--solar-bright)]"
-            >
-              Sophia (Gnostic Wisdom)
-            </button>
-            <button
-              onClick={() => handlePresetSelect('Leonardo', '1452-04-15', 'Vinci', 43.7874, 10.9265, 'Polymathic Renaissance Ignition')}
-              className="nav-tab border border-[color:var(--line-soft)] !px-2 !py-1 text-[color:var(--solar-bright)]"
-            >
-              Leonardo da Vinci
-            </button>
-            <button
-              onClick={() => handlePresetSelect('Hermes', '2000-01-01', 'Giza Sanctuary', 29.9792, 31.1342, 'Hermetic Threshold Master')}
-              className="nav-tab border border-[color:var(--line-soft)] !px-2 !py-1 text-emerald-300"
-            >
-              Hermes Trismegistus
-            </button>
-          </div>
+          <label className="block space-y-1">
+            <span className="field-label">What this date is</span>
+            <input
+              type="text"
+              value={measurementReason}
+              onChange={(e) => setMeasurementReason(e.target.value)}
+              placeholder="For example, my birthday"
+              className="field-input w-full"
+            />
+            <span className="field-help">A short note shown in the report title. Optional.</span>
+          </label>
         </div>
 
-        {/* Section Navigation Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-3 border-t border-[color:var(--line-soft)]">
-          <div className="flex flex-wrap items-center gap-1">
-            {(
-              [
-                { id: 'OVERVIEW', label: 'Executive Synthesis', icon: FileText },
-                { id: 'GAIA', label: 'Speculative Field Overlay', icon: Globe },
-                { id: 'GEMATRIA', label: 'Gematria & Etymology', icon: BookOpen },
-                { id: 'FORKS', label: 'Dialectical Forks', icon: GitFork },
-                { id: 'SYSTEMS', label: 'All Systems Ledger', icon: Layers },
-                { id: 'JSON_DATA', label: 'JSON / JSONL Ledger', icon: Download }
-              ] as const
-            ).map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveSection(tab.id)}
-                  className={`nav-tab flex items-center gap-1.5 text-[10px] uppercase ${
-                    activeSection === tab.id
-                      ? 'nav-tab-active bg-cyan-300/[0.06]'
-                      : ''
-                  }`}
-                >
-                  <Icon className="w-3 h-3" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="submit" className="cta-primary">
+            Create report
+          </button>
+          <button type="button" onClick={handleSyncToCurrent} className="cta-ghost">
+            <RotateCcw className="w-4 h-4" />
+            <span>Use the day shown in Today</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsDailyReportModalOpen(true)}
+            className="cta-ghost"
+            title="Open the detailed report for the day shown in Today"
+          >
+            <Sun className="w-4 h-4" />
+            <span>Open today's detailed report</span>
+          </button>
+        </div>
+        <p className="field-help">The report below updates as you type.</p>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleInitiateDeepResearch}
-              disabled={isResearching}
-              className="cta-ghost min-h-0 px-3 py-2 text-[10px] uppercase"
-              title="Query Live Web Grounding & Network Sourced Scholarly Corpus"
-            >
-              <Zap className={`w-3 h-3 ${isResearching ? 'animate-spin text-amber-400' : 'text-cyan-400'}`} />
-              <span>{isResearching ? 'Synthesizing...' : 'Deep Network Research'}</span>
-            </button>
+        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[color:var(--line-soft)]">
+          <span className="readable-muted">Or try an example:</span>
+          <button
+            type="button"
+            onClick={() => handlePresetSelect('Alexander', '1988-08-08', 'Alexandria', 31.2001, 29.9187, 'Example: a protector')}
+            className="explore-tab"
+          >
+            Alexander
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePresetSelect('Sophia', '1995-03-21', 'Athens', 37.9838, 23.7275, 'Example: wisdom')}
+            className="explore-tab"
+          >
+            Sophia
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePresetSelect('Leonardo', '1452-04-15', 'Vinci', 43.7874, 10.9265, 'Example: Leonardo da Vinci\'s birthday')}
+            className="explore-tab"
+          >
+            Leonardo da Vinci
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePresetSelect('Hermes', '2000-01-01', 'Giza', 29.9792, 31.1342, 'Example: a legendary teacher')}
+            className="explore-tab"
+          >
+            Hermes
+          </button>
+        </div>
+      </form>
+
+      {/* Report header + section choice */}
+      <div ref={reportRef} className="instrument-panel space-y-4 scroll-mt-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="ui-eyebrow">Report for</p>
+            <h3 className="panel-title">{reportHeading}</h3>
+            <p className="readable-muted mt-1">
+              {inputDate
+                ? `${inputDate} at ${inputTime || '12:00:00'} UTC${inputCity ? `, ${inputCity}` : ''}`
+                : `No date entered, so this uses the day shown in Today (${currentCtx.input.dateString}).`}
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={handleInitiateDeepResearch}
+            disabled={isResearching}
+            className="cta-ghost"
+            title="Look up the name and date online and add a written summary"
+          >
+            <Search className={`w-4 h-4 ${isResearching ? 'animate-pulse' : ''}`} />
+            <span>{isResearching ? 'Researching…' : 'Add online research'}</span>
+          </button>
+        </div>
+
+        <div className="explore-tabs" role="tablist" aria-label="Report sections">
+          {sectionTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeSection === tab.id}
+              onClick={() => setActiveSection(tab.id)}
+              className={`explore-tab ${activeSection === tab.id ? 'explore-tab-active' : ''}`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Network Research Output Banner (if triggered) */}
+      {/* Online research result */}
       {networkResearchOutput && (
-        <div className="instrument-panel motion-enter !p-4 text-xs space-y-2">
-          <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-2">
-            <div className="flex items-center gap-1.5 text-cyan-400 font-bold uppercase text-[10px]">
-              <Search className="w-3.5 h-3.5" />
-              <span>Network Sourced Research Dossier</span>
-            </div>
-            <button
-              onClick={() => setNetworkResearchOutput(null)}
-              className="text-gray-400 hover:text-white text-[10px]"
-            >
-              Dismiss
+        <div className="instrument-panel motion-enter space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="ui-eyebrow">Online research</p>
+            <button type="button" onClick={() => setNetworkResearchOutput(null)} className="cta-ghost">
+              Hide
             </button>
           </div>
-          <p className="font-serif italic text-gray-200 text-xs leading-relaxed whitespace-pre-line">
-            {networkResearchOutput}
+          <p className="readable-body whitespace-pre-line">{networkResearchOutput}</p>
+        </div>
+      )}
+
+      {/* Summary */}
+      {activeSection === 'OVERVIEW' && (
+        <div className="instrument-panel space-y-5">
+          <div>
+            <p className="ui-eyebrow">Summary</p>
+            <p className="readable-body whitespace-pre-line mt-2">{totalReport.executiveSynthesizedTreatise}</p>
+          </div>
+
+          <div>
+            <p className="ui-eyebrow">Key numbers</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
+              <div className="curious-box">
+                <p className="readable-muted">Life path number</p>
+                <p className="trad-hero-value">{measuredContext.numerology.lifePathNumber}</p>
+                <p className="readable-muted">
+                  The digits of the date added together
+                  {measuredContext.numerology.lifePathIsMaster ? '. 11, 22 and 33 are called master numbers.' : '.'}
+                </p>
+              </div>
+              <div className="curious-box">
+                <p className="readable-muted">Name number</p>
+                <p className="trad-hero-value">{gematriaEtymology.fusedNumerology.expressionNumber}</p>
+                <p className="readable-muted">All the letters of the name added together.</p>
+              </div>
+              <div className="curious-box">
+                <p className="readable-muted">Heart's desire number</p>
+                <p className="trad-hero-value">{gematriaEtymology.fusedNumerology.soulUrgeNumber}</p>
+                <p className="readable-muted">Only the vowels of the name added together.</p>
+              </div>
+              <div className="curious-box">
+                <p className="readable-muted">Hebrew letter total</p>
+                <p className="trad-hero-value">{gematriaEtymology.ciphers.hebrewStandard.totalSum}</p>
+                <p className="readable-muted">
+                  From gematria (adding up the number values of letters), using the Hebrew alphabet.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="ui-eyebrow">The name and the date together</p>
+            <p className="readable-body mt-2">{gematriaEtymology.fusedNumerology.fusedLiteraryMonograph}</p>
+          </div>
+
+          <p className="chart-note">
+            These readings come from traditions and are offered for reflection. They are not predictions.
           </p>
         </div>
       )}
 
-      {/* SECTION 1: EXECUTIVE SYNTHESIS & PROFILE SUMMARY */}
-      {activeSection === 'OVERVIEW' && (
-        <div className="space-y-3">
-          <div className="instrument-panel instrument-panel-solar space-y-4">
-            <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-3">
-              <div>
-                <span className="ui-eyebrow text-[color:var(--temporal)]">
-                  Executive Monograph
-                </span>
-                <h3 className="text-base font-cinzel font-bold text-white">
-                  {subjectName} — {measurementReason}
-                </h3>
-              </div>
-              <div className="text-right text-[10px] text-gray-400">
-                <span>JD {measuredContext.temporal.julianDayUT.toFixed(4)}</span>
-                <p className="text-gray-500">{inputCity} ({inputLat.toFixed(2)}°, {inputLng.toFixed(2)}°)</p>
-              </div>
-            </div>
-
-            {/* Prose Narrative */}
-            <div className="rounded-[var(--radius-md)] border border-cyan-300/10 border-l-2 border-l-[color:var(--temporal)] bg-cyan-300/[0.025] p-4">
-              <p className="font-serif text-xs md:text-sm text-gray-200 leading-relaxed italic whitespace-pre-line">
-                {totalReport.executiveSynthesizedTreatise}
-              </p>
-            </div>
-
-            {/* Quick Metrics Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-              <div className="rounded-[var(--radius-md)] border border-amber-300/10 bg-amber-300/[0.025] p-3">
-                <span className="text-[8px] uppercase text-gray-500 block">Life Path Number</span>
-                <span className="text-lg font-cinzel font-bold text-[color:var(--solar-bright)]">
-                  {measuredContext.numerology.lifePathNumber}
-                </span>
-                <span className="text-[8px] text-gray-400 block mt-0.5">
-                  {measuredContext.numerology.lifePathIsMaster ? 'Master Ray' : 'Pythagorean Root'}
-                </span>
-              </div>
-
-              <div className="rounded-[var(--radius-md)] border border-cyan-300/10 bg-cyan-300/[0.025] p-3">
-                <span className="text-[8px] uppercase text-gray-500 block">Name Expression</span>
-                <span className="text-lg font-cinzel font-bold text-cyan-300">
-                  {gematriaEtymology.fusedNumerology.expressionNumber}
-                </span>
-                <span className="text-[8px] text-gray-400 block mt-0.5">Destiny Archetype</span>
-              </div>
-
-              <div className="rounded-[var(--radius-md)] border border-emerald-300/10 bg-emerald-300/[0.025] p-3">
-                <span className="text-[8px] uppercase text-gray-500 block">Soul Urge (Vowels)</span>
-                <span className="text-lg font-cinzel font-bold text-emerald-300">
-                  {gematriaEtymology.fusedNumerology.soulUrgeNumber}
-                </span>
-                <span className="text-[8px] text-gray-400 block mt-0.5">Heart's Inner Thirst</span>
-              </div>
-
-              <div className="rounded-[var(--radius-md)] border border-amber-300/10 bg-amber-300/[0.025] p-3">
-                <span className="text-[8px] uppercase text-gray-500 block">Hebrew Gematria</span>
-                <span className="text-lg font-cinzel font-bold text-amber-300">
-                  {gematriaEtymology.ciphers.hebrewStandard.totalSum}
-                </span>
-                <span className="text-[8px] text-gray-400 block mt-0.5">Mispar Hechrachi</span>
-              </div>
-            </div>
-
-            {/* Fused Etymological & Numerological Monograph */}
-            <div className="rounded-[var(--radius-md)] border border-amber-300/10 border-l-2 border-l-[color:var(--solar)] bg-amber-300/[0.025] p-4 space-y-1">
-              <span className="ui-eyebrow text-[color:var(--solar)]">
-                Fused Name-Definition & Life Path Monograph
-              </span>
-              <p className="font-serif text-xs text-gray-300 leading-relaxed italic">
-                {gematriaEtymology.fusedNumerology.fusedLiteraryMonograph}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SECTION 2: GAIA'S ENERGETIC OVERCAST */}
+      {/* Earth and sky conditions */}
       {activeSection === 'GAIA' && (
-        <div className="space-y-3">
-          <div className="instrument-panel instrument-panel-maya space-y-4">
-            <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-3">
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-sm uppercase tracking-wider font-bold text-white">
-                  Speculative Field Overlay (Proxy Baseline)
-                </h3>
-              </div>
-              <span className="text-[10px] text-gray-400">
-                Date of Observation: <strong className="text-white">{totalReport.gaiaOvercast.date}</strong>
-              </span>
-            </div>
+        <div className="instrument-panel space-y-5">
+          <div>
+            <p className="ui-eyebrow">Earth and sky conditions on {gaia.date}</p>
+            <p className="chart-note mt-2">
+              These figures are estimates worked out from the date. They are not live measurements.
+            </p>
+            <p className="readable-body mt-3">{gaia.literaryOvercastDossier}</p>
+          </div>
 
-            {/* Overcast Literary Narrative */}
-            <div className="rounded-[var(--radius-md)] border border-cyan-300/10 border-l-2 border-l-[color:var(--temporal)] bg-cyan-300/[0.025] p-4">
-              <p className="font-serif text-xs md:text-sm text-gray-200 leading-relaxed italic">
-                {totalReport.gaiaOvercast.literaryOvercastDossier}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="curious-box space-y-1">
+              <p className="readable-muted">Magnetic activity around the Earth</p>
+              <p className="trad-hero-value">{gaia.geomagneticStatus}</p>
+              <p className="readable-muted">
+                Kp index {gaia.geomagneticKpEstimated} on a scale of 0 (calm) to 9 (severe storm). It rises when the
+                solar wind disturbs the Earth's magnetic field.
               </p>
             </div>
 
-            {/* Geophysical & Atmospheric Matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="rounded-[var(--radius-md)] border border-cyan-300/10 bg-cyan-300/[0.025] p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] uppercase font-bold text-cyan-400">Geomagnetic Tension</span>
-                  <span className="text-xs font-bold text-white">Kp {totalReport.gaiaOvercast.geomagneticKpEstimated}</span>
-                </div>
-                <p className="text-xs font-cinzel text-white font-bold">{totalReport.gaiaOvercast.geomagneticStatus}</p>
-                <p className="text-[10px] text-gray-400 leading-snug">
-                  Solar wind particle flux interacting with Earth's magnetosphere, modulating the collective nervous system.
-                </p>
-              </div>
-
-              <div className="rounded-[var(--radius-md)] border border-emerald-300/10 bg-emerald-300/[0.025] p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] uppercase font-bold text-emerald-400">Schumann Cavity</span>
-                  <span className="text-xs font-bold text-white">{totalReport.gaiaOvercast.schumannFrequencyHz} Hz</span>
-                </div>
-                <p className="text-xs font-cinzel text-white font-bold">{totalReport.gaiaOvercast.schumannResonanceMode}</p>
-                <p className="text-[10px] text-gray-400 leading-snug">
-                  Fundamental terrestrial electromagnetic resonance between Earth's surface and conductive ionosphere.
-                </p>
-              </div>
-
-              <div className="rounded-[var(--radius-md)] border border-amber-300/10 bg-amber-300/[0.025] p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] uppercase font-bold text-amber-400">Aspect Friction Index</span>
-                  <span className="text-xs font-bold text-white">{totalReport.gaiaOvercast.celestialAspectTensionScore}/100</span>
-                </div>
-                <p className="text-xs font-cinzel text-white font-bold">{totalReport.gaiaOvercast.collectiveFieldPolarity}</p>
-                <p className="text-[10px] text-gray-400 leading-snug">
-                  Geometric quadrature and opposition angles between celestial bodies generating atmospheric pressure.
-                </p>
-              </div>
+            <div className="curious-box space-y-1">
+              <p className="readable-muted">Earth's background hum</p>
+              <p className="trad-hero-value">{gaia.schumannFrequencyHz} Hz</p>
+              <p className="readable-muted">
+                {gaia.schumannResonanceMode}. This is the Schumann resonance, a natural radio hum between the ground
+                and the upper atmosphere, usually near 7.83 Hz.
+              </p>
             </div>
 
-            {/* Atmospheric Details */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-3 border-t border-[color:var(--line-soft)] text-xs">
-              <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] p-3">
-                <span className="text-[8px] uppercase text-gray-500 block">Lunar Illumination</span>
-                <span className="font-bold text-white">{totalReport.gaiaOvercast.lunarIlluminationPercent}%</span>
-                <span className="text-[8px] text-gray-400 block">{totalReport.gaiaOvercast.lunarTone}</span>
+            <div className="curious-box space-y-1">
+              <p className="readable-muted">Tension between the planets</p>
+              <p className="trad-hero-value">{gaia.celestialAspectTensionScore} out of 100</p>
+              <div className="score-track">
+                <div
+                  className="score-fill"
+                  style={{ width: `${Math.max(0, Math.min(100, gaia.celestialAspectTensionScore))}%` }}
+                />
               </div>
-              <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] p-3">
-                <span className="text-[8px] uppercase text-gray-500 block">Dominant Element</span>
-                <span className="font-bold text-emerald-400">{totalReport.gaiaOvercast.dominantElementalAtmosphere}</span>
-                <span className="text-[8px] text-gray-400 block">Wu Xing Vector</span>
-              </div>
-              <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] p-3">
-                <span className="text-[8px] uppercase text-gray-500 block">Solar Term</span>
-                <span className="font-bold text-amber-400">{totalReport.gaiaOvercast.solarTermPhase}</span>
-                <span className="text-[8px] text-gray-400 block">Season Ingress</span>
-              </div>
-              <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] p-3">
-                <span className="text-[8px] uppercase text-gray-500 block">Polarity Balance</span>
-                <span className="font-bold text-cyan-400">{totalReport.gaiaOvercast.collectiveFieldPolarity.split(' ')[0]}</span>
-                <span className="text-[8px] text-gray-400 block">Energetic Vector</span>
-              </div>
+              <p className="readable-muted">
+                {gaia.collectiveFieldPolarity}. Higher means more planets sit at angles astrologers read as
+                difficult.
+              </p>
             </div>
           </div>
+
+          <dl className="trad-facts">
+            <dt>Moon</dt>
+            <dd>
+              {gaia.lunarIlluminationPercent}% lit ({gaia.lunarTone})
+            </dd>
+            <dt>Leading element</dt>
+            <dd>{gaia.dominantElementalAtmosphere} (one of the five Chinese elements)</dd>
+            <dt>Solar term</dt>
+            <dd>{gaia.solarTermPhase} (one of 24 Chinese season markers)</dd>
+            <dt>Overall mood</dt>
+            <dd>{gaia.collectiveFieldPolarity.split(' ')[0]}</dd>
+          </dl>
         </div>
       )}
 
-      {/* SECTION 3: GEMATRIA ON NAMES & ETYMOLOGY */}
+      {/* Name analysis */}
       {activeSection === 'GEMATRIA' && (
-        <div className="space-y-3">
-          {/* Ciphers Strip */}
-          <div className="instrument-panel space-y-4">
-            <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-3">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-sm uppercase tracking-wider font-bold text-white">
-                  Multi-Tradition Gematria & Cipher Ledgers for "{subjectName}"
-                </h3>
-              </div>
-              <span className="ui-eyebrow">
-                Acoustic & Sacred Letter Values
-              </span>
-            </div>
+        <div className="instrument-panel space-y-5">
+          <CultureHeader culture="numerology" title={`Name analysis for “${subjectName || 'no name yet'}”`} />
+          <p className="trad-meaning">
+            <strong>In plain words:</strong> gematria (adding up the number values of letters) gives each letter a
+            number and adds them up. Different traditions number the letters differently, so the same name gets
+            several totals. Each total is then reduced to a single digit by adding its own digits.
+          </p>
 
-            {/* Cipher Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div>
+            <p className="ui-eyebrow">Totals by method</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
               {Object.entries(gematriaEtymology.ciphers).slice(0, 6).map(([key, rawCipher]) => {
                 const c = rawCipher as GematriaCipherResult;
                 return (
-                  <div key={key} className="rounded-[var(--radius-md)] border border-cyan-300/10 bg-cyan-300/[0.025] p-3 space-y-1">
-                    <span className="text-[8px] uppercase font-bold text-gray-400 block truncate" title={c.cipherName}>
+                  <div key={key} className="curious-box space-y-1">
+                    <p className="readable-muted" title={c.cipherName}>
                       {c.cipherName.split('(')[0]}
-                    </span>
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-xl font-cinzel font-bold text-cyan-300">{c.totalSum}</span>
-                      <span className="data-readout text-[9px] text-gray-500">Root {c.reducedRoot}</span>
-                    </div>
-                    <p className="text-[8px] text-gray-400 italic line-clamp-1">
-                      {c.resonantKeywords[0] || 'Harmonic'}
+                    </p>
+                    <p className="trad-hero-value">{c.totalSum}</p>
+                    <p className="readable-muted">
+                      Reduces to {c.reducedRoot}
+                      {c.resonantKeywords[0] ? `. Theme: ${c.resonantKeywords[0]}` : ''}
                     </p>
                   </div>
                 );
               })}
             </div>
+          </div>
 
-            {/* Letter by Letter Matrix Table */}
-            <div className="overflow-x-auto rounded-[var(--radius-md)] border border-[color:var(--line-soft)]">
-              <table className="w-full text-left text-[11px] font-mono">
-                <thead className="bg-white/[0.035] text-gray-400 text-[9px] uppercase border-b border-[color:var(--line-soft)]">
+          <div>
+            <p className="ui-eyebrow">Letter by letter</p>
+            <div className="overflow-x-auto rounded-xl border border-[color:var(--line-soft)] bg-white mt-2">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-[color:var(--line-soft)] text-[color:var(--text-muted)]">
                   <tr>
-                    <th className="p-2">Char</th>
-                    <th className="p-2">Type</th>
-                    <th className="p-2">Hebrew Letter</th>
-                    <th className="p-2">Hebrew (Mispar)</th>
-                    <th className="p-2">Ordinal (1-26)</th>
-                    <th className="p-2">Reduction (1-9)</th>
-                    <th className="p-2">Sumerian (×6)</th>
-                    <th className="p-2">Chaldean Sound</th>
-                    <th className="p-2">Greek Isopsephy</th>
+                    <th className="p-2 font-semibold">Letter</th>
+                    <th className="p-2 font-semibold">Kind</th>
+                    <th className="p-2 font-semibold">Hebrew letter</th>
+                    <th className="p-2 font-semibold">Hebrew value</th>
+                    <th className="p-2 font-semibold">Place in alphabet (1–26)</th>
+                    <th className="p-2 font-semibold">Single digit (1–9)</th>
+                    <th className="p-2 font-semibold">Place × 6 (Sumerian)</th>
+                    <th className="p-2 font-semibold">Chaldean value</th>
+                    <th className="p-2 font-semibold">Greek value</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#151515]">
+                <tbody className="divide-y divide-[color:var(--line-soft)] text-[color:var(--text-secondary)]">
                   {gematriaEtymology.letterBreakdowns.map((b, idx) => (
-                    <tr key={idx} className="hover:bg-white/[0.025]">
-                      <td className="p-2 font-bold text-white text-xs">{b.char}</td>
+                    <tr key={idx}>
+                      <td className="p-2 font-semibold text-[color:var(--text-primary)]">{b.char}</td>
+                      <td className="p-2">{b.isVowel ? 'Vowel' : 'Consonant'}</td>
                       <td className="p-2">
-                        <span className={`rounded-full px-2 py-0.5 text-[8px] ${b.isVowel ? 'bg-amber-300/[0.08] text-[color:var(--solar-bright)]' : 'bg-white/[0.05] text-gray-300'}`}>
-                          {b.isVowel ? 'Vowel (Soul)' : 'Consonant'}
-                        </span>
+                        <Script lang="he">{b.hebrewLetter}</Script>
                       </td>
-                      <td className="p-2 font-serif text-amber-200">{b.hebrewLetter}</td>
-                      <td className="p-2 text-cyan-300">{b.hebrewValue}</td>
-                      <td className="p-2 text-white">{b.ordinalValue}</td>
-                      <td className="p-2 text-[color:var(--solar-bright)]">{b.reductionValue}</td>
-                      <td className="p-2 text-emerald-300">{b.sumerianValue}</td>
-                      <td className="p-2 text-amber-300">{b.chaldeanValue}</td>
-                      <td className="p-2 text-sky-300">{b.greekValue}</td>
+                      <td className="p-2">{b.hebrewValue}</td>
+                      <td className="p-2">{b.ordinalValue}</td>
+                      <td className="p-2">{b.reductionValue}</td>
+                      <td className="p-2">{b.sumerianValue}</td>
+                      <td className="p-2">{b.chaldeanValue}</td>
+                      <td className="p-2">{b.greekValue}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+          </div>
 
-            {/* Etymological Dossier */}
-            <div className="rounded-[var(--radius-md)] border border-emerald-300/10 border-l-2 border-l-emerald-500 bg-emerald-300/[0.025] p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] uppercase font-bold text-emerald-400">
-                  Linguistic Etymology & Historical Root Research
-                </span>
-                <span className="text-[9px] text-gray-500 uppercase">
-                  Language: <strong className="text-gray-300">{gematriaEtymology.etymology.originalLanguage}</strong>
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                <div>
-                  <p className="text-[9px] uppercase text-gray-500">Root Morpheme:</p>
-                  <p className="font-serif text-white italic text-sm">{gematriaEtymology.etymology.rootWord}</p>
-                  <p className="text-[9px] uppercase text-gray-500 mt-2">Literal Definition:</p>
-                  <p className="font-serif text-cyan-300 italic">{gematriaEtymology.etymology.literalDefinition}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase text-gray-500">Living Mythic Archetype:</p>
-                  <p className="font-serif text-amber-300 italic">{gematriaEtymology.etymology.archetype}</p>
-                  <p className="text-[9px] uppercase text-gray-500 mt-2">Elemental Affinity:</p>
-                  <p className="text-gray-300">{gematriaEtymology.etymology.elementalAffinity} Element</p>
-                </div>
-              </div>
-              <p className="font-serif text-xs text-gray-300 italic leading-relaxed pt-2 border-t border-[color:var(--line-soft)]">
-                {gematriaEtymology.etymology.etymologicalNarrative}
-              </p>
-            </div>
+          <div>
+            <p className="ui-eyebrow">Where the name comes from</p>
+            <dl className="trad-facts mt-2">
+              <dt>Language</dt>
+              <dd>{gematriaEtymology.etymology.originalLanguage}</dd>
+              <dt>Root word</dt>
+              <dd>{gematriaEtymology.etymology.rootWord}</dd>
+              <dt>Literal meaning</dt>
+              <dd>{gematriaEtymology.etymology.literalDefinition}</dd>
+              <dt>Character type</dt>
+              <dd>{gematriaEtymology.etymology.archetype}</dd>
+              <dt>Linked element</dt>
+              <dd>{gematriaEtymology.etymology.elementalAffinity}</dd>
+            </dl>
+            <p className="readable-body mt-3">{gematriaEtymology.etymology.etymologicalNarrative}</p>
           </div>
         </div>
       )}
 
-      {/* SECTION 4: DIALECTICAL FORKS IN THE ROAD */}
+      {/* Where traditions disagree */}
       {activeSection === 'FORKS' && (
-        <div className="space-y-3">
-          <div className="instrument-panel instrument-panel-solar space-y-4">
-            <div className="border-b border-[color:var(--line-soft)] pb-3">
-              <div className="flex items-center gap-2">
-                <GitFork className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-sm uppercase tracking-wider font-bold text-white">
-                  Dialectical Contradictions Mapped as Forks in the Road of Opportunity
-                </h3>
-              </div>
-              <p className="text-xs text-gray-400 font-serif italic mt-0.5">
-                The Crucible rejects artificial homogenization. When traditions point in opposing directions, they are mapped here as explicit branches of opportunity, evaluated directly against Gaia's daily energetic overcast.
-              </p>
-            </div>
-
-            {/* List of Forks */}
-            <div className="space-y-4">
-              {totalReport.dialecticalForks.map((fork, idx) => (
-                <div key={fork.id} className="rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-4 space-y-3">
-                  {/* Fork Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[color:var(--line-soft)] pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] border border-cyan-300/20 bg-cyan-300/[0.07] text-[10px] font-bold text-[color:var(--temporal-bright)]">
-                        0{idx + 1}
-                      </span>
-                      <h4 className="text-xs font-bold text-white font-cinzel">
-                        {fork.title}
-                      </h4>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[9px] text-gray-400">
-                      {fork.traditionsInvolved.map((trad, tIdx) => (
-                        <span key={tIdx} className="rounded-full border border-[color:var(--line-soft)] bg-white/[0.035] px-2 py-0.5">
-                          {trad}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* The Apparent Paradox */}
-                  <div className="rounded-[var(--radius-sm)] border border-amber-300/10 border-l-2 border-l-[color:var(--solar)] bg-amber-300/[0.025] p-3">
-                    <span className="text-[9px] uppercase font-bold text-amber-500 block">The Apparent Contradiction</span>
-                    <p className="font-serif text-xs text-gray-300 italic leading-snug mt-0.5">
-                      {fork.apparentContradictionDescription}
-                    </p>
-                  </div>
-
-                  {/* Bifurcated Paths: Alpha vs Beta */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {/* Path Alpha */}
-                    <div className="rounded-[var(--radius-md)] border border-cyan-300/15 bg-cyan-300/[0.035] p-4 space-y-2">
-                      <div className="flex items-center justify-between border-b border-cyan-300/10 pb-2">
-                        <span className="text-[9px] uppercase font-bold text-cyan-400">{fork.forkPathAlpha.pathLabel}</span>
-                        <span className="ui-eyebrow text-[color:var(--temporal)]">SOLAR/ACTIVE</span>
-                      </div>
-                      <h5 className="text-xs font-bold text-white font-cinzel">{fork.forkPathAlpha.title}</h5>
-                      <p className="text-[11px] text-gray-300 font-serif italic leading-snug">{fork.forkPathAlpha.leaningStrategy}</p>
-                      <div>
-                        <span className="text-[8px] uppercase font-bold text-gray-500 block">Prospective Outcomes:</span>
-                        <ul className="text-[10px] text-gray-400 list-disc list-inside space-y-0.5 mt-0.5">
-                          {fork.forkPathAlpha.potentialOutcomes.map((out, oIdx) => (
-                            <li key={oIdx}>{out}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="pt-1 border-t border-cyan-900/40 text-[9px]">
-                        <span className="text-amber-400 font-bold uppercase">Speculative Overlay Synergy: </span>
-                        <span className="text-gray-400">{fork.forkPathAlpha.resonanceAgainstGaiaOvercast}</span>
-                      </div>
-                    </div>
-
-                    {/* Path Beta */}
-                    <div className="rounded-[var(--radius-md)] border border-amber-300/15 bg-amber-300/[0.035] p-4 space-y-2">
-                      <div className="flex items-center justify-between border-b border-amber-300/10 pb-2">
-                        <span className="ui-eyebrow text-[color:var(--solar)]">{fork.forkPathBeta.pathLabel}</span>
-                        <span className="ui-eyebrow text-[color:var(--solar)]">LUNAR/RECEPTIVE</span>
-                      </div>
-                      <h5 className="text-xs font-bold text-white font-cinzel">{fork.forkPathBeta.title}</h5>
-                      <p className="text-[11px] text-gray-300 font-serif italic leading-snug">{fork.forkPathBeta.leaningStrategy}</p>
-                      <div>
-                        <span className="text-[8px] uppercase font-bold text-gray-500 block">Prospective Outcomes:</span>
-                        <ul className="text-[10px] text-gray-400 list-disc list-inside space-y-0.5 mt-0.5">
-                          {fork.forkPathBeta.potentialOutcomes.map((out, oIdx) => (
-                            <li key={oIdx}>{out}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="pt-2 border-t border-amber-300/10 text-[9px]">
-                        <span className="text-emerald-400 font-bold uppercase">Speculative Overlay Synergy: </span>
-                        <span className="text-gray-400">{fork.forkPathBeta.resonanceAgainstGaiaOvercast}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Alchemical Synthesis (Third Way) */}
-                  <div className="rounded-[var(--radius-sm)] border border-emerald-300/10 border-l-2 border-l-emerald-500 bg-emerald-300/[0.025] p-3 space-y-1">
-                    <span className="text-[9px] uppercase font-bold text-emerald-400">
-                      The Higher Alchemical Synthesis (The Middle Pillar)
-                    </span>
-                    <p className="text-xs font-cinzel font-bold text-white">
-                      {fork.alchemicalSynthesis.title}
-                    </p>
-                    <p className="font-serif text-xs text-gray-300 italic leading-snug">
-                      {fork.alchemicalSynthesis.description}
-                    </p>
-                    <p className="data-readout pt-2 text-[10px]">
-                      <strong className="text-gray-400 uppercase text-[9px]">Sovereign Leverage Point:</strong> {fork.alchemicalSynthesis.transcendentLeveragePoint}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SECTION 5: ALL SYSTEMS COMPARATIVE LEDGER */}
-      {activeSection === 'SYSTEMS' && (
-        <div className="space-y-3">
-          <div className="instrument-panel instrument-panel-maya space-y-4">
-            <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-3">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-sm uppercase tracking-wider font-bold text-white">
-                  Total Multi-Tradition Ledger for Measured Coordinate
-                </h3>
-              </div>
-              <span className="text-[10px] text-gray-400">
-                JD {measuredContext.temporal.julianDayUT.toFixed(4)}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-              {/* Maya Long Count */}
-              <div className="rounded-[var(--radius-md)] border border-cyan-300/10 border-l-2 border-l-[color:var(--temporal)] bg-cyan-300/[0.025] p-4 space-y-1">
-                <span className="text-[9px] uppercase font-bold text-cyan-400">Classical Maya Long Count</span>
-                <p className="text-sm font-cinzel font-bold text-white">{measuredContext.mayan.longCount.formatted}</p>
-                <p className="text-[10px] text-gray-300">Tzolk'in: {measuredContext.mayan.tzolkin.formatted} (Kin {measuredContext.mayan.kinNumber})</p>
-                <p className="text-[10px] text-gray-400">Haab': {measuredContext.mayan.haab.formatted} ({measuredContext.mayan.calendarRound})</p>
-              </div>
-
-              {/* Chinese BaZi */}
-              <div className="rounded-[var(--radius-md)] border border-emerald-300/10 border-l-2 border-l-emerald-500 bg-emerald-300/[0.025] p-4 space-y-1">
-                <span className="text-[9px] uppercase font-bold text-green-400">Chinese BaZi Four Pillars</span>
-                <p className="text-sm font-cinzel font-bold text-white">
-                  {measuredContext.chinese.yearPillar.stemPinYin}-{measuredContext.chinese.yearPillar.branchPinYin} ({measuredContext.chinese.yearPillar.zodiacAnimal})
-                </p>
-                <p className="text-[10px] text-gray-300">Dominant Wu Xing: {measuredContext.chinese.dominantElement} Element</p>
-                <p className="text-[10px] text-gray-400">Solar Term: {measuredContext.chinese.solarTerm.name}</p>
-              </div>
-
-              {/* Dreamspell 13:20 */}
-              <div className="rounded-[var(--radius-md)] border border-emerald-300/10 border-l-2 border-l-emerald-500 bg-emerald-300/[0.025] p-4 space-y-1">
-                <span className="text-[9px] uppercase font-bold text-emerald-400">Dreamspell 13:20 Galactic Signature</span>
-                <p className="text-xs font-cinzel font-bold text-white">{measuredContext.dreamspell.signature}</p>
-                <p className="text-[10px] text-gray-300">{measuredContext.dreamspell.thirteenMoon.moonName} (Day {measuredContext.dreamspell.thirteenMoon.dayOfMoon}/28)</p>
-                <p className="text-[10px] text-gray-400">Radial Plasma: {measuredContext.dreamspell.thirteenMoon.radialPlasma.name}</p>
-              </div>
-
-              {/* Egyptian Sothic */}
-              <div className="rounded-[var(--radius-md)] border border-amber-300/10 border-l-2 border-l-[color:var(--solar)] bg-amber-300/[0.025] p-4 space-y-1">
-                <span className="text-[9px] uppercase font-bold text-amber-400">Ancient Egyptian Sothic Civil</span>
-                <p className="text-sm font-cinzel font-bold text-white">Year {measuredContext.egyptian.civilYear}, {measuredContext.egyptian.monthName}</p>
-                <p className="text-[10px] text-gray-300">Season of {measuredContext.egyptian.season} (Day {measuredContext.egyptian.dayOfMonth})</p>
-                <p className="text-[10px] text-gray-400">Sothic Great Year: {measuredContext.egyptian.sothicYearInCycle}/1460</p>
-              </div>
-
-              {/* Greek Attic */}
-              <div className="rounded-[var(--radius-md)] border border-cyan-300/10 border-l-2 border-l-[color:var(--temporal)] bg-cyan-300/[0.025] p-4 space-y-1">
-                <span className="text-[9px] uppercase font-bold text-indigo-400">Attic Lunisolar Metonic</span>
-                <p className="text-sm font-cinzel font-bold text-white">Month of {measuredContext.greek.atticMonthName}</p>
-                <p className="text-[10px] text-gray-300">Metonic Cycle Year {measuredContext.greek.metonicCycleYear}/19</p>
-                <p className="text-[10px] text-gray-400">Patron Deity: {measuredContext.greek.patronDeity}</p>
-              </div>
-
-              {/* Enochian / Biblical / Roman */}
-              <div className="rounded-[var(--radius-md)] border border-amber-300/10 border-l-2 border-l-[color:var(--solar)] bg-amber-300/[0.025] p-4 space-y-1 md:col-span-2">
-                <span className="text-[9px] uppercase font-bold text-amber-400">Enochian · Biblical Tekufot · Roman Dies</span>
-                <p className="text-sm font-cinzel font-bold text-white">{measuredContext.enochianBiblical.enochian.formatted}</p>
-                <p className="text-[10px] text-gray-300">
-                  {measuredContext.enochianBiblical.biblicalSeason.hebrewTekufah} · Verses: {measuredContext.enochianBiblical.biblicalTransits.seasonVerseAnchors.join(', ')}
-                </p>
-                <p className="text-[10px] text-gray-400">
-                  {measuredContext.enochianBiblical.gregorianWeekdayDeity.latinDies} ({measuredContext.enochianBiblical.gregorianWeekdayDeity.romanDeity}) · Hour of {measuredContext.enochianBiblical.currentPlanetaryHour.planet} · Flip N→{measuredContext.enochianBiblical.compassOrientation.directionRemap.North}
-                </p>
-                <p className="font-serif text-[10px] text-gray-400 italic mt-1 leading-snug">
-                  {measuredContext.enochianBiblical.abPeek.synthesis.summary}
-                </p>
-              </div>
-
-              {/* Twelve Tribes Matrix */}
-              <div className="rounded-[var(--radius-md)] border border-cyan-300/10 border-l-2 border-l-[color:var(--temporal)] bg-cyan-300/[0.025] p-4 space-y-1">
-                <span className="ui-eyebrow text-[color:var(--temporal)]">Twelve Tribes Sanctuary Affinity</span>
-                <p className="text-sm font-cinzel font-bold text-white">
-                  {measuredContext.synthesis.topResonatingTribe.tribe}
-                </p>
-                <p className="text-[10px] text-gray-300">Direction: {measuredContext.synthesis.topResonatingTribe.directionInCamp} Camp ({measuredContext.synthesis.topResonatingTribe.affinityScore}% affinity)</p>
-                <p className="text-[10px] text-gray-400">Stone: {measuredContext.synthesis.topResonatingTribe.gemstone}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SECTION 6: LIVE MACHINE-READABLE JSON & JSONL LEDGER */}
-      {activeSection === 'JSON_DATA' && (
-        <div className="space-y-3">
-          <div className="instrument-panel space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[color:var(--line-soft)] pb-3">
-              <div className="flex items-center gap-2">
-                <Download className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-sm uppercase tracking-wider font-bold text-white">
-                  Encoded Machine-Readable Interchange Ledger (JSON & JSONL)
-                </h3>
-              </div>
-
-              {/* Format Selector & Actions */}
-              <div className="flex items-center gap-2 text-[10px]">
-                <div className="flex items-center rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-1">
-                  <button
-                    onClick={() => setJsonFormat('JSON')}
-                    className={`nav-tab !px-2 !py-1 text-[10px] uppercase ${
-                      jsonFormat === 'JSON' ? 'nav-tab-active bg-cyan-300/[0.06]' : ''
-                    }`}
-                  >
-                    Structured JSON
-                  </button>
-                  <button
-                    onClick={() => setJsonFormat('JSONL')}
-                    className={`nav-tab !px-2 !py-1 text-[10px] uppercase ${
-                      jsonFormat === 'JSONL' ? 'nav-tab-active bg-cyan-300/[0.06]' : ''
-                    }`}
-                  >
-                    Streaming JSONL
-                  </button>
-                </div>
-
-                <button
-                  onClick={handleCopy}
-                  className="cta-ghost min-h-0 px-3 py-2 text-[10px]"
-                >
-                  {copiedNotification ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
-                  <span>{copiedNotification ? 'Copied!' : `Copy ${jsonFormat}`}</span>
-                </button>
-
-                <button
-                  onClick={handleDownload}
-                  className="cta-primary min-h-0 px-3 py-2 text-[10px]"
-                >
-                  <Download className="w-3 h-3" />
-                  <span>Download .{jsonFormat.toLowerCase()}</span>
-                </button>
-              </div>
-            </div>
-
-            <p className="text-xs text-gray-400 font-serif italic">
-              Full serialization of querent birthdata, Gaia overcast profile, multi-cipher Gematria, etymological trees, fused numerology, dialectical contradiction branches, and total cross-system ledgers.
+        <div className="space-y-4">
+          <div className="instrument-panel">
+            <p className="ui-eyebrow">Where traditions disagree</p>
+            <p className="readable-body mt-2">
+              The traditions do not always point the same way. When they disagree, this report does not blend them
+              into one answer. It shows both options side by side, plus a middle way, so you can choose.
             </p>
+          </div>
 
-            {/* Code Display Area */}
-            <div className="relative">
-              <pre className="data-readout max-h-[500px] overflow-x-auto rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-black/25 p-4 text-[10px] leading-tight text-cyan-200 selection:bg-cyan-900 selection:text-white">
-                {jsonFormat === 'JSON' ? formattedJSON : formattedJSONL}
-              </pre>
+          {totalReport.dialecticalForks.map((fork, idx) => (
+            <div key={fork.id} className="instrument-panel space-y-4">
+              <div>
+                <p className="ui-eyebrow">Choice {idx + 1}</p>
+                <h4 className="panel-title">{fork.title}</h4>
+                <p className="readable-muted mt-1">Traditions involved: {fork.traditionsInvolved.join(', ')}</p>
+              </div>
+
+              <div className="chart-note">
+                <strong>The disagreement:</strong> {fork.apparentContradictionDescription}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {([
+                  { path: fork.forkPathAlpha, label: 'Option A: the active approach' },
+                  { path: fork.forkPathBeta, label: 'Option B: the receptive approach' }
+                ] as const).map(({ path, label }) => (
+                  <div key={label} className="curious-box space-y-2">
+                    <p className="ui-eyebrow">{label}</p>
+                    <p className="trad-hero-value">{path.title}</p>
+                    <p className="readable-body">{path.leaningStrategy}</p>
+                    <div>
+                      <p className="readable-muted">What might follow</p>
+                      <ul className="curious-list">
+                        {path.potentialOutcomes.map((out, oIdx) => (
+                          <li key={oIdx}>{out}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <p className="readable-muted">
+                      <strong>How it fits the day's conditions:</strong> {path.resonanceAgainstGaiaOvercast}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="trad-meaning">
+                <strong>A middle way: {fork.alchemicalSynthesis.title}.</strong> {fork.alchemicalSynthesis.description}
+                <br />
+                <strong>Where to put your effort:</strong> {fork.alchemicalSynthesis.transcendentLeveragePoint}
+              </div>
             </div>
+          ))}
+        </div>
+      )}
+
+      {/* Each tradition */}
+      {activeSection === 'SYSTEMS' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="instrument-panel space-y-3">
+              <CultureHeader culture="maya" />
+              <dl className="trad-facts">
+                <dt>Long Count</dt>
+                <dd>{measuredContext.mayan.longCount.formatted} (a running count of days)</dd>
+                <dt>Tzolk'in</dt>
+                <dd>
+                  {measuredContext.mayan.tzolkin.formatted}, day {measuredContext.mayan.kinNumber} of the 260-day sacred count
+                </dd>
+                <dt>Haab'</dt>
+                <dd>{measuredContext.mayan.haab.formatted} (the 365-day year)</dd>
+                <dt>Both together</dt>
+                <dd>{measuredContext.mayan.calendarRound}</dd>
+              </dl>
+            </div>
+
+            <div className="instrument-panel space-y-3">
+              <CultureHeader culture="chinese" />
+              <dl className="trad-facts">
+                <dt>Year</dt>
+                <dd>
+                  {HANZI_ANIMALS[yearAnimal] && (
+                    <>
+                      <Script lang="zh">{HANZI_ANIMALS[yearAnimal]}</Script>{' '}
+                    </>
+                  )}
+                  {yearAnimal} ({measuredContext.chinese.yearPillar.stemPinYin}-
+                  {measuredContext.chinese.yearPillar.branchPinYin})
+                </dd>
+                <dt>Strongest element</dt>
+                <dd>{measuredContext.chinese.dominantElement} (of the five Chinese elements)</dd>
+                <dt>Solar term</dt>
+                <dd>{measuredContext.chinese.solarTerm.name} (a season marker)</dd>
+              </dl>
+            </div>
+
+            <div className="instrument-panel space-y-3">
+              <CultureHeader culture="dreamspell" />
+              <dl className="trad-facts">
+                <dt>Day name</dt>
+                <dd>{measuredContext.dreamspell.signature}</dd>
+                <dt>Month</dt>
+                <dd>
+                  {measuredContext.dreamspell.thirteenMoon.moonName}, day{' '}
+                  {measuredContext.dreamspell.thirteenMoon.dayOfMoon} of 28 (the year has 13 such months)
+                </dd>
+                <dt>Weekday</dt>
+                <dd>{measuredContext.dreamspell.thirteenMoon.radialPlasma.name} (Dreamspell calls weekdays “plasmas”)</dd>
+              </dl>
+            </div>
+
+            <div className="instrument-panel space-y-3">
+              <CultureHeader culture="egyptian" />
+              <dl className="trad-facts">
+                <dt>Date</dt>
+                <dd>
+                  Year {measuredContext.egyptian.civilYear}, {measuredContext.egyptian.monthName}, day{' '}
+                  {measuredContext.egyptian.dayOfMonth}
+                </dd>
+                <dt>Season</dt>
+                <dd>{measuredContext.egyptian.season}</dd>
+                <dt>Sirius cycle</dt>
+                <dd>Year {measuredContext.egyptian.sothicYearInCycle} of 1,460 (how long the calendar takes to realign with the star Sirius)</dd>
+              </dl>
+            </div>
+
+            <div className="instrument-panel space-y-3">
+              <CultureHeader culture="greek" />
+              <dl className="trad-facts">
+                <dt>Athenian month</dt>
+                <dd>{measuredContext.greek.atticMonthName}</dd>
+                <dt>Cycle year</dt>
+                <dd>{measuredContext.greek.metonicCycleYear} of 19 (the cycle that lines up Sun and Moon)</dd>
+                <dt>Month's god</dt>
+                <dd>{measuredContext.greek.patronDeity}</dd>
+              </dl>
+            </div>
+
+            <div className="instrument-panel space-y-3">
+              <CultureHeader culture="callings" title="Today's calling" />
+              <div className="trad-hero">
+                <span className="trad-hero-symbol">
+                  <CallingEmblem emblemId={calling.emblemId} size={26} />
+                </span>
+                <div className="min-w-0">
+                  <p className="trad-hero-value">{calling.calling}</p>
+                  <p className="trad-hero-sub">{calling.motto}</p>
+                </div>
+              </div>
+              <dl className="trad-facts">
+                <dt>Quarter</dt>
+                <dd>{calling.quarter}</dd>
+                <dt>Gemstone</dt>
+                <dd>{calling.gemstone}</dd>
+                <dt>Match score</dt>
+                <dd>{calling.affinityScore}%</dd>
+              </dl>
+            </div>
+          </div>
+
+          <div className="instrument-panel space-y-3">
+            <CultureHeader culture="hebrew" title="Seasons, the 364-day calendar and the Roman weekday" />
+            <dl className="trad-facts">
+              <dt>Enoch calendar</dt>
+              <dd>{eb.enochian.formatted} (an ancient 364-day year)</dd>
+              <dt>Season</dt>
+              <dd>{eb.biblicalSeason.hebrewTekufah}</dd>
+              <dt>Bible verses</dt>
+              <dd>{eb.biblicalTransits.seasonVerseAnchors.join(', ')}</dd>
+              <dt>Latin weekday</dt>
+              <dd>
+                {eb.gregorianWeekdayDeity.latinDies}, named for {eb.gregorianWeekdayDeity.romanDeity}
+              </dd>
+              <dt>Planet of the hour</dt>
+              <dd>
+                <PlanetGlyph planet={String(eb.currentPlanetaryHour.planet).toLowerCase()} size={16} tinted />{' '}
+                {eb.currentPlanetaryHour.planet} (an old custom gives each hour to a planet)
+              </dd>
+            </dl>
+            <p className="readable-body">{eb.abPeek.synthesis.summary}</p>
+            <details>
+              <summary className="readable-muted cursor-pointer">Technical details</summary>
+              <dl className="trad-facts mt-2">
+                <dt>Compass</dt>
+                <dd>In the Enoch reading, north is read as {eb.compassOrientation.directionRemap.North}</dd>
+                <dt>Julian day</dt>
+                <dd>{measuredContext.temporal.julianDayUT.toFixed(4)} (astronomers' running day count)</dd>
+                <dt>Map position</dt>
+                <dd>
+                  {inputLat.toFixed(2)}°, {inputLng.toFixed(2)}°
+                </dd>
+              </dl>
+            </details>
           </div>
         </div>
       )}
 
-      {/* Sourced Research Citations Ledger */}
-      <div className="instrument-panel instrument-panel-solar !p-4 space-y-3">
-        <div className="flex items-center gap-2 border-b border-[color:var(--line-soft)] pb-2">
-          <BookOpen className="w-3 h-3 text-cyan-400" />
-          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-            Sourced Research Citations & Academic Network Ledgers
-          </span>
+      {/* Data file */}
+      {activeSection === 'JSON_DATA' && (
+        <div className="instrument-panel space-y-4">
+          <div>
+            <p className="ui-eyebrow">Data file</p>
+            <p className="readable-body mt-2">
+              Everything in this report as raw data, for use in a spreadsheet or another program. You do not need
+              this to read the report.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="seg">
+              <button
+                type="button"
+                onClick={() => setJsonFormat('JSON')}
+                className={`seg-btn ${jsonFormat === 'JSON' ? 'seg-btn-active' : ''}`}
+                title="One structured document"
+              >
+                JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => setJsonFormat('JSONL')}
+                className={`seg-btn ${jsonFormat === 'JSONL' ? 'seg-btn-active' : ''}`}
+                title="One record per line"
+              >
+                JSON Lines
+              </button>
+            </div>
+
+            <button type="button" onClick={handleCopy} className="cta-ghost">
+              {copiedNotification ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>{copiedNotification ? 'Copied' : 'Copy to clipboard'}</span>
+            </button>
+
+            <button type="button" onClick={handleDownload} className="cta-ghost">
+              <Download className="w-4 h-4" />
+              <span>Download as file (.{jsonFormat.toLowerCase()})</span>
+            </button>
+          </div>
+
+          <pre className="max-h-[500px] overflow-auto rounded-xl border border-[color:var(--line-soft)] bg-white p-4 text-xs leading-snug text-[color:var(--text-secondary)]">
+            {jsonFormat === 'JSON' ? formattedJSON : formattedJSONL}
+          </pre>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-[10px]">
+      )}
+
+      {/* Sources */}
+      <div className="instrument-panel space-y-3">
+        <p className="ui-eyebrow">Sources and further reading</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {totalReport.researchNetworkingCitations.map((cit, idx) => (
-            <div key={idx} className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] bg-white/[0.025] p-3">
-              <span className="text-cyan-400 font-bold block">{cit.source}</span>
-              <span className="text-gray-500 uppercase text-[8px] block">{cit.domain}</span>
-              <span className="text-gray-400 italic text-[9px] block mt-0.5">{cit.note}</span>
+            <div key={idx} className="curious-box">
+              <p className="text-sm font-semibold text-[color:var(--text-primary)]">{cit.source}</p>
+              <p className="readable-muted">{cit.domain}</p>
+              <p className="text-sm text-[color:var(--text-secondary)] mt-1">{cit.note}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Comprehensive Today's Daily Energy Report Modal */}
+      {/* Detailed report for the day shown in Today */}
       <DailyEnergyReportModal
         ctx={currentCtx}
         isOpen={isDailyReportModalOpen}
@@ -1071,4 +912,3 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
     </div>
   );
 };
-

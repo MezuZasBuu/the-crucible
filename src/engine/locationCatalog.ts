@@ -75,7 +75,7 @@ function presetToCatalog(p: (typeof PRESET_LOCATIONS)[0]): CatalogLocation {
 
 export const WORLD_CATALOG_ENTRY: CatalogLocation = {
   id: 'world_utc',
-  label: 'World · UTC (global sky)',
+  label: 'No specific place (world time)',
   kind: 'world',
   region: 'Global',
   country: 'Global',

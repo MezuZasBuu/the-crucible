@@ -111,7 +111,6 @@ export const WorldEnergyGallery: React.FC<{
       onIndexChange={onSlideIndexChange}
       panelCount={panels.length}
       labels={panels.map((p) => p.label)}
-      autoAdvanceMs={6000}
     >
       {panels.map((panel) => (
         <SlidePanel key={panel.key}>

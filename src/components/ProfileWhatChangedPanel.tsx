@@ -13,7 +13,8 @@ import {
   upsertProfile
 } from '../engine/crucibleProfile';
 import { birthTimeSensitivity, computeWhatChanged } from '../engine/whatChanged';
-import { EpistemicBadge } from './EpistemicBadge';
+import { PlaceSearch } from './location/PlaceSearch';
+import { formatUtcOffset, offsetMinutesForLocalTime, zoneForPlace } from '../engine/timezone';
 
 interface Props {
   transitCtx: CompleteCalculationContext;
@@ -32,7 +33,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
 }) => {
   const [profiles, setProfiles] = useState<CrucibleProfile[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [displayName, setDisplayName] = useState('My Profile');
+  const [displayName, setDisplayName] = useState('');
   const [querentName, setQuerentName] = useState(transitCtx.input.querentName || '');
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
@@ -65,11 +66,22 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
     }
   }, []);
 
+  const birthZone = useMemo(() => {
+    const lat = parseFloat(birthLat);
+    const lng = parseFloat(birthLng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    const zone = zoneForPlace(lat, lng);
+    if (!zone) return null;
+    const offset = offsetMinutesForLocalTime(zone, birthDate || transitCtx.input.dateString, birthTime || '12:00:00');
+    return offset === null ? null : { zone, offset };
+  }, [birthLat, birthLng, birthDate, birthTime, transitCtx.input.dateString]);
+
   const birthInput: TemporalInput = useMemo(
     () => ({
       dateString: birthDate || transitCtx.input.dateString,
       timeString: birthTime || '12:00:00',
-      timezoneOffsetMinutes: transitCtx.input.timezoneOffsetMinutes,
+      // Local birth time → UTC using the birth place's own time zone on that date.
+      timezoneOffsetMinutes: birthZone ? birthZone.offset : transitCtx.input.timezoneOffsetMinutes,
       isUTC: false,
       location: {
         latitude: parseFloat(birthLat) || transitCtx.input.location.latitude,
@@ -79,7 +91,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
       querentName: querentName || undefined,
       methodology: transitCtx.input.methodology
     }),
-    [birthDate, birthTime, birthLat, birthLng, birthCity, querentName, transitCtx.input]
+    [birthDate, birthTime, birthLat, birthLng, birthCity, querentName, transitCtx.input, birthZone]
   );
 
   const natalReady = Boolean(birthDate);
@@ -132,7 +144,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
   const save = () => {
     const p = upsertProfile({
       id: activeId || undefined,
-      displayName,
+      displayName: displayName || querentName || 'My chart',
       querentName,
       birth: birthInput,
       birthTimeConfidence: confidence,
@@ -148,27 +160,23 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
     <div className="instrument-panel instrument-panel-solar motion-enter space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[color:var(--line-soft)] pb-4">
           <div>
-            <p className="ui-eyebrow text-[color:var(--solar)]">Personal temporal archive</p>
-            <h3 className="panel-title mt-1">My Crucible Profile · What Changed?</h3>
-            <p className="font-garamond text-[16px] italic text-[color:var(--text-secondary)] mt-2">
-              Person → time → systems → comparison — natal baseline vs transit
-            </p>
+            <p className="ui-eyebrow">Your details</p>
+            <h3 className="panel-title mt-1">{activeId ? 'Edit your birth details' : 'Add your birth details'}</h3>
+            <p className="readable-muted mt-1">Saved on this device only. You can add more than one person.</p>
           </div>
-          <div className="flex flex-wrap gap-1 rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-1">
+          <div className="seg">
             {(
               [
-                { id: 'profile' as const, label: 'Profile' },
-                { id: 'changed' as const, label: 'What Changed?' },
-                { id: 'sensitivity' as const, label: 'Birth-Time Sensitivity' }
+                { id: 'profile' as const, label: 'Birth details' },
+                { id: 'changed' as const, label: 'Compare two dates' },
+                { id: 'sensitivity' as const, label: 'Unsure of birth time?' }
               ]
             ).map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setMode(t.id)}
-                className={`nav-tab ${
-                  mode === t.id ? 'nav-tab-active' : ''
-                }`}
+                className={`seg-btn ${mode === t.id ? 'seg-btn-active' : ''}`}
               >
                 {t.label}
               </button>
@@ -196,11 +204,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
                     setBirthLng(String(p.birth.location.longitude));
                     setConfidence(p.birthTimeConfidence);
                   }}
-                  className={`cta-ghost min-h-0 px-3 py-2 text-[11px] ${
-                    activeId === p.id
-                      ? 'border-cyan-400/50 text-[color:var(--temporal-bright)] bg-cyan-400/[0.08]'
-                      : ''
-                  }`}
+                  className={`explore-tab ${activeId === p.id ? 'explore-tab-active' : ''}`}
                 >
                   {p.displayName}
                 </button>
@@ -209,81 +213,125 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
 
             <div className="form-grid form-grid-3">
               <label className="space-y-1.5">
-                <span className="ui-eyebrow">Display name</span>
-                <input className="field-input w-full" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+                <span className="field-label">Name</span>
+                <input
+                  className="field-input w-full"
+                  value={querentName}
+                  placeholder="e.g. Alex Morgan"
+                  onChange={(e) => {
+                    setQuerentName(e.target.value);
+                    setDisplayName(e.target.value);
+                  }}
+                />
+                <span className="field-help">Used for numerology. A full birth name works best.</span>
               </label>
               <label className="space-y-1.5">
-                <span className="ui-eyebrow">Querent / name</span>
-                <input className="field-input w-full" value={querentName} onChange={(e) => setQuerentName(e.target.value)} />
+                <span className="field-label">Birth date</span>
+                <input type="date" className="field-input w-full" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
               </label>
               <label className="space-y-1.5">
-                <span className="ui-eyebrow">Birth-time confidence</span>
+                <span className="field-label">Birth time (local clock time)</span>
+                <input
+                  type="time"
+                  className="field-input w-full"
+                  value={birthTime.slice(0, 5)}
+                  disabled={confidence === 'unknown_window'}
+                  onChange={(e) => setBirthTime(e.target.value ? `${e.target.value}:00` : '')}
+                />
+                <span className="field-help">Usually on a birth certificate.</span>
+              </label>
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="field-label" htmlFor="birth-place">Birth place</label>
+                <PlaceSearch
+                  inputId="birth-place"
+                  value={birthCity}
+                  onPick={(place) => {
+                    setBirthCity(place.label);
+                    setBirthLat(place.latitude.toFixed(4));
+                    setBirthLng(place.longitude.toFixed(4));
+                  }}
+                />
+                <span className="field-help">
+                  {birthLat && birthLng
+                    ? `Found: ${Number(birthLat).toFixed(2)}°, ${Number(birthLng).toFixed(2)}°${
+                        birthZone ? ` · time zone ${birthZone.zone.replace(/_/g, ' ')} (${formatUtcOffset(birthZone.offset)} on that date)` : ''
+                      }`
+                    : 'Pick a place from the list so the time zone can be worked out automatically.'}
+                </span>
+              </div>
+              <label className="space-y-1.5">
+                <span className="field-label">How sure are you of the time?</span>
                 <select
                   className="field-input w-full"
                   value={confidence}
                   onChange={(e) => setConfidence(e.target.value as CrucibleProfile['birthTimeConfidence'])}
                 >
-                  <option value="exact">Exact</option>
-                  <option value="approximate">Approximate</option>
-                  <option value="unknown_window">Unknown window</option>
+                  <option value="exact">Exact (from a record)</option>
+                  <option value="approximate">Roughly right</option>
+                  <option value="unknown_window">I don’t know the time</option>
                 </select>
-              </label>
-              <label className="space-y-1.5">
-                <span className="ui-eyebrow">Birth date</span>
-                <input type="date" className="field-input w-full" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
-              </label>
-              <label className="space-y-1.5">
-                <span className="ui-eyebrow">Birth time</span>
-                <input type="time" step={1} className="field-input w-full" value={birthTime} onChange={(e) => setBirthTime(e.target.value.length === 5 ? `${e.target.value}:00` : e.target.value)} />
-              </label>
-              <label className="space-y-1.5">
-                <span className="ui-eyebrow">Birth place</span>
-                <input className="field-input w-full" value={birthCity} onChange={(e) => setBirthCity(e.target.value)} />
-              </label>
-              <label className="space-y-1.5">
-                <span className="ui-eyebrow">Latitude</span>
-                <input className="field-input data-readout w-full" value={birthLat} onChange={(e) => setBirthLat(e.target.value)} />
-              </label>
-              <label className="space-y-1.5">
-                <span className="ui-eyebrow">Longitude</span>
-                <input className="field-input data-readout w-full" value={birthLng} onChange={(e) => setBirthLng(e.target.value)} />
               </label>
             </div>
 
             {confidence === 'unknown_window' && (
-              <div className="flex flex-wrap gap-4 rounded-[var(--radius-md)] border border-amber-400/20 bg-amber-400/[0.04] p-4">
+              <div className="chart-note flex flex-wrap items-end gap-4">
+                <p className="basis-full">
+                  No problem — your chart will leave out the rising sign and houses. If you know a rough range, enter it to
+                  see which results stay the same across it.
+                </p>
                 <label className="space-y-1.5">
-                  <span className="ui-eyebrow text-[color:var(--solar)]">Window start</span>
-                  <input type="time" step={1} className="field-input data-readout" value={windowStart} onChange={(e) => setWindowStart(e.target.value.length === 5 ? `${e.target.value}:00` : e.target.value)} />
+                  <span className="field-label">Earliest possible</span>
+                  <input type="time" className="field-input" value={windowStart.slice(0, 5)} onChange={(e) => setWindowStart(`${e.target.value}:00`)} />
                 </label>
                 <label className="space-y-1.5">
-                  <span className="ui-eyebrow text-[color:var(--solar)]">Window end</span>
-                  <input type="time" step={1} className="field-input data-readout" value={windowEnd} onChange={(e) => setWindowEnd(e.target.value.length === 5 ? `${e.target.value}:00` : e.target.value)} />
+                  <span className="field-label">Latest possible</span>
+                  <input type="time" className="field-input" value={windowEnd.slice(0, 5)} onChange={(e) => setWindowEnd(`${e.target.value}:00`)} />
                 </label>
               </div>
             )}
 
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={save} className="cta-primary">
-                Save Profile
-              </button>
-              <button
-                type="button"
-                onClick={() => onLoadBirthIntoTransit(birthInput, querentName)}
-                className="cta-ghost"
-              >
-                Load Birth into Master Grid
+              <button type="button" onClick={save} className="cta-primary" disabled={!birthDate}>
+                {activeId ? 'Save changes' : 'Save and show my chart'}
               </button>
               {activeId && (
                 <button
                   type="button"
                   onClick={() => {
+                    setActiveId(null);
+                    setDisplayName('');
+                    setQuerentName('');
+                    setBirthDate('');
+                    setBirthTime('');
+                    setBirthCity('');
+                    setBirthLat('');
+                    setBirthLng('');
+                  }}
+                  className="cta-ghost"
+                >
+                  Add another person
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onLoadBirthIntoTransit(birthInput, querentName)}
+                className="cta-ghost"
+                disabled={!birthDate}
+                title="Open the Today reading for the birth date itself"
+              >
+                See the reading for this birth date
+              </button>
+              {activeId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!window.confirm('Delete this saved person from this device?')) return;
                     deleteProfile(activeId);
                     setActiveId(null);
                     refreshList();
                     onProfilesChanged?.();
                   }}
-                  className="cta-ghost border-rose-400/20 text-rose-300 hover:border-rose-400/50 hover:bg-rose-400/[0.06] hover:text-rose-200"
+                  className="cta-ghost cta-danger"
                 >
                   Delete
                 </button>
@@ -292,24 +340,23 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-4">
-                <div className="ui-eyebrow mb-2">Natal snapshot</div>
+                <div className="ui-eyebrow mb-2">Born on this day</div>
                 {natalCtx ? (
                   <>
                     <p className="text-[color:var(--text-primary)]">Maya {natalCtx.mayan.tzolkin.formatted} · Chinese {natalCtx.chinese.dayPillar.stemPinYin}-{natalCtx.chinese.dayPillar.branchPinYin}</p>
-                    <p className="mt-1 text-[color:var(--text-secondary)]">Life Path {natalCtx.numerology.lifePathNumber} · Tribe lens {natalCtx.synthesis.topResonatingTribe.tribe}</p>
-                    <p className="font-garamond text-[15px] italic text-[color:var(--text-muted)] mt-2">Archetypal alignment under methodology — not identity.</p>
+                    <p className="mt-1 text-[color:var(--text-secondary)]">Life Path {natalCtx.numerology.lifePathNumber} · Calling {natalCtx.synthesis.topCalling.calling}</p>
+                    <p className="readable-muted mt-2">What the calendars said on the birth date.</p>
                   </>
                 ) : (
-                  <p className="font-garamond text-[15px] text-[color:var(--text-muted)] italic">Enter birth date to lock your natal baseline.</p>
+                  <p className="font-garamond text-[15px] text-[color:var(--text-muted)] italic">Enter a birth date to see what the calendars said that day.</p>
                 )}
               </div>
               <div className="rounded-[var(--radius-lg)] border border-cyan-400/15 bg-cyan-400/[0.035] p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="ui-eyebrow text-[color:var(--temporal)]">Natal → Transit</span>
-                  <EpistemicBadge epistemicClass="COMPARATIVE_ANALOGY" />
+                  <span className="ui-eyebrow">Birth day compared with today</span>
                 </div>
                 <pre className="whitespace-pre-wrap font-garamond text-[15px] leading-relaxed text-[color:var(--text-secondary)]">
-                  {natalVsTransit?.summary || 'Lock birth data to compare natal vs today’s transit.'}
+                  {natalVsTransit?.summary || 'Enter a birth date to compare it with today.'}
                 </pre>
               </div>
             </div>
@@ -324,7 +371,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
                 <input type="date" className="field-input data-readout" value={compareDate} onChange={(e) => setCompareDate(e.target.value)} />
               </label>
               <button type="button" onClick={() => onApplyDate(compareDate)} className="cta-ghost">
-                Load Compare Date in Grid
+                Open this date in Today
               </button>
             </div>
             <pre className="whitespace-pre-wrap rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-4 font-garamond text-[16px] leading-relaxed text-[color:var(--text-secondary)]">
@@ -355,7 +402,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
               </div>
               <div className="rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-4 space-y-3">
                 <div>
-                  <div className="ui-eyebrow text-emerald-300 mb-2">Convergence</div>
+                  <div className="ui-eyebrow mb-2">In agreement</div>
                   <ul className="text-[color:var(--text-secondary)] space-y-1">
                     {changedReport.convergenceNotes.map((n) => (
                       <li key={n}>{n}</li>
@@ -364,7 +411,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
                   </ul>
                 </div>
                 <div>
-                  <div className="ui-eyebrow text-rose-300 mb-2">Tension</div>
+                  <div className="ui-eyebrow mb-2">Pulling apart</div>
                   <ul className="text-[color:var(--text-secondary)] space-y-1">
                     {changedReport.tensionNotes.map((n) => (
                       <li key={n}>{n}</li>
@@ -380,16 +427,16 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
         {mode === 'sensitivity' && (
           <div className="space-y-4 text-sm">
             <p className="font-garamond text-[16px] text-[color:var(--text-secondary)] italic">
-              Sensitivity Analysis — results that remain unchanged across your stated birth-time range vs those that change substantially. Not authoritative chart rectification.
+              If you only know roughly when you were born, this shows which results stay the same across your time range and which depend on the exact minute.
             </p>
             {confidence !== 'unknown_window' ? (
-              <p className="text-amber-400">Set birth-time confidence to “Unknown window” and define start/end on the Profile tab.</p>
+              <p className="text-amber-400">On the Birth details tab, choose “I don’t know the time” and enter the earliest and latest possible times.</p>
             ) : sensitivity ? (
               <>
                 <pre className="whitespace-pre-wrap rounded-[var(--radius-lg)] border border-[color:var(--line-soft)] bg-[color:var(--surface-well)] p-4 font-garamond text-[16px] text-[color:var(--text-secondary)]">{sensitivity.summary}</pre>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="rounded-[var(--radius-md)] border border-emerald-400/20 bg-emerald-400/[0.035] p-4">
-                    <div className="ui-eyebrow text-emerald-300 mb-2">Stable ({sensitivity.stable.length})</div>
+                    <div className="ui-eyebrow text-emerald-300 mb-2">Same either way ({sensitivity.stable.length})</div>
                     <ul className="space-y-2 max-h-48 overflow-auto text-[color:var(--text-secondary)]">
                       {sensitivity.stable.map((s) => (
                         <li key={`${s.systemId}-${s.label}`}>
@@ -399,7 +446,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
                     </ul>
                   </div>
                   <div className="rounded-[var(--radius-md)] border border-rose-400/20 bg-rose-400/[0.035] p-4">
-                    <div className="ui-eyebrow text-rose-300 mb-2">Sensitive ({sensitivity.sensitive.length})</div>
+                    <div className="ui-eyebrow text-rose-300 mb-2">Depends on the exact time ({sensitivity.sensitive.length})</div>
                     <ul className="space-y-2 max-h-48 overflow-auto">
                       {sensitivity.sensitive.map((s) => (
                         <li key={`${s.systemId}-${s.label}`}>

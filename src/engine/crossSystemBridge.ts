@@ -3,7 +3,7 @@
  *
  * Explains why each spiritual/calendrical system is present, how it
  * connects to the living day, month, birth chart, and name vibration,
- * and how all streams triangulate through the Twelve Tribes camp matrix.
+ * and how all streams triangulate through the Twelve Callings circle.
  */
 
 import {
@@ -20,113 +20,106 @@ import {
   NumerologyResult,
   SystemCrossNote,
   TemporalCoordinate,
-  TwelveTribeAffinity,
-  TwelveTribeLifeConnotation
+  CallingAffinity,
+  CallingLifeConnotation
 } from '../types';
 
-const TRIBE_LIFE_MEANINGS: Record<string, TwelveTribeLifeConnotation> = {
-  Judah: {
+const CALLING_LIFE_MEANINGS: Record<string, CallingLifeConnotation> = {
+  'The Trailblazer': {
     lifeRepresents:
-      'Leadership under pressure, courage that protects the camp, and the willingness to go first when others hesitate. As an archetypal reading under this methodology, this aligns with sovereign responsibility—not domination, but radiant stewardship.',
-    dayPractice: 'Speak one clear vow aloud at sunrise; act on it before noon.',
-    shadowToWatch: 'Pride that isolates, or roaring without serving the flock.',
+      'Leadership under pressure: the willingness to go first when others hesitate. This is about responsibility, not control — courage that makes the people around you safer.',
+    dayPractice: 'Say one clear intention out loud in the morning; act on it before noon.',
+    shadowToWatch: 'Pride that isolates, or making noise without helping anyone.',
     giftToEmbody: 'Courage that makes others safer.'
   },
-  Issachar: {
+  'The Stargazer': {
     lifeRepresents:
-      'Reading seasons rightly—knowing when to plant, wait, or harvest. As an archetypal reading under this methodology, this aligns with discernment of timing, study, and wise counsel that orients communities.',
+      'Reading the season correctly — knowing when to plant, wait, or harvest. This is about timing, study, and calm advice that helps others get their bearings.',
     dayPractice: 'Before deciding, name the season you are actually in (seed / heat / gather / rest).',
     shadowToWatch: 'Analysis that never becomes action.',
-    giftToEmbody: 'Epoch-reading that liberates others from false urgency.'
+    giftToEmbody: 'A sense of timing that frees others from false urgency.'
   },
-  Zebulun: {
+  'The Wayfarer': {
     lifeRepresents:
-      'Commerce as covenant—building harbors where resources, ideas, and people meet safely. As an archetypal reading under this methodology, this aligns with networking, patronage, and translating vision into trade.',
-    dayPractice: 'Send one message that opens a harbor between two people or projects.',
+      'Building harbors where resources, ideas, and people can meet safely. This is about networking, generosity, and turning a vision into a workable exchange.',
+    dayPractice: 'Send one message that connects two people or projects.',
     shadowToWatch: 'Restless travel that never docks.',
-    giftToEmbody: 'Bridge-building that funds and shelters the scholars.'
+    giftToEmbody: 'Bridge-building that supports the people doing deep work.'
   },
-  Reuben: {
+  'The Wellspring': {
     lifeRepresents:
-      'Firstborn passion and the awakening of human potential. As an archetypal reading under this methodology, this aligns with raw vitality, honesty about desire, and the courage to begin again after instability.',
+      'Raw vitality and fresh starts. This is about being honest about what you want, and having the courage to begin again after things have been unstable.',
     dayPractice: 'Name one desire without shame; channel it into one constructive act.',
-    shadowToWatch: 'Impulse that destabilizes trust.',
-    giftToEmbody: 'Passionate honesty that restarts stagnant fields.'
+    shadowToWatch: 'Impulse that damages trust.',
+    giftToEmbody: 'Passionate honesty that restarts what has gone stale.'
   },
-  Simeon: {
+  'The Listener': {
     lifeRepresents:
-      'Hearing truth that cuts—zeal for purity and the intensity that refuses soft lies. As an archetypal reading under this methodology, this aligns with fierce listening and decisive purification.',
-    dayPractice: 'Listen twice before you speak once; cut one false narrative today.',
-    shadowToWatch: 'Zeal that wounds allies.',
+      'Hearing the truth, even when it cuts. This is about deep listening and refusing comfortable lies — then clearing them away cleanly.',
+    dayPractice: 'Listen twice before you speak once; drop one false story today.',
+    shadowToWatch: 'Intensity that wounds allies.',
     giftToEmbody: 'Truth-hearing that cleanses without cruelty.'
   },
-  Gad: {
+  'The Sentinel': {
     lifeRepresents:
-      'Tactical courage on the frontier—overcoming when the camp is threatened. As an archetypal reading under this methodology, this aligns with crisis competence and loyal defense of what matters.',
-    dayPractice: 'Identify one frontier threat; take one protective tactical step.',
-    shadowToWatch: 'Fighting every battle as if it were existential.',
-    giftToEmbody: 'Resolute defense that creates peace behind the line.'
+      'Steady courage at the edge. This is about staying competent in a crisis and loyally defending what matters.',
+    dayPractice: 'Identify one real risk; take one protective step.',
+    shadowToWatch: 'Fighting every battle as if everything depended on it.',
+    giftToEmbody: 'Firm defense that creates peace behind the line.'
   },
-  Ephraim: {
+  'The Cultivator': {
     lifeRepresents:
-      'Fruitfulness and material stewardship—turning scarcity into provision. As an archetypal reading under this methodology, this aligns with building, multiplying resources, and leaving systems stronger than you found them.',
+      'Fruitfulness and care for material things — turning scarcity into plenty. This is about building, multiplying resources, and leaving systems stronger than you found them.',
     dayPractice: 'Improve one tangible system (budget, workspace, archive) by 1%.',
-    shadowToWatch: 'Empire-building that forgets the fountain.',
-    giftToEmbody: 'Provision that multiplies blessing for many.'
+    shadowToWatch: 'Building an empire and forgetting what it was for.',
+    giftToEmbody: 'Provision that benefits many people.'
   },
-  Manasseh: {
+  'The Memory Keeper': {
     lifeRepresents:
-      'Restoring forgotten knowledge—remembering what exile erased. As an archetypal reading under this methodology, this aligns with memory work, lineage repair, and reclaiming abandoned gifts.',
-    dayPractice: 'Recover one forgotten skill, photo, text, or ancestor story.',
-    shadowToWatch: 'Nostalgia that blocks present fruitfulness.',
+      'Restoring what was forgotten. This is about memory work, repairing family or community threads, and reclaiming abandoned gifts.',
+    dayPractice: 'Recover one forgotten skill, photo, text, or family story.',
+    shadowToWatch: 'Nostalgia that blocks what could grow now.',
     giftToEmbody: 'Memory that heals the future.'
   },
-  Benjamin: {
+  'The Flamekeeper': {
     lifeRepresents:
-      'Fierce protection of the sanctuary and the written word. As an archetypal reading under this methodology, this aligns with guardianship of sacred boundaries, craftsmanship of text, and loyalty under night.',
+      'Fierce protection of what is precious. This is about guarding boundaries, careful craft with words, and staying loyal through the night.',
     dayPractice: 'Guard one boundary; write one sentence worth keeping.',
-    shadowToWatch: 'Predatory intensity without temple purpose.',
-    giftToEmbody: 'Protector-scribe energy that keeps the flame lit.'
+    shadowToWatch: 'Intensity with no purpose behind it.',
+    giftToEmbody: 'Protective focus that keeps the flame lit.'
   },
-  Dan: {
+  'The Arbiter': {
     lifeRepresents:
-      'Judgment as equilibrium—discerning law so the camp does not dissolve into chaos. As an archetypal reading under this methodology, this aligns with ethical clarity, fair arbitration, and serpent-wise caution.',
-    dayPractice: 'Weigh one decision on the scales; refuse both favoritism and fear.',
+      'Judgment as balance — fair rules so the circle does not dissolve into chaos. This is about ethical clarity, even-handed decisions, and wise caution.',
+    dayPractice: 'Weigh one decision honestly; refuse both favoritism and fear.',
     shadowToWatch: 'Cold judgment that loses mercy.',
     giftToEmbody: 'Discernment that restores balance.'
   },
-  Asher: {
+  'The Host': {
     lifeRepresents:
-      'Oil, nourishment, and gracious hosting—abundance that delights. As an archetypal reading under this methodology, this aligns with hospitality, healing craft, and making ordinary tables sacred.',
-    dayPractice: 'Feed someone (body or soul) with genuine delight.',
-    shadowToWatch: 'Pleasure without consecration.',
-    giftToEmbody: 'Nourishment that makes royalty of the everyday.'
+      'Nourishment and gracious hosting — plenty that delights. This is about hospitality, healing craft, and making an ordinary table feel special.',
+    dayPractice: 'Feed someone (body or spirit) with genuine delight.',
+    shadowToWatch: 'Pleasure with no care behind it.',
+    giftToEmbody: 'Nourishment that dignifies the everyday.'
   },
-  Naphtali: {
+  'The Messenger': {
     lifeRepresents:
-      'Swift joy and eloquent speech—pleasant words that climb mountains. As an archetypal reading under this methodology, this aligns with messaging, poetry, agility of spirit, and good news carried far.',
-    dayPractice: 'Speak or write one pleasant true word that lifts another person.',
+      'Swift joy and warm speech. This is about carrying good news, writing and speaking well, and keeping a light, agile spirit.',
+    dayPractice: 'Say or write one kind, true thing that lifts another person.',
     shadowToWatch: 'Speed that skips depth.',
-    giftToEmbody: 'Joyful eloquence that moves mountains lightly.'
+    giftToEmbody: 'Joyful words that make hard things lighter.'
   }
 };
 
-function tribeKey(tribeName: string): string {
-  const base = tribeName.split('(')[0].trim().split('/')[0].trim();
-  return base.replace(/\s+/g, ' ');
-}
-
-function lifeForTribe(tribeName: string): TwelveTribeLifeConnotation {
-  const key = tribeKey(tribeName);
-  for (const [k, v] of Object.entries(TRIBE_LIFE_MEANINGS)) {
-    if (key.includes(k)) return v;
-  }
-  return {
-    lifeRepresents: 'An archetypal stewardship role within the living camp of meaning—under this methodology, not as an objective identity claim.',
-    dayPractice: 'Orient one action toward service of the whole.',
-    shadowToWatch: 'Forgetting why the banner was raised.',
-    giftToEmbody: 'Faithful presence in your quadrant.'
-  };
+function lifeForCalling(callingName: string): CallingLifeConnotation {
+  return (
+    CALLING_LIFE_MEANINGS[callingName] ?? {
+      lifeRepresents: 'A role of service within the circle — a lens for today, not a fixed identity.',
+      dayPractice: 'Point one action toward the good of the whole.',
+      shadowToWatch: 'Forgetting why you took up the role.',
+      giftToEmbody: 'Faithful presence in your quarter.'
+    }
+  );
 }
 
 /** Completes the navigation ladder on every cross-note (Why → Independent → Intersect → Disagree → Act). */
@@ -166,7 +159,7 @@ export function buildSystemCrossNotes(args: {
   enochianBiblical: EnochianBiblicalResult;
   numerology: NumerologyResult;
   geneKeysSun: GeneKeyGate;
-  topTribe: TwelveTribeAffinity;
+  topCalling: CallingAffinity;
   sunSign: string;
 }): SystemCrossNote[] {
   const {
@@ -180,11 +173,11 @@ export function buildSystemCrossNotes(args: {
     enochianBiblical,
     numerology,
     geneKeysSun,
-    topTribe,
+    topCalling,
     sunSign
   } = args;
   const eb = enochianBiblical;
-  const life = lifeForTribe(topTribe.tribe);
+  const life = lifeForCalling(topCalling.calling);
 
   return [
     withNavigationLadder({
@@ -194,12 +187,12 @@ export function buildSystemCrossNotes(args: {
         'Maya computus measures sacred day-quality independent of the Gregorian marketplace clock. It answers: what kind of day-spirit is active?',
       lifeRelevance:
         'Use it to time initiation, rest, and ritual—not as fortune-telling, but as a vocabulary for the day’s character.',
-      connectsToDay: `Today is ${mayan.tzolkin.formatted} (${mayan.tzolkin.meaning}) facing ${mayan.tzolkin.direction}—the same compass quadrant as the ${topTribe.directionInCamp} tribal camp when directions align.`,
+      connectsToDay: `Today is ${mayan.tzolkin.formatted} (${mayan.tzolkin.meaning}) facing ${mayan.tzolkin.direction}—the same compass quarter as today's calling (${topCalling.quarter}) when directions align.`,
       connectsToMonth: `Haabʼ ${mayan.haab.formatted} frames the solar month mood (${mayan.haab.meaning}).`,
       connectsToBirthChart: `Your measured moment’s Kin ${mayan.kinNumber} can be compared to a natal Kin if you lock a birth date—birth Kin vs transit Kin is the Maya “progressed day.”`,
-      connectsToName: `Name numerology (Life Path ${numerology.lifePathNumber}) scores tribal affinity; Maya direction then boosts tribes camping the same way as today’s glyph.`,
-      triangulatesWith: ['dreamspell', 'twelve_tribes', 'chinese', 'enochian'],
-      crossNote: `Cross-note: Maya ${mayan.tzolkin.direction} × Tribe ${topTribe.tribe} (${topTribe.directionInCamp}) × Chinese ${chinese.dominantElement} — ${life.giftToEmbody}`,
+      connectsToName: `Name numerology (Life Path ${numerology.lifePathNumber}) scores calling affinity; Maya direction then boosts callings in the same quarter as today’s glyph.`,
+      triangulatesWith: ['dreamspell', 'twelve_callings', 'chinese', 'enochian'],
+      crossNote: `Cross-note: Maya ${mayan.tzolkin.direction} × Calling ${topCalling.calling} (${topCalling.quarter}) × Chinese ${chinese.dominantElement} — ${life.giftToEmbody}`,
       independentlySays: `${mayan.tzolkin.formatted} · Kin ${mayan.kinNumber} · Long Count ${mayan.longCount.formatted}.`,
       disagreesWith:
         'Maya day-quality can conflict with Chinese day-pillar work-style or Roman dies temperament on the same civil date—sacred character ≠ marketplace schedule.',
@@ -217,7 +210,7 @@ export function buildSystemCrossNotes(args: {
       connectsToMonth: `Thirteen Moon: ${dreamspell.thirteenMoon.moonName}, day ${dreamspell.thirteenMoon.dayOfMoon}/28 (${dreamspell.thirteenMoon.serviceQuestion}).`,
       connectsToBirthChart: `Destiny Kin vs today’s Kin shows harmonic distance in the 260-day field—useful natal/transit contrast when birth data is locked.`,
       connectsToName: `Oracle guide ${dreamspell.oracle.guide.name} often rhymes with name-path themes under Universal Day ${numerology.universalDay}.`,
-      triangulatesWith: ['mayan', 'gene_keys', 'twelve_tribes'],
+      triangulatesWith: ['mayan', 'gene_keys', 'twelve_callings'],
       crossNote: `Cross-note: Dreamspell ${dreamspell.solarSeal.name} power of ${dreamspell.solarSeal.power} supports Gene Key gift “${geneKeysSun.gift}” when you refuse the shadow of ${geneKeysSun.shadow}.`,
       independentlySays: `${dreamspell.signature} · Tone ${dreamspell.galacticTone.name} (${dreamspell.galacticTone.power}).`,
       disagreesWith:
@@ -235,8 +228,8 @@ export function buildSystemCrossNotes(args: {
       connectsToDay: `Day pillar ${chinese.dayPillar.stemPinYin}-${chinese.dayPillar.branchPinYin} (${chinese.dayPillar.stemElement} ${chinese.dayPillar.zodiacAnimal}).`,
       connectsToMonth: `Month pillar + solar term ${chinese.solarTerm.name} (${chinese.solarTerm.chineseName}) set the seasonal qi for this stretch of the year.`,
       connectsToBirthChart: `Natal four pillars vs today’s day pillar is classical BaZi timing—compare when you enter birth data in Systems Report.`,
-      connectsToName: `Dominant ${chinese.dominantElement} is weighed against Life Path ${numerology.lifePathNumber} and tribal zodiac ${topTribe.zodiacCorrespondence}.`,
-      triangulatesWith: ['mayan', 'twelve_tribes', 'egyptian', 'enochian'],
+      connectsToName: `Dominant ${chinese.dominantElement} is weighed against Life Path ${numerology.lifePathNumber} and calling zodiac ${topCalling.zodiacCorrespondence}.`,
+      triangulatesWith: ['mayan', 'twelve_callings', 'egyptian', 'enochian'],
       crossNote: `Cross-note: Chinese ${chinese.solarTerm.name} ↔ Egyptian ${egyptian.season} ↔ Biblical ${eb.biblicalSeason.hebrewTekufah} — three seasonal clocks on one JD.`,
       independentlySays: `Day ${chinese.dayPillar.stemPinYin}-${chinese.dayPillar.branchPinYin} · Dominant ${chinese.dominantElement} · ${chinese.solarTerm.name}.`,
       disagreesWith:
@@ -254,7 +247,7 @@ export function buildSystemCrossNotes(args: {
       connectsToDay: `Civil day ${egyptian.dayOfMonth} of ${egyptian.monthName}.`,
       connectsToMonth: `Season ${egyptian.season} — Sothic year ${egyptian.sothicYearInCycle}/1460.`,
       connectsToBirthChart: `Egyptian civil date of birth vs today measures “civic age” on the Nabonassar loom.`,
-      connectsToName: `Epagomenal/deity month lore colors how name-path leadership (Judah-types) or scholarship (Issachar-types) shows up.`,
+      connectsToName: `Epagomenal/deity month lore colors how name-path leadership (Trailblazer types) or scholarship (Stargazer types) shows up.`,
       triangulatesWith: ['chinese', 'ethiopian', 'enochian', 'greek'],
       crossNote: `Cross-note: Egyptian ${egyptian.season} and Chinese ${chinese.solarTerm.name} both read solar longitude—use them as twin harvest advisories.`,
       independentlySays: `${egyptian.monthName} ${egyptian.dayOfMonth} · Season ${egyptian.season}.`,
@@ -274,7 +267,7 @@ export function buildSystemCrossNotes(args: {
       connectsToMonth: `Evangelist cycle: ${ethiopian.evangelist} — a gospel posture for the year’s narrative voice.`,
       connectsToBirthChart: `Geʼez birth date vs civil Gregorian reveals the 7–8 year era offset—useful for Ethiopian lineage work.`,
       connectsToName: `Evangelist tone can color how you speak your name’s mission this year.`,
-      triangulatesWith: ['enochian', 'egyptian', 'twelve_tribes'],
+      triangulatesWith: ['enochian', 'egyptian', 'twelve_callings'],
       crossNote: `Cross-note: Ethiopian evangelist ${ethiopian.evangelist} × Enochian watch ${eb.enochian.watchGate} — highland memory meeting Watcher gates.`,
       independentlySays: `${ethiopian.monthName} ${ethiopian.dayOfMonth}, Amete Mihret ${ethiopian.year} · Evangelist ${ethiopian.evangelist}.`,
       disagreesWith:
@@ -293,7 +286,7 @@ export function buildSystemCrossNotes(args: {
       connectsToMonth: `Festival field: ${greek.historicFestival} · Metonic ${greek.metonicCycleYear}/19.`,
       connectsToBirthChart: `Olympiad dating frames life in four-year athletic-civic arcs.`,
       connectsToName: `Patron deity of the Attic month can name the mythic ally of your Life Path work this month.`,
-      triangulatesWith: ['egyptian', 'roman_dies', 'twelve_tribes'],
+      triangulatesWith: ['egyptian', 'roman_dies', 'twelve_callings'],
       crossNote: `Cross-note: Greek ${greek.patronDeity} ↔ Roman ${eb.gregorianWeekdayDeity.romanDeity} (${eb.gregorianWeekdayDeity.latinDies}) — Hellenic month deity meets Latin dies.`,
       independentlySays: `${greek.atticMonthName} ${greek.atticDay} · ${greek.patronDeity} · ${greek.historicFestival}.`,
       disagreesWith:
@@ -311,12 +304,12 @@ export function buildSystemCrossNotes(args: {
       connectsToDay: `${eb.enochian.formatted} · ${eb.gregorianWeekdayDeity.latinDies} · Hour of ${eb.currentPlanetaryHour.planet}.`,
       connectsToMonth: `${eb.biblicalSeason.name} — verses ${eb.biblicalTransits.seasonVerseAnchors.slice(0, 2).join(', ')}.`,
       connectsToBirthChart: `Tekufah of birth vs today shows seasonal covenant distance; Roman birth-weekday deity vs today is diurnal temperament contrast.`,
-      connectsToName: `Name path + tribal camp remap under Enochian flip: civil ${topTribe.directionInCamp} may read as Watcher ${eb.compassOrientation.directionRemap[topTribe.directionInCamp]}.`,
-      triangulatesWith: ['twelve_tribes', 'ethiopian', 'chinese', 'mayan'],
-      crossNote: `Cross-note: ${eb.biblicalSeason.verses[0].ref} anchors the season; Tribe ${topTribe.tribe} practices: ${life.dayPractice}`,
+      connectsToName: `Name path + calling-quarter remap under Enochian flip: civil ${topCalling.quarter} may read as Watcher ${eb.compassOrientation.directionRemap[topCalling.quarter]}.`,
+      triangulatesWith: ['twelve_callings', 'ethiopian', 'chinese', 'mayan'],
+      crossNote: `Cross-note: ${eb.biblicalSeason.verses[0].ref} anchors the season; Calling ${topCalling.calling} practices: ${life.dayPractice}`,
       independentlySays: `${eb.enochian.formatted} · ${eb.biblicalSeason.hebrewTekufah} · ${eb.gregorianWeekdayDeity.latinDies} (hour of ${eb.currentPlanetaryHour.planet}).`,
       disagreesWith:
-        'Civil north-up compass vs Enochian flip remaps tribal camp bearings—Peek A and Peek B are intentionally non-identical.',
+        'Civil north-up compass vs Enochian flip remaps calling quarters—Peek A and Peek B are intentionally non-identical.',
       doWithDisagreement:
         'Use A/B Compare. Act in one orientation at a time; log which frame you chose.'
     }),
@@ -330,9 +323,9 @@ export function buildSystemCrossNotes(args: {
       connectsToDay: `Universal Day ${numerology.universalDay} — ${numerology.numberMeanings[numerology.universalDay] || 'active vibration'}.`,
       connectsToMonth: `Universal Month ${numerology.universalMonth} inside Universal Year ${numerology.universalYear}.`,
       connectsToBirthChart: `Life Path ${numerology.lifePathNumber}${numerology.lifePathIsMaster ? ' (Master)' : ''} is birth-date derived—your durable number signature.`,
-      connectsToName: `Expression/soul calculations (Systems Report gematria) fuse name letters with Life Path; tribal scoring uses Life Path index.`,
-      triangulatesWith: ['twelve_tribes', 'mayan', 'gene_keys'],
-      crossNote: `Cross-note: Life Path ${numerology.lifePathNumber} elevates tribe affinity for camp roles that match your number’s vocation.`,
+      connectsToName: `Expression/soul calculations (Systems Report gematria) fuse name letters with Life Path; calling scoring uses Life Path index.`,
+      triangulatesWith: ['twelve_callings', 'mayan', 'gene_keys'],
+      crossNote: `Cross-note: Life Path ${numerology.lifePathNumber} elevates calling affinity for callings that match your number’s vocation.`,
       independentlySays: `Life Path ${numerology.lifePathNumber} · Universal Day ${numerology.universalDay} · Chaldean ${numerology.chaldeanVibration}.`,
       disagreesWith:
         'Life Path vocation may not match the day’s Maya/Chinese weather—long arc vs daily weather is a real tension.',
@@ -349,9 +342,9 @@ export function buildSystemCrossNotes(args: {
       connectsToDay: `Sun Gate ${geneKeysSun.gate}.${geneKeysSun.line} (${geneKeysSun.name}) — Gift: ${geneKeysSun.gift}.`,
       connectsToMonth: `As the Sun moves ~1°/day, gate/line slowly shift—monthly Gene Key weather.`,
       connectsToBirthChart: `Natal Sun gate vs transit Sun gate is the classic Golden Path contrast when birth time/date is fixed.`,
-      connectsToName: `Name-path themes often rhyme with the Gift emphasized under this methodology (e.g. leadership names under Judah + Gate of Guidance).`,
-      triangulatesWith: ['dreamspell', 'twelve_tribes', 'ephemeris'],
-      crossNote: `Cross-note: Gene Key Gift “${geneKeysSun.gift}” × Tribe gift “${life.giftToEmbody}” × Dreamspell power “${dreamspell.solarSeal.power}”.`,
+      connectsToName: `Name-path themes often rhyme with the Gift emphasized under this methodology (e.g. leadership names with The Trailblazer + Gate of Guidance).`,
+      triangulatesWith: ['dreamspell', 'twelve_callings', 'ephemeris'],
+      crossNote: `Cross-note: Gene Key Gift “${geneKeysSun.gift}” × Calling gift “${life.giftToEmbody}” × Dreamspell power “${dreamspell.solarSeal.power}”.`,
       independentlySays: `Sun Gate ${geneKeysSun.gate}.${geneKeysSun.line} (${geneKeysSun.name}) — Shadow ${geneKeysSun.shadow} / Gift ${geneKeysSun.gift} / Siddhi ${geneKeysSun.siddhi}.`,
       disagreesWith:
         'Gift practice can conflict with a Roman dies or Chinese yang day that pushes speed over depth.',
@@ -359,23 +352,23 @@ export function buildSystemCrossNotes(args: {
         'Protect a Gift window (even 20 minutes). Schedule yang tasks outside that window.'
     }),
     withNavigationLadder({
-      systemId: 'twelve_tribes',
-      systemName: 'Twelve Tribes Archetypal Camp (Numbers 2)',
+      systemId: 'twelve_callings',
+      systemName: 'The Twelve Callings',
       whyPresent:
-        'The Tribes are not ethnic branding here—they are a twelvefold archetypal camp around the Tabernacle: how human vocation arranges itself in space (East/South/West/North) and symbol (gem, banner, blessing).',
+        'The Twelve Callings are the Crucible’s own circle of twelve roles standing around a shared centre—three in each compass quarter (East/South/West/North). Each has a stone, an emblem, a gift and a shadow. It describes how people serve a whole, not who anyone is by birth.',
       lifeRelevance: life.lifeRepresents,
-      connectsToDay: `Strongest archetypal alignment under this methodology: ${topTribe.tribe} (${topTribe.affinityScore}%). Suggested practice: ${life.dayPractice}`,
-      connectsToMonth: `Camp direction ${topTribe.directionInCamp} should be read against this month’s Chinese solar term (${chinese.solarTerm.name}) and biblical tekufah (${eb.biblicalSeason.hebrewTekufah}).`,
-      connectsToBirthChart: `Natal Sun in ${sunSign} leans toward tribes whose zodiacCorrespondence shares that sign’s element/mythos; lock birth data to deepen natal tribe scoring.`,
-      connectsToName: `Life Path ${numerology.lifePathNumber} and name gematria (Systems Report) further weight which banner scores highest—name is a tribal trumpet, not a destiny stamp.`,
+      connectsToDay: `Strongest archetypal alignment under this methodology: ${topCalling.calling} (${topCalling.affinityScore}%). Suggested practice: ${life.dayPractice}`,
+      connectsToMonth: `The quarter ${topCalling.quarter} should be read against this month’s Chinese solar term (${chinese.solarTerm.name}) and biblical tekufah (${eb.biblicalSeason.hebrewTekufah}).`,
+      connectsToBirthChart: `Natal Sun in ${sunSign} leans toward callings whose zodiacCorrespondence shares that sign’s element/mythos; lock birth data to deepen natal calling scoring.`,
+      connectsToName: `Life Path ${numerology.lifePathNumber} and name gematria (Systems Report) further weight which calling scores highest—name is a signal, not a destiny stamp.`,
       triangulatesWith: ['mayan', 'chinese', 'numerology', 'enochian_biblical', 'gene_keys', 'ephemeris'],
-      crossNote: `Cross-note: Why Tribes sit beside every system—because camp direction is the common language that Maya glyphs, Chinese elements, Roman dies, and Enochian watches can all speak.`,
-      independentlySays: `Strongest archetypal alignment under this methodology: ${topTribe.tribe} (${topTribe.affinityScore}%) · ${topTribe.directionInCamp} camp · ${topTribe.archetypeRole}.`,
-      intersectsWith: `Scored from Maya direction, Chinese element, and Life Path/Universal Day—then read against Gene Key gift and Enochian camp remap.`,
+      crossNote: `Cross-note: Why the Callings sit beside every system—because compass direction is the common language that Maya glyphs, Chinese elements, Roman dies, and Enochian watches can all speak.`,
+      independentlySays: `Strongest archetypal alignment under this methodology: ${topCalling.calling} (${topCalling.affinityScore}%) · ${topCalling.quarter} quarter · ${topCalling.archetypeRole}.`,
+      intersectsWith: `Scored from Maya direction, Chinese element, and Life Path/Universal Day—then read against Gene Key gift and Enochian compass remap.`,
       disagreesWith:
-        'A second tribe may score close behind; Maya direction and Chinese element can pull affinity in opposite camps.',
+        'A second calling may score close behind; Maya direction and Chinese element can pull affinity in opposite quarters.',
       doWithDisagreement:
-        'Treat the top tribe as the primary archetypal lens for today, not an identity. If scores are close, hold both banners and choose practice consciously.'
+        'Treat the top calling as the primary archetypal lens for today, not an identity. If scores are close, hold both callings and choose practice consciously.'
     }),
     withNavigationLadder({
       systemId: 'ephemeris_astro',
@@ -384,15 +377,15 @@ export function buildSystemCrossNotes(args: {
         'Planets locate the day in ecliptic myth; astrocartography projects those myths onto Earth so place becomes part of the chart.',
       lifeRelevance:
         'Sky tells *what* is emphasized; map tells *where* that emphasis geographically intensifies.',
-      connectsToDay: `Sun in ${sunSign} colors tribal zodiac links; planetary hour of ${eb.currentPlanetaryHour.planet} times action.`,
+      connectsToDay: `Sun in ${sunSign} colors calling zodiac links; planetary hour of ${eb.currentPlanetaryHour.planet} times action.`,
       connectsToMonth: `Slow planets set multi-month weather; solar sign change marks month-scale shifts.`,
       connectsToBirthChart: `Transit-to-natal aspects (when birth locked) and relocation lines are the birth-chart spine of The Crucible.`,
       connectsToName: `Gematria of place-names and personal names in Systems Report fuses linguistic vibration with geodetic lines.`,
-      triangulatesWith: ['gene_keys', 'twelve_tribes', 'enochian_biblical'],
-      crossNote: `Cross-note: Sun ${sunSign} × Tribe ${topTribe.zodiacCorrespondence} × Enoch Flip remaps camp bearings on the world map.`,
+      triangulatesWith: ['gene_keys', 'twelve_callings', 'enochian_biblical'],
+      crossNote: `Cross-note: Sun ${sunSign} × Calling ${topCalling.zodiacCorrespondence} × Enoch Flip remaps the quarters on the world map.`,
       independentlySays: `Sun in ${sunSign} · planetary hour of ${eb.currentPlanetaryHour.planet} · geographic line emphasis via astrocartography.`,
       disagreesWith:
-        'Place-line emphasis can contradict the day’s tribal camp direction if you are physically far from high-resonance meridians.',
+        'Place-line emphasis can contradict the day’s calling quarter if you are physically far from high-resonance meridians.',
       doWithDisagreement:
         'Either relocate attention (travel/call someone there) or treat place-lines as background weather while acting locally.'
     })
@@ -415,22 +408,22 @@ export function buildCrossSystemIntertwining(args: {
   geneKeysSun: GeneKeyGate;
   geneKeysEarth: GeneKeyGate;
   celestialBodies: CelestialCoordinate[];
-  twelveTribesScores: TwelveTribeAffinity[];
-  topTribe: TwelveTribeAffinity;
+  callingScores: CallingAffinity[];
+  topCalling: CallingAffinity;
 }): CrossSystemIntertwining {
   const sun = args.celestialBodies.find((b) => b.id === 'sun');
   const sunSign = sun?.zodiacSign || 'Unknown';
-  const life = lifeForTribe(args.topTribe.tribe);
+  const life = lifeForCalling(args.topCalling.calling);
 
-  const enrichedTribes: TwelveTribeAffinity[] = args.twelveTribesScores.map((t) => {
-    const L = lifeForTribe(t.tribe);
+  const enrichedCallings: CallingAffinity[] = args.callingScores.map((t) => {
+    const L = lifeForCalling(t.calling);
     return {
       ...t,
       lifeConnotation: L,
-      dayConnection: `Affinity ${t.affinityScore}% today via camp ${t.directionInCamp}, Maya direction ${args.mayan.tzolkin.direction}, and Universal Day ${args.numerology.universalDay}. Practice: ${L.dayPractice}`,
+      dayConnection: `Affinity ${t.affinityScore}% today via the ${t.quarter} quarter, Maya direction ${args.mayan.tzolkin.direction}, and Universal Day ${args.numerology.universalDay}. Practice: ${L.dayPractice}`,
       monthConnection: `Read against solar term ${args.chinese.solarTerm.name} and tekufah ${args.enochianBiblical.biblicalSeason.hebrewTekufah}.`,
       birthChartConnection: `Zodiac link ${t.zodiacCorrespondence} vs transit Sun ${sunSign}; deepen with locked natal date in Systems Report.`,
-      nameConnection: `Life Path ${args.numerology.lifePathNumber} and name gematria weight this banner; names that mean leadership, law, or joy amplify matching tribes.`
+      nameConnection: `Life Path ${args.numerology.lifePathNumber} and name gematria weight this calling; names that mean leadership, law, or joy amplify matching callings.`
     };
   });
 
@@ -445,11 +438,11 @@ export function buildCrossSystemIntertwining(args: {
     enochianBiblical: args.enochianBiblical,
     numerology: args.numerology,
     geneKeysSun: args.geneKeysSun,
-    topTribe: enrichedTribes[0] || args.topTribe,
+    topCalling: enrichedCallings[0] || args.topCalling,
     sunSign
   });
 
-  const top = enrichedTribes[0] || args.topTribe;
+  const top = enrichedCallings[0] || args.topCalling;
 
   const triangulationNarrative = `INTERTWINING DOSSIER — Why these systems sit together
 Julian Day ${args.temporal.julianDayUT.toFixed(4)} is the shared spine. From it:
@@ -460,21 +453,21 @@ Julian Day ${args.temporal.julianDayUT.toFixed(4)} is the shared spine. From it:
 • Roman ${args.enochianBiblical.gregorianWeekdayDeity.latinDies} and hour of ${args.enochianBiblical.currentPlanetaryHour.planet} speak diurnal temperament.
 • Numerology Life Path ${args.numerology.lifePathNumber} / Universal Day ${args.numerology.universalDay} speak name-and-date vibration.
 • Gene Keys Sun ${args.geneKeysSun.gate}.${args.geneKeysSun.line} (${args.geneKeysSun.gift}) speak shadow-to-gift practice.
-• Twelve Tribes strongest archetypal alignment under this methodology: ${top.tribe} — ${life.lifeRepresents}
+• Twelve Callings strongest archetypal alignment under this methodology: ${top.calling} — ${life.lifeRepresents}
 Suggested practice today: ${life.dayPractice}
 Shadow to refuse: ${life.shadowToWatch}
 Gift to explore: ${life.giftToEmbody}
-Enochian remap of camp ${top.directionInCamp} → ${args.enochianBiblical.compassOrientation.directionRemap[top.directionInCamp]}.
+Enochian remap of quarter ${top.quarter} → ${args.enochianBiblical.compassOrientation.directionRemap[top.quarter]}.
 These are not separate apps glued together—they are dialects of one JD, triangulated so agreements strengthen confidence and contradictions become conscious forks. Archetypal alignments are methodological readings, not objective identities.`;
 
   return {
     systemNotes,
-    twelveTribesEnriched: enrichedTribes,
-    primaryTribeLife: {
-      tribe: top.tribe,
+    callingsEnriched: enrichedCallings,
+    primaryCallingLife: {
+      calling: top.calling,
       ...life,
       whyBesideOtherSystems:
-        'The tribal camp is the human-vocation layer under this methodology. Calendars say when; planets say what; tribes offer archetypal lenses for how vocation can arrange itself in the living day—not a claim that computation discovered your objective identity.',
+        'The calling quarter is the human-vocation layer under this methodology. Calendars say when; planets say what; callings offer archetypal lenses for how vocation can arrange itself in the living day—not a claim that computation discovered your objective identity.',
       dayLink: top.dayConnection || '',
       monthLink: top.monthConnection || '',
       birthChartLink: top.birthChartConnection || '',
@@ -487,11 +480,11 @@ These are not separate apps glued together—they are dialects of one JD, triang
         title: 'Cardinal Direction Thread',
         nodes: [
           `Maya ${args.mayan.tzolkin.direction}`,
-          `Tribe camp ${top.directionInCamp}`,
-          `Enochian remap → ${args.enochianBiblical.compassOrientation.directionRemap[top.directionInCamp]}`,
+          `Calling quarter ${top.quarter}`,
+          `Enochian remap → ${args.enochianBiblical.compassOrientation.directionRemap[top.quarter]}`,
           `Astrocartography orientation (Enoch Flip optional)`
         ],
-        meaning: 'Direction is the shared grammar between glyph, camp, Watcher gate, and map.'
+        meaning: 'Direction is the shared grammar between glyph, quarter, Watcher gate, and map.'
       },
       {
         id: 'thread-season',
@@ -508,13 +501,13 @@ These are not separate apps glued together—they are dialects of one JD, triang
         id: 'thread-vocation',
         title: 'Vocation · Name · Gift Thread',
         nodes: [
-          `Tribe ${top.tribe}`,
+          `Calling ${top.calling}`,
           `Life Path ${args.numerology.lifePathNumber}`,
           `Gene Key Gift ${args.geneKeysSun.gift}`,
           `Dreamspell power ${args.dreamspell.solarSeal.power}`,
           `Roman ${args.enochianBiblical.gregorianWeekdayDeity.romanDeity}`
         ],
-        meaning: 'Archetypal vocation (tribe/name) meets how the sky asks you to practice (gift/tone/dies)—under declared methodologies, not as fixed identity.'
+        meaning: 'Archetypal vocation (calling/name) meets how the sky asks you to practice (gift/tone/dies)—under declared methodologies, not as fixed identity.'
       },
       {
         id: 'thread-element',
@@ -523,7 +516,7 @@ These are not separate apps glued together—they are dialects of one JD, triang
           `Chinese ${args.chinese.dominantElement}`,
           `Maya ${args.mayan.tzolkin.element}`,
           `Composite ${args.chinese.dominantElement}/${args.mayan.tzolkin.element}`,
-          `Tribe zodiac ${top.zodiacCorrespondence}`
+          `Calling zodiac ${top.zodiacCorrespondence}`
         ],
         meaning: 'Elemental agreement raises confidence; elemental tension becomes a dialectical fork.'
       }
@@ -531,12 +524,12 @@ These are not separate apps glued together—they are dialects of one JD, triang
   };
 }
 
-/** Enrich tribe scores with life connotations (used inside synthesis path). */
-export function enrichTribeWithLife(t: TwelveTribeAffinity): TwelveTribeAffinity {
-  const L = lifeForTribe(t.tribe);
+/** Enrich calling scores with life connotations (used inside synthesis path). */
+export function enrichCallingWithLife(t: CallingAffinity): CallingAffinity {
+  const L = lifeForCalling(t.calling);
   return {
     ...t,
     lifeConnotation: L,
-    resonanceDescription: `${L.lifeRepresents} Resonates at ${t.affinityScore}% via ${t.directionInCamp} camp, ${t.gemstone}, and role: ${t.archetypeRole}. Day practice: ${L.dayPractice}`
+    resonanceDescription: `${L.lifeRepresents} Resonates at ${t.affinityScore}% via ${t.quarter} quarter, ${t.gemstone}, and role: ${t.archetypeRole}. Day practice: ${L.dayPractice}`
   };
 }

@@ -19,7 +19,7 @@ function contextDigest(ctx: CompleteCalculationContext): string {
     `Chinese day ${ctx.chinese.dayPillar.stemElement} ${ctx.chinese.dayPillar.zodiacAnimal} · ${ctx.chinese.solarTerm.name}`,
     `Moon ${ctx.gaiaOvercast?.lunarPhaseName} · Sun ${ctx.celestialBodies.find((b) => b.id === 'sun')?.zodiacSign}`,
     `Gene Key Sun ${ctx.geneKeysSun.gate}.${ctx.geneKeysSun.line} (${ctx.geneKeysSun.gift})`,
-    `Top tribe ${ctx.synthesis?.topResonatingTribe?.tribe} · Harmonic ${ctx.synthesis?.harmonicResonanceIndex}/100`,
+    `Top calling ${ctx.synthesis?.topCalling?.calling} · Harmonic ${ctx.synthesis?.harmonicResonanceIndex}/100`,
     `Fork: ${ctx.dialecticalForks?.[0]?.title || 'none'}`
   ].join('\n');
 }

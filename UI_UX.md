@@ -1,5 +1,7 @@
 # The Crucible — UI / UX Design System Spec
 
+> **Superseded in part.** The interface was redesigned (ivory paper / night-sky ink palette, Fraunces + Inter, self-hosted Noto symbol and script fonts, standard chart wheel, plain-language navigation: Today · My chart · Next 14 days · Traditions). Tokens live in `src/index.css` and `src/styles/refine.css`. Treat the sections below as historical where they differ.
+
 **Purpose:** Single source of truth for a total visual revamp in **Figma** or **Framer**, then rebuild back into this Vite/React/Tailwind codebase. Capture **every** surface, typeface, color, graphic language, asset style, layout rule, interaction pattern, and component contract as implemented today.
 
 **Companion docs:** `HOW_THIS_WORKS.md` (engines & meaning) · this file (interface & experience only).
@@ -190,7 +192,7 @@ Custom SVG cartouches for:
 
 - Mayan day signs (Imix, Ik, Akbal, …) — cyan default `#00f0ff`, 48×48 viewBox, rounded cartouche + dashed inner circle  
 - Chinese zodiac / Wu Xing element marks  
-- Twelve Tribes emblems  
+- Twelve Callings emblems  
 
 **Asset style rules:**
 
@@ -280,7 +282,7 @@ Three columns: Gregorian datetime · Mayan Long Count (cyan) · Chinese year pil
 3. Planetary Ephemeris  
 4. Dreamspell Synchronometer  
 5. Calendar Comparison (+ per-system cross-notes)  
-6. Archetypal Matrix / Twelve Tribes (+ epistemic badges + intertwining)
+6. Archetypal Matrix / Twelve Callings (+ epistemic badges + intertwining)
 
 ### 6.6 Cross-note pattern (`SystemCrossNoteCard`)
 
@@ -336,7 +338,7 @@ Chat grounded on calculation context + knowledge-base claims/rulesets. Offline f
 | DreamspellSynchronometerPanel | `DreamspellSynchronometerPanel.tsx` | `Grid / Dreamspell` |
 | CalendarComparisonGrid | `CalendarComparisonGrid.tsx` | `Grid / Calendars` |
 | SystemCrossNoteCard | `SystemCrossNoteCard.tsx` | `Atoms / Cross-Note` |
-| ArchetypalMatrixPanel | `ArchetypalMatrixPanel.tsx` | `Grid / Tribes Matrix` |
+| ArchetypalMatrixPanel | `ArchetypalMatrixPanel.tsx` | `Grid / Twelve Callings` |
 | EpistemicBadge | `EpistemicBadge.tsx` | `Atoms / Epistemic` |
 | EnochianBiblicalPanel | `EnochianBiblicalPanel.tsx` | `View / Enochian` |
 | AstrocartographyMap | `AstrocartographyMap.tsx` | `View / Map` |

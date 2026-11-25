@@ -61,7 +61,7 @@ export function buildLocalReadingContext(
     Math.abs(loc.longitude - WORLD_DEFAULT_LOCATION.longitude) < 0.01;
 
   return {
-    cityLabel: isWorldDefault ? 'World · UTC (no regional overlay)' : cityLabel,
+    cityLabel: isWorldDefault ? 'No place chosen · world time (UTC)' : cityLabel,
     localTime: ctx.input.timeString.slice(0, 5),
     dateLabel: formatDateLabel(ctx.input.dateString, ctx.temporal.dayOfWeek),
     sunrise,

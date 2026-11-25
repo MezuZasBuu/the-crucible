@@ -1,5 +1,7 @@
 # How The Crucible Works — Complete Architecture & Implementation Reference
 
+> **Updated.** Planet positions now come from the open-source `astronomy-engine` library, houses are Placidus (Whole Sign optional), birth-place time zones are resolved with `tz-lookup`, and the former Twelve Tribes layer is replaced by **The Twelve Callings** (§8.13). The interface was redesigned; where a UI description below differs from the app, the app and `README.md` are current.
+
 This is the canonical human-readable map of **The Crucible**: purpose, philosophy, stack, data contracts, calculation pipeline, every engine module, UI wiring, APIs, free external services, epistemic honesty, reports, tests, defaults, limits, and glossary.
 
 **Companion docs**
@@ -38,7 +40,7 @@ When Maya, Chinese, Enochian, Roman dies, and other layers disagree, The Crucibl
 1. Shows each system’s own reading  
 2. Attaches a **cross-note** (why present · life · day · month · birth · name)  
 3. Surfaces **agreements**, **tensions**, and **dialectical forks** (Path A / Path B / synthesis)  
-4. Uses the **Twelve Tribes camp** as a human-vocation layer (direction, season, gift, name)
+4. Uses the **Twelve Callings circle** as a human-vocation layer (direction, season, gift, name)
 
 ### 2.3 Epistemic honesty
 
@@ -64,7 +66,7 @@ RAW INPUT (date / time / place / optional name / methodology)
     → NORMALIZATION (TemporalCoordinate / Julian Day)
     → DETERMINISTIC TRADITION ENGINES
     → OPTIONAL VEDIC (methodology flag)
-    → SYNTHESIS + TWELVE TRIBES SCORING
+    → SYNTHESIS + TWELVE CALLINGS SCORING
     → CROSS-SYSTEM INTERTWINING (notes, threads, life connotations)
     → OPTIONAL GAIA OVERCAST + DIALECTICAL FORKS (methodology flag)
     → HASH / AUDIT FIELDS
@@ -149,7 +151,7 @@ Default Maya correlation: `GMT_584283`.
 3. Ephemeris (sky facts)  
 4. Dreamspell (practice language)  
 5. Calendar Comparison + cross-notes  
-6. Archetypal Matrix / Twelve Tribes (vocation hub)
+6. Archetypal Matrix / Twelve Callings (vocation hub)
 
 ### 4.4 How state drives calculation
 
@@ -223,8 +225,8 @@ Merged via `mergeMethodology()` in `epistemic.ts`.
 | Field | Meaning |
 |-------|---------|
 | `systemNotes[]` | Per-tradition cross-notes |
-| `twelveTribesEnriched[]` | Tribes + life connotations |
-| `primaryTribeLife` | Top tribe manifesto + practices |
+| `callingsEnriched[]` | Callings + life connotations |
+| `primaryCallingLife` | Top calling summary + practices |
 | `triangulationNarrative` | Full dossier text |
 | `intertwiningThreads[]` | Direction, Season, Vocation/Name/Gift, Element |
 
@@ -251,12 +253,12 @@ File: `src/engine/crucibleCore.ts`
 | 12 | Gene Keys | `getGeneKeyFromLongitude` on Sun & anti-solar Earth | `geneKeysSun`, `geneKeysEarth` |
 | 13 | Vedic (opt) | `calculateVedicDetails(moon, sun, JD)` if `includeVedic` | `vedic` |
 | 14 | Synthesis | `calculateSynthesis(temporal, mayan, chinese, numerology)` | `synthesis` |
-| 15 | Intertwining | `buildCrossSystemIntertwining(...)` | `intertwining`; enriches tribes + `recommendedFocus` |
+| 15 | Intertwining | `buildCrossSystemIntertwining(...)` | `intertwining`; enriches callings + `recommendedFocus` |
 | 16 | Gaia (opt) | `calculateGaiaOvercast` + `buildDialecticalForks` + `toSharedDialecticalForks` if `includeGaiaOverlay` | `gaiaOvercast`, `dialecticalForks` |
 | 17 | Audit | hash canonical string | `rulesetHash`, `calculationId`, `executionDurationMs` |
 
 **Canonical hash string (simplified):**  
-`JD | methodology.version | Long Count | Dreamspell signature | Year pillar | Life Path | Enochian date | Top tribe | Vedic nakshatra`
+`JD | methodology.version | Long Count | Dreamspell signature | Year pillar | Life Path | Enochian date | Top calling | Vedic nakshatra`
 
 `calculationId` form: `CRUCIBLE-{HASH}-{floor(JD)}`.
 
@@ -276,8 +278,8 @@ File: `src/engine/crucibleCore.ts`
 | `numerology.ts` | Life Path, Universal Day/Month/Year, Chaldean vibration |
 | `ephemeris.ts` | Mean-motion tropical bodies, aspects helpers |
 | `astrocartography.ts` | MC/IC/ASC/DSC lines, `SANCTUARY_NODES` |
-| `synthesis.ts` | Harmonic index, Twelve Tribes scoring, Gene Keys gates |
-| `crossSystemBridge.ts` | Cross-notes, tribe life connotations, intertwining threads |
+| `synthesis.ts` | Harmonic index, Twelve Callings scoring, Gene Keys gates |
+| `crossSystemBridge.ts` | Cross-notes, calling life connotations, intertwining threads |
 | `sharedCelestial.ts` | Shared lunar illumination / phase / aspect metrics |
 | `gaiaOvercastForks.ts` | Speculative Gaia overlay + dialectical forks + total systems report builder |
 | `longTermResonance.ts` | Vedic details, `PRESET_LOCATIONS`, 14-day forecast |
@@ -311,19 +313,19 @@ File: `src/engine/crucibleCore.ts`
 | `SPINDEN_489384` | 489384 |
 
 **Why:** Sacred day-*quality* independent of marketplace Gregorian.  
-**Triangulates with:** Dreamspell, Tribes (camp direction), Chinese element, Enochian remap.
+**Triangulates with:** Dreamspell, Callings (compass quarter), Chinese element, Enochian remap.
 
 ### 8.3 Dreamspell (`dreamspell.ts`)
 
 **What:** Kin, seal, tone, wavespell, Fifth Force oracle, Thirteen Moon, plasmas.  
 **Why:** Modern practice language for *how to act* the day.  
-**Triangulates with:** Maya, Gene Keys gift, Tribes.
+**Triangulates with:** Maya, Gene Keys gift, Callings.
 
 ### 8.4 Chinese BaZi (`chinese.ts`)
 
 **What:** Year/month/day/hour pillars, solar terms (Jieqi), Wu Xing counts.  
 **Why:** Elemental weather and work-style timing.  
-**Triangulates with:** Egyptian season, biblical tekufah, Maya element, Tribes.
+**Triangulates with:** Egyptian season, biblical tekufah, Maya element, Callings.
 
 ### 8.5 Egyptian Sothic (`historicalCalendars.ts`)
 
@@ -335,13 +337,13 @@ File: `src/engine/crucibleCore.ts`
 
 **What:** 13 months, Amete Mihret, evangelist cycle.  
 **Why:** Highland Christian memory; bridge to Enoch preservation.  
-**Triangulates with:** Enochian watches, Tribes / Jerusalem default.
+**Triangulates with:** Enochian watches, Callings.
 
 ### 8.7 Greek Attic / Metonic
 
 **What:** Attic month, patron deity, festival, Metonic year, Olympiad.  
 **Why:** Lunisolar festival consciousness beside solar civil clocks.  
-**Triangulates with:** Roman dies deities, Tribes mythic roles.
+**Triangulates with:** Roman dies deities, Callings.
 
 ### 8.8 Enochian · Biblical · Roman (`enochianBiblical.ts`)
 
@@ -355,28 +357,28 @@ File: `src/engine/crucibleCore.ts`
 
 **Why:** Covenant season + Watcher direction + diurnal temperament in one layer.  
 **A/B peek:** Civil north-up vs Enochian/Biblical frame.  
-**Triangulates with:** Tribes camp remap, Chinese/Egyptian seasons, Maya direction.
+**Triangulates with:** Callings quarter remap, Chinese/Egyptian seasons, Maya direction.
 
 ### 8.9 Numerology (`numerology.ts`)
 
 **What:** Life Path, Universal Day/Month/Year, Chaldean vibration, meanings.  
 **Why:** Bridge from civil date (+ name) to vocation scoring.  
 **Name:** Core defaults to `"THE CRUCIBLE"` if unset; App defaults to `Sovereign Querent`; Systems Report / gematria deepen name work.  
-**Triangulates with:** Tribes, Maya, Gene Keys.
+**Triangulates with:** Callings, Maya, Gene Keys.
 
 ### 8.10 Ephemeris & Astrocartography
 
 **What:** Tropical longitudes (mean-motion model), aspects helpers; MC/IC/ASC/DSC lines; sanctuary nodes (Giza, Jerusalem, Chichen Itza, Lalibela, etc.).  
 **Why:** Sky *what* + Earth *where*.  
 **Enoch Flip:** Applies Watcher orientation to the map (`AstrocartographyMap`).  
-**Triangulates with:** Gene Keys (from longitude), tribal zodiac, Enochian remap.
+**Triangulates with:** Gene Keys (from longitude), calling zodiac sign, Enochian remap.
 
 ### 8.11 Gene Keys (`synthesis.ts`)
 
 **What:** Ecliptic → 64 gates; Sun & Earth (anti-solar); shadow → gift → siddhi.  
 **Why:** Psychological practice continuum for the sky’s teaching.  
 **Note:** Full Human Design stack is **not** implemented—gate mapping only.  
-**Triangulates with:** Dreamspell power, tribal gift-to-embody, name themes.
+**Triangulates with:** Dreamspell power, calling gift, name themes.
 
 ### 8.12 Vedic (`longTermResonance.ts` → core)
 
@@ -385,27 +387,27 @@ File: `src/engine/crucibleCore.ts`
 **Epistemic:** typically `SYSTEM_INTERPRETATION`.  
 **Toggle:** `methodology.includeVedic`.
 
-### 8.13 Twelve Tribes (`synthesis.ts` + `crossSystemBridge.ts`)
+### 8.13 The Twelve Callings (`synthesis.ts` + `crossSystemBridge.ts`)
 
-**What:** Numbers 2–style camp:
+**What:** The Crucible's own twelvefold framework — twelve roles a person can play, standing around a shared centre, three in each compass quarter. It is an original comparative lens, not a historical tradition and not a statement about ancestry, religion or identity.
 
-- **East:** Judah, Issachar, Zebulun  
-- **South:** Reuben, Simeon, Gad  
-- **West:** Ephraim, Manasseh, Benjamin  
-- **North:** Dan, Asher, Naphtali  
+- **East · Dawn · those who begin:** The Trailblazer, The Stargazer, The Wayfarer  
+- **South · Noon · those who act:** The Wellspring, The Listener, The Sentinel  
+- **West · Dusk · those who gather:** The Cultivator, The Memory Keeper, The Flamekeeper  
+- **North · Midnight · those who discern:** The Arbiter, The Host, The Messenger  
 
-Each carries gem, banner, zodiac correspondence, archetype role, and **life connotations** (life represents, day practice, shadow, gift).
+Each calling carries a motto, a gemstone, an emblem, a zodiac sign and element, a role description, and **life connotations** (what it is about, a practice for today, its gift, its shadow).
 
-**Why beside every system:** Calendars answer **when**. Planets answer **what**. Numbers answer **vibration**. Tribes answer **who you are being asked to be** in the living day—via direction, element/zodiac, and Life Path.
+**Why beside every system:** Calendars answer **when**. Planets answer **what**. Numbers answer **which theme**. The Callings answer **which role the day asks for** — via direction, element and the day's number.
 
 **Scoring (simplified):**
 
-- +25 if camp direction matches Maya day direction  
-- +20 if zodiac elemental language matches Chinese dominant element  
-- +15 if tribe index aligns with Life Path / Universal Day  
+- +25 if the calling's quarter matches the Maya day direction  
+- +20 if its zodiac element matches the Chinese dominant element (Metal reads as Air, Wood as Earth)  
+- +15 if its position aligns with Life Path / Universal Day  
 - Then enriched with life connotations + day/month/birth/name connection strings  
 
-**UI:** Archetypal Matrix banner + clickable tribes; cross-notes throughout Calendar grid.
+**UI:** `ArchetypalMatrixPanel` + `CallingsWheel` — a compass wheel of the twelve; tap one to read it.
 
 ### 8.14 Gaia overcast & dialectical forks (`gaiaOvercastForks.ts`)
 
@@ -423,10 +425,10 @@ Each carries gem, banner, zodiac correspondence, archetype role, and **life conn
 
 | Thread | Typical nodes | Meaning |
 |--------|---------------|---------|
-| **Cardinal Direction** | Maya → Tribe camp → Enochian remap → Map flip | Shared spatial grammar |
+| **Cardinal Direction** | Maya → Calling quarter → Enochian remap → Map flip | Shared spatial grammar |
 | **Seasonal Covenant** | Chinese jieqi → Egyptian season → Biblical tekufah → verse | Multiple season clocks, one solar sky |
-| **Vocation · Name · Gift** | Tribe → Life Path → Gene Key gift → Dreamspell power → Roman deity | Who + how to practice |
-| **Elemental Weather** | Chinese Wu Xing → Maya element → composite → tribal zodiac | Agreement raises confidence; tension → fork |
+| **Vocation · Name · Gift** | Calling → Life Path → Gene Key gift → Dreamspell power → Roman deity | Who + how to practice |
+| **Elemental Weather** | Chinese Wu Xing → Maya element → composite → calling zodiac sign | Agreement raises confidence; tension → fork |
 
 ### 9.2 Day / month / birth / name matrix
 
@@ -435,7 +437,7 @@ Each carries gem, banner, zodiac correspondence, archetype role, and **life conn
 | **Day** | What does *today’s* computation say in this tradition? |
 | **Month** | What longer seasonal/month container am I inside? |
 | **Birth chart** | How would natal data contrast with this transit? (deepened when birth locked in Systems Report) |
-| **Name** | How do Life Path / gematria / tribal scoring hear vocation? |
+| **Name** | How do Life Path / gematria / calling scoring hear vocation? |
 
 UI component: `SystemCrossNoteCard` (+ `IntertwiningOverview` on Archetypal Matrix).
 
@@ -451,7 +453,7 @@ UI component: `SystemCrossNoteCard` (+ `IntertwiningOverview` on Archetypal Matr
 | `PlanetaryEphemerisWidget` | Zodiac wheel, bodies, aspects |
 | `DreamspellSynchronometerPanel` | Dreamspell / 13-Moon / oracle |
 | `CalendarComparisonGrid` | Side-by-side calendars + cross-notes |
-| `ArchetypalMatrixPanel` | Tribes matrix + intertwining hub |
+| `ArchetypalMatrixPanel` | Twelve Callings compass + intertwining hub |
 | `SystemCrossNoteCard` | Expandable cross-note atom |
 | `EpistemicBadge` | Epistemic class chip |
 | `EnochianBiblicalPanel` | Enochian / biblical / Roman deep dive |
@@ -464,7 +466,7 @@ UI component: `SystemCrossNoteCard` (+ `IntertwiningOverview` on Archetypal Matr
 | `DailyEnergyReportModal` | Daily report + optional expand |
 | `ReportExportModal` | CSV / JSON / print / KB dumps |
 | `DiagnosticMicroTestsModal` | Runs `runMicroTests()` |
-| `symbols/CrucibleGlyphs` | SVG Maya / Chinese / tribe glyphs |
+| `symbols/CrucibleGlyphs` | SVG Maya / Chinese / culture glyphs |
 
 Visual tokens, fonts, and Framer checklist: see **`UI_UX.md`**.
 
@@ -518,10 +520,10 @@ Compass system prompt injects methodology, Vedic, Gaia epistemic class, intertwi
 
 | Output | Engine / UI | Notes |
 |--------|-------------|-------|
-| Daily Energy Report | `dailyEnergyReport.ts` / modal | Uses core Universal Day, Vedic, Gaia, Enochian, tribe practice |
+| Daily Energy Report | `dailyEnergyReport.ts` / modal | Uses core Universal Day, Vedic, Gaia, Enochian, calling practice |
 | Total Systems Report | `buildTotalSystemsReport` + panel | Gaia, gematria, forks, ledger, JSON/JSONL |
 | 14-day forecast | `generateFourteenDayForecast` | Re-runs core per day × location preset |
-| CSV / print | `export.ts` | Includes Enochian + Tribe life fields |
+| CSV / print | `export.ts` | Includes Enochian + Calling fields |
 | LLM Compass | `/api/compass` | Narration only |
 | Knowledge dumps | KB endpoints + export modal | Claims / rulesets |
 
@@ -536,7 +538,7 @@ Compass system prompt injects methodology, Vedic, Gaia epistemic class, intertwi
 
 This is an in-code provenance seed—not yet a PostgreSQL graph or file-pack ruleset archive.
 
-**Ritual counsel and tribal life meanings are symbolic navigation aids**, not medical, legal, or financial advice. Prefer Verify tests and `rulesetHash` when auditing numbers.
+**Ritual counsel and calling descriptions are symbolic navigation aids**, not medical, legal, or financial advice. Prefer Verify tests and `rulesetHash` when auditing numbers.
 
 ---
 
@@ -600,8 +602,8 @@ Fixture: `2026-09-07` @ Jerusalem `31.778, 35.2354`.
 
 ## 17. Typical user journeys
 
-1. **Live day reading** — Stream on Grid; gears → calendars → Tribes practice.  
-2. **Understand Tribes** — Archetypal Matrix; read day/month/birth/name links.  
+1. **Live day reading** — Stream on Grid; gears → calendars → Callings practice.  
+2. **Understand the Callings** — Archetypal Matrix; read day/month/birth/name links.  
 3. **Enochian season** — Enochian tab; Peek A/B; verses; flip map.  
 4. **Name + birth** — Systems Report; gematria + forks + JSON.  
 5. **Place change** — Sanctuary chip or Nominatim Geo search.  
@@ -620,7 +622,7 @@ It means:
 1. One **Julian Day** spine  
 2. Each tradition keeps its own integrity  
 3. **Cross-notes** make presence and life-relevance explicit  
-4. **Tribes** translate multi-system weather into vocation  
+4. **Callings** translate multi-system weather into vocation  
 5. **Threads** show direction, season, gift, and element as shared cables  
 6. **Forks** honor disagreement  
 7. **Epistemic labels** keep speculation from posing as instrument data  
@@ -649,9 +651,9 @@ The current app is a **synchronic intertwining product** with deterministic engi
 |------|-------------------------|
 | JD | Julian Day — shared time spine |
 | Cross-note | Why a system is here + day/month/birth/name links |
-| Intertwining | Structured weave of notes, threads, tribe life connotations |
+| Intertwining | Structured weave of notes, threads, calling life connotations |
 | Triangulation | Reading agreements/conflicts without averaging |
-| Camp / Tribe | Archetypal vocation quadrant (Numbers 2 symbolism) |
+| Calling / Quarter | One of twelve roles; its compass quarter (East, South, West, North) |
 | Tekufah | Biblical seasonal quarter with verse anchors |
 | Dies | Latin planetary weekday |
 | Enoch Flip | 180° + E↔W map/compass remap |

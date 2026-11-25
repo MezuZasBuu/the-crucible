@@ -271,11 +271,11 @@ export function buildEnochianCompassFlip(civilNorthUp: boolean = true): Enochian
       scaleX: -1,
       label: 'Enochian World Flip — South-primary + East–West mirror'
     },
-    connotation: '1 Enoch 72 describes the sun\'s portals by season-gates (East of light, South of heat, West of gathering, North of stillness). The ceremonial flip turns civil north-up cartography into Watcher-gate orientation so biblical camp directions, tribal banners, and geodetic lines can be triangulated against inverted cardinals.',
+    connotation: '1 Enoch 72 describes the sun\'s portals by season-gates (East of light, South of heat, West of gathering, North of stillness). The ceremonial flip turns civil north-up cartography into Watcher-gate orientation so the four season-gates, the calling quarters, and geodetic lines can be triangulated against inverted cardinals.',
     triangulationNotes: [
       'Civil North becomes Enochian South (heat / Tammuz watch)',
       'Civil East becomes Enochian West (ingathering / Tishrei watch)',
-      'Twelve Tribes camp East (Judah) reads as West-gate under flip — dialectical A/B required',
+      'An East-quarter calling reads as West-gate under the flip — compare both views side by side',
       'Astrocartography heading +180° and scaleX(-1) mirrors the world map to Watcher orientation'
     ]
   };
@@ -394,7 +394,7 @@ function buildPeekFrames(
     },
     synthesis: {
       title: 'Triangulated Third Path',
-      summary: `Hold both frames without collapse: execute civic duties under ${gregorianDeity.romanDeity} while orienting contemplative practice to the ${biblical.enochianWatch}, remapping tribal/camp bearings through the Enochian flip so contradictions become explicit forks rather than silent error.`
+      summary: `Hold both frames without collapse: execute civic duties under ${gregorianDeity.romanDeity} while orienting contemplative practice to the ${biblical.enochianWatch}, remapping the calling quarters through the Enochian flip so contradictions become explicit forks rather than silent error.`
     }
   };
 }

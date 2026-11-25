@@ -11,6 +11,7 @@ import {
   ReadingFocus,
   ReadingMode
 } from '../types';
+import { SIGN_KEYWORDS } from './ephemeris';
 import { compileAlmanacEntries } from './almanac';
 import { selectEntriesForFocus } from './readingFocus';
 import { buildLocalReadingContext } from './localContext';
@@ -73,32 +74,51 @@ function buildDomains(
   const tone = entries.find((e) => e.id === 'maya-tone');
   const fork = ctx.dialecticalForks?.[0];
 
-  const sunSign = ctx.celestialBodies.find((b) => b.id === 'sun')?.zodiacSign || 'the current season';
+  const body = (id: string) => ctx.celestialBodies.find((b) => b.id === id);
+  const sun = body('sun');
+  const moon = body('moon');
+  const mercury = body('mercury');
+  const venus = body('venus');
+  const mars = body('mars');
+  const jupiter = body('jupiter');
+  const sunSign = sun?.zodiacSign || 'the current season';
   const moonPhase = ctx.gaiaOvercast?.lunarPhaseName || 'a shifting moon';
+  const kw = (sign?: string) => (sign && SIGN_KEYWORDS[sign]) || 'its own themes';
+  const phaseNote = /Full/.test(moonPhase)
+    ? 'feelings tend to run high and things come to a head'
+    : /New/.test(moonPhase)
+      ? 'energy is low and inward — good for quiet starts'
+      : /Waxing/.test(moonPhase)
+        ? 'momentum is building, so it is easier to push things forward'
+        : 'things are winding down, which favours finishing and letting go';
+  const term = ctx.chinese.solarTerm.name.match(/\(([^)]+)\)/)?.[1] || ctx.chinese.solarTerm.name;
 
-  const mood = firstSentence(
-    `*${moonPhase}* keeps feelings closer to the surface. Most people meet the day with mixed pacing — sleep and overstimulation decide whether patience or irritability wins.`
-  );
+  const mood = `*${moonPhase} in ${moon?.zodiacSign ?? 'the sky'}.* Traditionally ${phaseNote}. The Moon in ${moon?.zodiacSign ?? 'this sign'} colours the mood with ${kw(moon?.zodiacSign)}.`;
 
-  const people = firstSentence(
-    `Negotiations inherit today's social temperature — *alliances move at the day's pace*, not yours alone. Small misreads in tone carry extra weight.`
-  );
+  const people = `*Venus is in ${venus?.zodiacSign ?? 'transit'}*, the planet linked with relationships, so connection leans toward ${kw(venus?.zodiacSign)}.${
+    venus?.isRetrograde ? ' Venus is retrograde, traditionally a time to revisit old ties rather than start new ones.' : ''
+  } Mars in ${mars?.zodiacSign ?? 'transit'} shapes how people push and argue: ${kw(mars?.zodiacSign)}.`;
 
-  const travel = firstSentence(
-    `Movement favors clarity over speed. *Check timing twice* before departures; delays usually come from compressed mood, not a cosmic veto.`
-  );
+  const travel = mercury?.isRetrograde
+    ? `*Mercury is retrograde in ${mercury.zodiacSign}* — it appears to move backward in the sky. Astrologers treat this as a time to *double-check bookings, routes and timings* and to leave extra margin.`
+    : `*Mercury is moving forward in ${mercury?.zodiacSign ?? 'transit'}*, which astrologers read as plain sailing for trips and plans. Journeys suit ${kw(mercury?.zodiacSign)}.`;
 
-  const finance = firstSentence(
-    `Money decisions want a second read today. Avoid impulsive commitments — contracts and purchases benefit from patience, especially when the emotional weather is restless.`
-  );
+  const finance = `*Jupiter in ${jupiter?.zodiacSign ?? 'transit'}* is the traditional marker for growth and luck — right now it favours ${kw(jupiter?.zodiacSign)}.${
+    jupiter?.isRetrograde ? ' It is retrograde, which suggests reviewing plans rather than expanding them.' : ''
+  } In the Chinese calendar the strongest element today is ${ctx.chinese.dominantElement.toLowerCase()}.`;
 
-  const tech = firstSentence(
-    `Messages, tools, and networks inherit today's friction field — *double-check automation, passwords, and assumptions* before you ship anything important.`
-  );
+  const tech = mercury?.isRetrograde
+    ? `*Mercury retrograde* is the classic time for crossed wires. *Back things up, re-read before you send*, and expect to revisit earlier conversations.`
+    : `With Mercury moving forward, messages and tools are traditionally expected to run smoothly. Mercury in ${mercury?.zodiacSign ?? 'this sign'} gives communication a tone of ${kw(mercury?.zodiacSign)}.`;
 
-  const whyToday = firstSentence(
-    `The sky, season, and calendar weather converge on one atmospheric theme — *${sunSign} light*, ${ctx.chinese.solarTerm.name.toLowerCase()} pacing, and ${moonPhase.toLowerCase()} mood. ${fork?.synthesis.summary || 'Different lenses name the same pressure differently.'}`
-  );
+  const whyToday = `Three things set today’s tone: the Sun in *${sunSign}* (${kw(sunSign)}), a *${moonPhase}*, and the Chinese season marker *${term}*. The Maya day sign is ${ctx.mayan.tzolkin.formatted} (${ctx.mayan.tzolkin.meaning.split('/')[0].trim().toLowerCase()}).`;
+
+  void lunar;
+  void bazi;
+  void gene;
+  void maya;
+  void tone;
+  void fork;
 
   let personalAlignment: string | undefined;
   if (mode === 'personal' && profile) {
@@ -125,7 +145,8 @@ export function synthesizeDailyBearing(
     selected[0]?.behavioralCue ||
     fork?.synthesis.leverage ||
     'Name one decision, then refuse both panic and perfectionism.';
-  const watchFor = fork?.pathB.summary || selected[0]?.dataPoint || 'Urgency that pretends to be clarity.';
+  const callingLife = ctx.intertwining.primaryCallingLife;
+  const watchFor = `*${ctx.geneKeysSun.shadow}* is today’s pressure point in the Gene Keys — try answering it with ${ctx.geneKeysSun.gift.toLowerCase()}. Also keep an eye on this: ${callingLife.shadowToWatch.replace(/\.$/, '').toLowerCase()}.`;
   const theme = themeFrom(practice, selected[0]?.behavioralCue || '', fork?.title || '');
 
   const lead = firstSentence(selected[0]?.collectiveImpact || selected[0]?.individualImpact || 'The day carries a readable atmospheric theme.');
@@ -133,28 +154,19 @@ export function synthesizeDailyBearing(
 
   const who =
     mode === 'personal' && profile
-      ? `${profile.displayName || profile.querentName}: this layers today’s world sky against your saved chart.`
-      : 'This is today’s world energy — the shared sky and calendar weather everyone moves through.';
+      ? `${profile.displayName || profile.querentName}: this compares today’s sky with your own birth chart.`
+      : 'This reading is for everyone — it describes the day itself, not you personally.';
 
   const summary = `*${lead.replace(/\.$/, '')}.* ${second ? `${second} ` : ''}${who}`;
 
   const contributors: DailyBearingContributor[] = selected
-    .filter((e) => e.id !== 'tribe')
+    .filter((e) => e.id !== 'calling')
     .map((e) => ({
       systemId: e.id,
       label: e.tradition,
       signal: e.dataPoint,
       epistemic: e.epistemic
     }));
-
-  if (fork) {
-    contributors.push({
-      systemId: fork.id,
-      label: 'Fork of opportunity',
-      signal: fork.title,
-      epistemic: fork.epistemicClass
-    });
-  }
 
   return {
     theme,

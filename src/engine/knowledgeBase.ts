@@ -107,19 +107,19 @@ export const CANONICAL_RULESETS: RulesetMetadata[] = [
     ]
   },
   {
-    id: 'RULES-TWELVE-TRIBES',
-    name: 'Twelve Tribes of Israel Archetypal Correspondence Matrix',
-    tradition: 'Hebraic Kabbalistic / Patriarchal',
+    id: 'RULES-TWELVE-CALLINGS',
+    name: 'The Twelve Callings Circle',
+    tradition: 'Twelve Callings',
     category: 'archetype',
-    version: '1.0.0',
-    epoch: 'Genesis 49 & Deuteronomy 33 blessings; Sefer Yetzirah',
-    sourceAuthority: 'Sefer Yetzirah (Book of Creation); Midrash Rabbah; Ari Zal (Luria)',
-    description: 'Twelvefold archetypal camp distribution aligned with cardinal directions, gemstones, and planetary signs.',
+    version: '2.0.0',
+    epoch: 'Original Crucible framework (no historical epoch)',
+    sourceAuthority: 'The Crucible — an original comparative lens built on the zodiac, the four directions and birthstone lore',
+    description: 'Twelve roles of human vocation around a shared centre, three per compass quarter, each with a stone, an emblem and a zodiac sign.',
     gridlockedRules: [
-      'Camp of Judah on East (Judah, Issachar, Zebulun)',
-      'Camp of Reuben on South (Reuben, Simeon, Gad)',
-      'Camp of Ephraim on West (Ephraim, Manasseh, Benjamin)',
-      'Camp of Dan on North (Dan, Asher, Naphtali)'
+      'East · Dawn · those who begin (Trailblazer, Stargazer, Wayfarer)',
+      'South · Noon · those who act (Wellspring, Listener, Sentinel)',
+      'West · Dusk · those who gather (Cultivator, Memory Keeper, Flamekeeper)',
+      'North · Midnight · those who discern (Arbiter, Host, Messenger)'
     ]
   },
   {
@@ -226,14 +226,14 @@ export const CANONICAL_CLAIMS: KnowledgeClaim[] = [
   },
   {
     id: 'CLAIM-004',
-    tradition: 'Twelve Tribes Matrix',
-    entity: 'tribe.judah',
+    tradition: 'Twelve Callings',
+    entity: 'calling.trailblazer',
     relation: 'governs_direction',
     target: 'direction.east',
-    validityScope: 'Biblical Camp Order (Numbers 2)',
-    sourceCitation: 'Torah (Numbers 2:3); Midrash Bemidbar Rabbah',
-    status: 'Authoritative',
-    confidenceScore: 0.99
+    validityScope: 'Twelve Callings circle (Crucible framework v2)',
+    sourceCitation: 'The Crucible — Twelve Callings definition',
+    status: 'Documented',
+    confidenceScore: 1
   },
   {
     id: 'CLAIM-005',

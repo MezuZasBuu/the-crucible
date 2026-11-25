@@ -19,7 +19,7 @@ export const TGOLD_VECTORS: TgoldVector[] = [
     name: 'Ancestral and Indigenous Knowledge Systems',
     shortLabel: 'Ancestral / Indigenous',
     expansionProtocol:
-      'Locate accounts within the tradition itself — not only academic summaries. Cross-tribal convergence elevates signal. Distinguish preserved knowledge from colonial filtering.',
+      'Locate accounts within the tradition itself — not only academic summaries. Cross-cultural convergence elevates signal. Distinguish preserved knowledge from colonial filtering.',
     caution: 'Subject to cultural drift and internal manipulation like all knowledge systems.',
     traditions: ['Maya Calendrical', 'Chinese Sexagenary', 'Ethiopian Orthodox / Ge\'ez', 'Ancient Egyptian', 'Vedic']
   },
@@ -30,7 +30,7 @@ export const TGOLD_VECTORS: TgoldVector[] = [
     expansionProtocol:
       'Treat phenomenological reports as data; theological interpretation as secondary framework. Cross-cultural convergence of reported experience is the highest-value signal.',
     caution: 'Symbol and mechanism must not be collapsed without historical evidence.',
-    traditions: ['Hebraic Kabbalistic / Patriarchal', 'Enochian / Ethiopian Astronomical Book', 'Gene Keys', 'Twelve Tribes Matrix']
+    traditions: ['Enochian / Ethiopian Astronomical Book', 'Gene Keys', 'Twelve Callings']
   },
   {
     id: 7,

@@ -212,7 +212,7 @@ export function buildDialecticalForks(
     alchemicalSynthesis: {
       title: 'Transmutation via Sacred Form (The Temple of Breath)',
       description: `Do not break the vessel; re-temper it in the crucible. Update the agreements, rewrite the constitution, and expand the walls rather than abandoning the city.`,
-      transcendentLeveragePoint: `Anchor your transformation within the ${ctx.synthesis.topResonatingTribe.tribe} archetype and its ${ctx.synthesis.topResonatingTribe.gemstone} crystalline frequency.`
+      transcendentLeveragePoint: `Anchor your transformation within the ${ctx.synthesis.topCalling.calling} archetype and its ${ctx.synthesis.topCalling.gemstone} crystalline frequency.`
     }
   });
 
@@ -220,7 +220,7 @@ export function buildDialecticalForks(
   forks.push({
     id: 'FORK-03-CIVIL-DUTY-VS-LUNAR-GNOSIS',
     title: 'The Scribe and the Sibyl: Royal Civil Duty vs. Lunisolar Mystery',
-    traditionsInvolved: ['Ancient Egyptian Sothic Civil Year', 'Attic Greek Metonic Lunisolar', 'Twelve Tribes Matrix'],
+    traditionsInvolved: ['Ancient Egyptian Sothic Civil Year', 'Attic Greek Metonic Lunisolar', 'Twelve Callings'],
     apparentContradictionDescription: `The Egyptian Sothic calendar records Year ${ctx.egyptian.civilYear} in the season of ${ctx.egyptian.season}—an imperial, unyielding solar clockwork measuring civic harvest and civic taxes. Simultaneously, the Athenian Attic Metonic calendar measures Month ${ctx.greek.atticMonthName}, subservient to the fickle, ecstatic lunar horns and patron deity ${ctx.greek.patronDeity}.`,
     whyThisIsAForkInTheRoad: `Civil law demands conformity to the imperial calendar, whereas the lunar mystery cult invites ecstatic communion with wild, untamed cosmic nature.`,
     forkPathAlpha: {
@@ -252,7 +252,7 @@ export function buildDialecticalForks(
     alchemicalSynthesis: {
       title: 'The Sacred Lawgiver (Priest-King Equilibrium)',
       description: `Bring the divine nectar of the oracle into the laws of the marketplace. Let your civil administration be infused with sacred compassion, and let your mystical practice be disciplined with architectural rigor.`,
-      transcendentLeveragePoint: `The ${ctx.synthesis.topResonatingTribe.tribe} banner (${ctx.synthesis.topResonatingTribe.bannerSymbol}) represents the fusion of spiritual kingship with practical governance.`
+      transcendentLeveragePoint: `The ${ctx.synthesis.topCalling.calling} emblem (${ctx.synthesis.topCalling.emblem}) represents the fusion of spiritual kingship with practical governance.`
     }
   });
 
@@ -261,9 +261,9 @@ export function buildDialecticalForks(
   forks.push({
     id: 'FORK-04-CIVIL-VS-ENOCHIAN-FLIP',
     title: 'The Watcher\'s Mirror: Civil North-up vs Enochian Gate Flip',
-    traditionsInvolved: ['Enochian 364-Day Computus', 'Biblical Tekufot', 'Roman Planetary Dies', 'Twelve Tribes Matrix'],
-    apparentContradictionDescription: `Civil chronometry reads ${eb.gregorianWeekdayDeity.latinDies} under ${eb.gregorianWeekdayDeity.romanDeity} with north-up geography, while the Enochian ledger holds ${eb.enochian.formatted} at the ${eb.enochian.watchGate}. Biblical ${eb.biblicalSeason.hebrewTekufah} cites ${eb.biblicalTransits.seasonVerseAnchors.slice(0, 2).join(' and ')}. Under the Enochian flip, civil North becomes ${eb.compassOrientation.directionRemap.North} and East becomes ${eb.compassOrientation.directionRemap.East}, remapping the ${ctx.synthesis.topResonatingTribe.tribe} camp bearing.`,
-    whyThisIsAForkInTheRoad: `Marketplace obligation and Watcher-gate orientation cannot be averaged; they must be held as an explicit A/B peek so tribal banners, map headings, and hour rulers remain mutually intelligible.`,
+    traditionsInvolved: ['Enochian 364-Day Computus', 'Biblical Tekufot', 'Roman Planetary Dies', 'Twelve Callings'],
+    apparentContradictionDescription: `Civil chronometry reads ${eb.gregorianWeekdayDeity.latinDies} under ${eb.gregorianWeekdayDeity.romanDeity} with north-up geography, while the Enochian ledger holds ${eb.enochian.formatted} at the ${eb.enochian.watchGate}. Biblical ${eb.biblicalSeason.hebrewTekufah} cites ${eb.biblicalTransits.seasonVerseAnchors.slice(0, 2).join(' and ')}. Under the Enochian flip, civil North becomes ${eb.compassOrientation.directionRemap.North} and East becomes ${eb.compassOrientation.directionRemap.East}, remapping the ${ctx.synthesis.topCalling.calling} quarter bearing.`,
+    whyThisIsAForkInTheRoad: `Marketplace obligation and Watcher-gate orientation cannot be averaged; they must be held as an explicit A/B peek so calling emblems, map headings, and hour rulers remain mutually intelligible.`,
     forkPathAlpha: {
       pathLabel: 'Branch Alpha',
       title: 'Civil / Gregorian Frame (Peek A)',
@@ -285,7 +285,7 @@ export function buildDialecticalForks(
     alchemicalSynthesis: {
       title: eb.abPeek.synthesis.title,
       description: eb.abPeek.synthesis.summary,
-      transcendentLeveragePoint: `Triangulate ${eb.enochian.watchGate} with Tribe of ${ctx.synthesis.topResonatingTribe.tribe} (${ctx.synthesis.topResonatingTribe.directionInCamp} camp) after Enochian remap → ${eb.compassOrientation.directionRemap[ctx.synthesis.topResonatingTribe.directionInCamp as 'North' | 'East' | 'South' | 'West'] || ctx.synthesis.topResonatingTribe.directionInCamp}.`
+      transcendentLeveragePoint: `Triangulate ${eb.enochian.watchGate} with ${ctx.synthesis.topCalling.calling} (${ctx.synthesis.topCalling.quarter} quarter) after Enochian remap → ${eb.compassOrientation.directionRemap[ctx.synthesis.topCalling.quarter as 'North' | 'East' | 'South' | 'West'] || ctx.synthesis.topCalling.quarter}.`
     }
   });
 
@@ -329,7 +329,7 @@ export function toSharedDialecticalForks(
  */
 export function buildTotalSystemsReport(
   ctx: CompleteCalculationContext,
-  querentName: string = 'The Sovereign Querent',
+  querentName: string = 'you',
   measurementReason: string = 'Cosmic Natal & Daily Trajectory Measurement',
   natalContext?: CompleteCalculationContext
 ): TotalSystemsReportData {
@@ -341,21 +341,24 @@ export function buildTotalSystemsReport(
   const natalTime = natalContext?.input?.timeString || ctx.input.timeString;
   const natalCity = natalContext?.input?.location?.city || ctx.input.location?.city || 'World · UTC';
 
-  const executiveSynthesizedTreatise = `EXECUTIVE SYNCHRONIC DOSSIER FOR ${querentName.toUpperCase()}:
-Measured against the living energetic overcast of Gaia on ${ctx.input.dateString}, your temporal coordinate intersects a dense matrix of multi-tradition computus. 
-Under the Great Baktun Loom of the Maya (Long Count ${ctx.mayan.longCount.formatted}), this moment registers Kin ${ctx.mayan.kinNumber} (${ctx.mayan.tzolkin.formatted}, ${ctx.mayan.haab.formatted}), vibrating through the ${ctx.dreamspell.signature}. 
-The Chinese BaZi pillars channel ${ctx.chinese.yearPillar.stemElement} ${ctx.chinese.yearPillar.zodiacAnimal} through the solar term of ${ctx.chinese.solarTerm.name}, while the ancient Nile civil year ${ctx.egyptian.civilYear} holds the season of ${ctx.egyptian.season}.
-Enochian computus registers ${ctx.enochianBiblical.enochian.formatted} at the ${ctx.enochianBiblical.enochian.watchGate}, concurrent with biblical ${ctx.enochianBiblical.biblicalSeason.hebrewTekufah} (${ctx.enochianBiblical.biblicalTransits.seasonVerseAnchors[0]}). Roman ${ctx.enochianBiblical.gregorianWeekdayDeity.latinDies} (${ctx.enochianBiblical.gregorianWeekdayDeity.romanDeity}) and planetary hour of ${ctx.enochianBiblical.currentPlanetaryHour.planet} supply the diurnal temperament; the Enochian compass flip remaps cardinals for Watcher-gate triangulation in all final outputs.
-Numerologically, your Life Path vibration ${ctx.numerology.lifePathNumber} encounters Universal Day ${ctx.numerology.universalDay}. 
-Crucially, where these systems appear to offer divergent instructions, The Crucible does not collapse them into bland averages; rather, they are mapped as explicit Forks in the Road. 
-By measuring your personal trajectory against Gaia\'s real-time geomagnetic and aspect overcast (${overcast.geomagneticStatus}, ${overcast.celestialAspectTensionScore}/100 tension), you hold the key to navigating the bifurcation points with sovereign deliberate intent.`;
+  const who = querentName && querentName !== 'you' ? `${querentName}: here` : 'Here';
+  const sunBody = ctx.celestialBodies.find((x) => x.id === 'sun');
+  const moonBody = ctx.celestialBodies.find((x) => x.id === 'moon');
+  const executiveSynthesizedTreatise = `${who} is how each tradition reads ${ctx.input.dateString}.
+Western astrology: the Sun is in ${sunBody?.zodiacSign ?? 'n/a'} and the Moon is in ${moonBody?.zodiacSign ?? 'n/a'}.
+Maya calendar: the day is ${ctx.mayan.tzolkin.formatted} (${ctx.mayan.tzolkin.meaning}), ${ctx.mayan.haab.formatted} in the solar year, Long Count ${ctx.mayan.longCount.formatted}.
+Chinese calendar: a ${ctx.chinese.dayPillar.stemElement} ${ctx.chinese.dayPillar.zodiacAnimal} day in a ${ctx.chinese.yearPillar.stemElement} ${ctx.chinese.yearPillar.zodiacAnimal} year; the season marker is ${ctx.chinese.solarTerm.name}.
+Egyptian calendar: the season of ${ctx.egyptian.season}. The 364-day calendar: month ${ctx.enochianBiblical.enochian.monthIndex}, day ${ctx.enochianBiblical.enochian.dayOfMonth}.
+The weekday is named for ${ctx.enochianBiblical.gregorianWeekdayDeity.planetaryRuler}, and this hour for ${ctx.enochianBiblical.currentPlanetaryHour.planet}.
+Numerology: today is a ${ctx.numerology.universalDay} day; the Life Path number for this date is ${ctx.numerology.lifePathNumber}.
+Where the traditions point in different directions, the report shows both views side by side rather than averaging them. Estimated tension between the planets today: ${overcast.celestialAspectTensionScore} out of 100.`;
 
   const temporalDeltaSummary = isNatalComparison
-    ? `Natal Origin: ${natalDate} at ${natalTime} (${natalCity}) compared against Earth Real-Time Transit: ${ctx.input.dateString} at ${ctx.input.timeString}. Total temporal span: ${Math.abs(ctx.temporal.julianDayUT - (natalContext?.temporal.julianDayUT || ctx.temporal.julianDayUT)).toFixed(2)} Julian Days.`
-    : `Temporal Invariant: Point-in-time calculation executed on JD ${ctx.temporal.julianDayUT.toFixed(4)} with sub-millisecond deterministic precision.`;
+    ? `Birth: ${natalDate} at ${natalTime} (${natalCity}), compared with ${ctx.input.dateString} at ${ctx.input.timeString}. Time between them: ${Math.abs(ctx.temporal.julianDayUT - (natalContext?.temporal.julianDayUT || ctx.temporal.julianDayUT)).toFixed(0)} days.`
+    : `Calculated for a single moment (Julian Day ${ctx.temporal.julianDayUT.toFixed(4)}).`;
 
   const researchNetworkingCitations = [
-    { source: 'Crucible mean-motion ephemeris (crucible_mean_motion_v1)', domain: 'Astro-Mechanics', note: 'Approximate tropical geocentric longitudes — not VSOP87 or JPL Horizons' },
+    { source: 'astronomy-engine (open-source library)', domain: 'Astronomy', note: 'Tropical geocentric positions for the Sun, Moon and planets, accurate to arc-minutes' },
     { source: 'Online Etymology Dictionary (Harper)', domain: 'Linguistic Roots', note: 'Morphological origin of names and cultural semantic fields' },
     { source: 'Goodman-Martínez-Thompson (GMT 584283) Correlation', domain: 'Mayan Archeo-Astronomy', note: 'Validated on Dresden & Madrid codices' },
     { source: 'Purple Star Astrological BaZi Gan-Zhi Computus', domain: 'Chinese Chronobiology', note: 'Sexagenary solar term ingress and Wu Xing balance' },

@@ -47,7 +47,6 @@ export const DomainImpactCards: React.FC<{
       onIndexChange={onSlideIndexChange}
       panelCount={panels.length}
       labels={panels.map((p) => p.label)}
-      autoAdvanceMs={6000}
     >
       {panels.map(({ key, label, title, body }) => (
         <SlidePanel key={String(key)}>

@@ -181,7 +181,7 @@ function natalDerivativeParagraph(
   const transitSun = transitCtx.celestialBodies.find((b) => b.id === 'sun');
 
   const lines: string[] = [
-    `Natal baseline [COMPUTED]: ${natalCtx.input.querentName || 'Querent'} — ${natalKin}; Sun ${natalSun?.zodiacSign} ${natalSun?.signDegree.toFixed(1)}°.`,
+    `Natal baseline [COMPUTED]: ${natalCtx.input.querentName || 'You'} — ${natalKin}; Sun ${natalSun?.zodiacSign} ${natalSun?.signDegree.toFixed(1)}°.`,
     `Today's sky against that chart: ${transitKin}; transit Sun ${transitSun?.zodiacSign} ${transitSun?.signDegree.toFixed(1)}°.`
   ];
 
@@ -226,8 +226,8 @@ export function compileAlmanacEntries(ctx: CompleteCalculationContext): AlmanacE
   entries.push({
     id: 'maya-tone',
     tier: 'CRITICAL',
-    tradition: 'Maya Galactic Tone',
-    dataPoint: `Tone ${tone} ${ctx.mayan.galacticTone.name} · Kin ${ctx.mayan.kinNumber} ${ctx.mayan.tzolkin.formatted}`,
+    tradition: 'Maya day number',
+    dataPoint: `Day number ${tone} (${ctx.mayan.galacticTone.name}) · ${ctx.mayan.tzolkin.formatted}`,
     collectiveImpact: toneLife.collective,
     individualImpact: toneLife.individual,
     behavioralCue: toneLife.cue,
@@ -237,7 +237,7 @@ export function compileAlmanacEntries(ctx: CompleteCalculationContext): AlmanacE
   entries.push({
     id: 'maya-seal',
     tier: 'IMPORTANT',
-    tradition: 'Tzolk\'in Solar Seal',
+    tradition: 'Maya day sign',
     dataPoint: ctx.mayan.tzolkin.formatted,
     collectiveImpact: `Collective attention tilts toward ${ctx.mayan.tzolkin.meaning} themes — media, conflict, and ritual echo this archetype whether people name it or not.`,
     individualImpact: `If this seal matches your birth kin, today is a return pulse — identity themes amplify. If not, you are guesting in its mythology; borrow its gift without claiming it as core self.`,
@@ -248,8 +248,8 @@ export function compileAlmanacEntries(ctx: CompleteCalculationContext): AlmanacE
   entries.push({
     id: 'bazi-day',
     tier: 'CRITICAL',
-    tradition: 'BaZi Day Pillar',
-    dataPoint: `${ctx.chinese.dayPillar.stemPinYin}-${ctx.chinese.dayPillar.branchPinYin} (${dayEl} ${ctx.chinese.dayPillar.zodiacAnimal})`,
+    tradition: 'Chinese calendar day',
+    dataPoint: `${dayEl} ${ctx.chinese.dayPillar.zodiacAnimal} day (${ctx.chinese.dayPillar.stem}${ctx.chinese.dayPillar.branch})`,
     collectiveImpact: elLife.collective,
     individualImpact: `${elLife.individual} Branch animal ${ctx.chinese.dayPillar.zodiacAnimal} adds relational texture — negotiations and alliances carry this creature's pacing.`,
     behavioralCue: `Honor ${ctx.chinese.solarTerm.name} — seasonal qi supports ${ctx.chinese.dominantElement} vector today.`,
@@ -259,8 +259,8 @@ export function compileAlmanacEntries(ctx: CompleteCalculationContext): AlmanacE
   entries.push({
     id: 'lunar-phase',
     tier: 'IMPORTANT',
-    tradition: 'Lunar Phase',
-    dataPoint: `${phase} · ${ctx.gaiaOvercast?.lunarIlluminationPercent ?? 50}% illumination`,
+    tradition: 'Moon phase',
+    dataPoint: `${phase} · ${ctx.gaiaOvercast?.lunarIlluminationPercent ?? 50}% lit`,
     collectiveImpact: phaseLife.collective,
     individualImpact: phaseLife.individual,
     behavioralCue: 'Match public vs private output to lunar visibility.',
@@ -270,24 +270,24 @@ export function compileAlmanacEntries(ctx: CompleteCalculationContext): AlmanacE
   entries.push({
     id: 'gene-key-sun',
     tier: 'RELEVANT',
-    tradition: 'Gene Keys Sun Transit',
-    dataPoint: `Gate ${ctx.geneKeysSun.gate}.${ctx.geneKeysSun.line} ${ctx.geneKeysSun.name}`,
+    tradition: 'Gene Keys',
+    dataPoint: `Key ${ctx.geneKeysSun.gate}: from ${ctx.geneKeysSun.shadow.toLowerCase()} to ${ctx.geneKeysSun.gift.toLowerCase()}`,
     collectiveImpact: `Collective shadow field: ${ctx.geneKeysSun.shadow} — societies scapegoat this pattern when stressed.`,
     individualImpact: `Personal growth edge: move ${ctx.geneKeysSun.shadow} → ${ctx.geneKeysSun.gift}; siddhi ${ctx.geneKeysSun.siddhi} is the long arc, not today's homework.`,
     behavioralCue: `When triggered, pause before embodying ${ctx.geneKeysSun.shadow} in speech.`,
     epistemic: 'COMPARATIVE_ANALOGY'
   });
 
-  const tribe = ctx.intertwining.primaryTribeLife;
-  const topTribe = ctx.synthesis.topResonatingTribe;
+  const calling = ctx.intertwining.primaryCallingLife;
+  const topCalling = ctx.synthesis.topCalling;
   entries.push({
-    id: 'tribe',
+    id: 'calling',
     tier: 'RELEVANT',
-    tradition: 'Twelve Tribes',
-    dataPoint: `${tribe.tribe} · ${topTribe.directionInCamp} camp · ${topTribe.gemstone}`,
-    collectiveImpact: `Group dynamics favor ${tribe.giftToEmbody} — teams that ignore this gift fracture.`,
-    individualImpact: `${tribe.dayPractice} Shadow watch: ${tribe.shadowToWatch}.`,
-    behavioralCue: tribe.giftToEmbody,
+    tradition: 'Twelve Callings',
+    dataPoint: `${calling.calling} · “${topCalling.motto}”`,
+    collectiveImpact: `Group dynamics favor ${calling.giftToEmbody} — teams that ignore this gift fracture.`,
+    individualImpact: `${calling.dayPractice} Shadow watch: ${calling.shadowToWatch}.`,
+    behavioralCue: calling.giftToEmbody,
     epistemic: 'COMPARATIVE_ANALOGY'
   });
 

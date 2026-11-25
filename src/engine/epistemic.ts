@@ -19,7 +19,7 @@ export const EPISTEMIC_LABELS: Record<EpistemicClass, { label: string; short: st
 export const DEFAULT_METHODOLOGY: MethodologyBundle = {
   calendarCorrelation: 'GMT_584283',
   ayanamsha: 'lahiri',
-  ephemerisModel: 'crucible_mean_motion_v1',
+  ephemerisModel: 'astronomy-engine 2.1 (geocentric, tropical)',
   houseSystem: 'none',
   chineseDayBoundary: 'solar_terms',
   zodiac: 'tropical_primary',

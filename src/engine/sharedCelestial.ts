@@ -15,20 +15,20 @@ export function lunarPhaseFromLongitudes(
   phaseName: string;
   epistemicClass: EpistemicClass;
 } {
-  const sunMoonDiff = Math.abs(sunLong - moonLong) % 360;
-  const phaseAngle = sunMoonDiff > 180 ? 360 - sunMoonDiff : sunMoonDiff;
+  // Elongation: how far the Moon is ahead of the Sun (0° new, 180° full, 360° new again).
+  const elongation = (((moonLong - sunLong) % 360) + 360) % 360;
+  const phaseAngle = elongation > 180 ? 360 - elongation : elongation;
   const illuminationPercent = Math.round(((1 - Math.cos((phaseAngle * Math.PI) / 180)) / 2) * 100);
 
-  let phaseName = 'Waxing Crescent';
-  if (phaseAngle < 10) phaseName = 'New Moon';
-  else if (phaseAngle < 80) phaseName = 'Waxing Crescent';
-  else if (phaseAngle < 100) phaseName = 'First Quarter';
-  else if (phaseAngle < 170) phaseName = 'Waxing Gibbous';
-  else if (phaseAngle < 190) phaseName = 'Full Moon';
-  else if (phaseAngle < 260) phaseName = 'Waning Gibbous';
-  else if (phaseAngle < 280) phaseName = 'Last Quarter';
-  else if (phaseAngle < 350) phaseName = 'Waning Crescent';
-  else phaseName = 'New Moon';
+  let phaseName = 'New Moon';
+  if (elongation < 10 || elongation >= 350) phaseName = 'New Moon';
+  else if (elongation < 80) phaseName = 'Waxing Crescent';
+  else if (elongation < 100) phaseName = 'First Quarter';
+  else if (elongation < 170) phaseName = 'Waxing Gibbous';
+  else if (elongation < 190) phaseName = 'Full Moon';
+  else if (elongation < 260) phaseName = 'Waning Gibbous';
+  else if (elongation < 280) phaseName = 'Last Quarter';
+  else phaseName = 'Waning Crescent';
 
   return {
     phaseAngle,

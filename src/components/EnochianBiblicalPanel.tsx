@@ -1,18 +1,40 @@
 /**
- * The Crucible — Enochian Time, Biblical Transits & Roman Diurnal Panel
- * Dedicated view with A/B peek (Civil vs Enochian/Biblical) and hour matrix.
+ * The Crucible — "Seasons & hours" panel
+ * The 364-day calendar from the Book of Enoch, the season's scripture verses,
+ * the planet that names today and this hour, and the optional flipped-map view.
  */
 
 import React, { useState } from 'react';
 import { CompleteCalculationContext } from '../types';
-import { Compass, FlipHorizontal2, BookOpen, Clock, GitFork, Eye } from 'lucide-react';
-import { EpistemicBadge } from './EpistemicBadge';
+import { FlipHorizontal2 } from 'lucide-react';
+import { PlanetGlyph } from './symbols/AstroGlyph';
+import { CultureHeader } from './symbols/CultureSymbols';
 
 interface EnochianBiblicalPanelProps {
   ctx: CompleteCalculationContext;
   onEnableMapFlip?: (enabled: boolean) => void;
   mapFlipEnabled?: boolean;
 }
+
+/** Plain one-line reading for each of the seven classical planets. */
+const PLANET_PLAIN: Record<string, { theme: string; goodFor: string }> = {
+  Sun: { theme: 'confidence and being seen', goodFor: 'leading, presenting, making a clear decision' },
+  Moon: { theme: 'feelings, home and rest', goodFor: 'reflecting, caring for people, quiet tasks' },
+  Mars: { theme: 'energy and courage', goodFor: 'physical effort, hard conversations, getting started' },
+  Mercury: { theme: 'thinking and talking', goodFor: 'writing, messages, learning, short trips' },
+  Jupiter: { theme: 'growth and generosity', goodFor: 'teaching, planning big, asking for help' },
+  Venus: { theme: 'affection and beauty', goodFor: 'time with people you like, making things, making peace' },
+  Saturn: { theme: 'structure and patience', goodFor: 'tidying up, finishing, slow careful work' }
+};
+
+const planetId = (name: string) => name.trim().toLowerCase();
+const planetTheme = (name: string) => PLANET_PLAIN[name]?.theme ?? 'its own traditional theme';
+const planetGoodFor = (name: string, fallback: string) => PLANET_PLAIN[name]?.goodFor ?? fallback;
+
+/** "Winter (…)" or "Winter — …" → "Winter" */
+const firstWord = (s: string) => s.split(/[\s(—–-]/)[0] || s;
+/** "North Gate of Stillness (1 Enoch 72)" → "North Gate of Stillness" */
+const stripBrackets = (s: string) => s.replace(/\s*\(.*?\)\s*/g, ' ').trim();
 
 export const EnochianBiblicalPanel: React.FC<EnochianBiblicalPanelProps> = ({
   ctx,
@@ -24,319 +46,392 @@ export const EnochianBiblicalPanel: React.FC<EnochianBiblicalPanelProps> = ({
   const [showHourMatrix, setShowHourMatrix] = useState(false);
   const [showHalfHours, setShowHalfHours] = useState(false);
 
+  const season = firstWord(eb.enochian.seasonName);
+  const gate = stripBrackets(eb.enochian.watchGate);
+  const today = eb.gregorianWeekdayDeity;
+  const julian = eb.julianWeekdayDeity;
+  const hour = eb.currentPlanetaryHour;
+  const jd = ctx.temporal.julianCalendarDate;
+  const isFirstHalf = eb.currentHalfHour.startHourLocal === hour.startHourLocal;
+  const halfLabel = (h: { startHourLocal: number; hourIndex: number }) => {
+    const parent = eb.planetaryHours.find((p) => p.index === h.hourIndex);
+    return parent && h.startHourLocal === parent.startHourLocal ? 'First half' : 'Second half';
+  };
+  const halfPlain = (label: string) =>
+    label === 'First half'
+      ? 'The planet’s theme is freshest: a good moment to begin.'
+      : 'The theme is settling: a good moment to adjust or finish.';
+
   return (
     <div className="space-y-5 motion-enter text-[color:var(--text-secondary)]">
-      {/* Header + A/B Peek Toggle */}
-      <div className="instrument-panel instrument-panel-solar">
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[color:var(--line-soft)] pb-4 mb-4">
-          <div className="flex items-start gap-2.5">
-            <div className="rounded-[var(--radius-md)] border border-amber-300/20 bg-amber-300/[0.06] p-2 text-[color:var(--solar-bright)] shadow-[var(--glow-solar)]">
-              <BookOpen className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="panel-title">
-                  Enochian Time · Biblical Transits · Roman Dies
-                </h3>
-                <EpistemicBadge epistemicClass="TEXTUAL_TRADITION" />
-                <EpistemicBadge epistemicClass="SYSTEM_INTERPRETATION" />
+      {/* (a) The 364-day calendar */}
+      <section className="instrument-panel">
+        <CultureHeader culture="hebrew" title="The 364-day calendar" explain={false} />
+        <div className="trad-hero mt-3">
+          <span className="trad-hero-symbol" aria-hidden="true">
+            {eb.enochian.dayOfMonth}
+          </span>
+          <div>
+            <p className="trad-hero-value">
+              Month {eb.enochian.monthIndex}, day {eb.enochian.dayOfMonth}
+            </p>
+            <p className="trad-hero-sub">
+              {eb.enochian.monthName} · {season}
+            </p>
+          </div>
+        </div>
+        <p className="trad-meaning mt-3">
+          <strong>In plain words:</strong> The Book of Enoch, an ancient Jewish text, describes a year of exactly 364
+          days: four seasons of 91 days, each made of three 30-day months plus one extra day. Because 364 divides evenly
+          into 52 weeks, every date falls on the same weekday every year. Each season is pictured as a “gate” in the sky
+          that the sun passes through.
+        </p>
+        <dl className="trad-facts mt-3">
+          <dt>Season</dt>
+          <dd>{season}</dd>
+          <dt>Season’s gate</dt>
+          <dd>{gate}</dd>
+          <dt>Week of the year</dt>
+          <dd>
+            {eb.enochian.weekOfYear} of 52
+          </dd>
+          <dt>Day of the year</dt>
+          <dd>
+            {eb.enochian.dayOfYear} of 364
+          </dd>
+          <dt>Extra day?</dt>
+          <dd>
+            {eb.enochian.isIntercalaryDay
+              ? 'Yes. Today is the extra day that closes the season.'
+              : 'No, an ordinary day.'}
+          </dd>
+        </dl>
+        <p className="readable-muted text-xs mt-3">
+          The season shown follows the sun’s actual position, so it can differ slightly from the month count.
+        </p>
+      </section>
+
+      {/* (b) This season in scripture */}
+      <section className="instrument-panel">
+        <h3 className="panel-title">This season in scripture</h3>
+        <p className="readable-body mt-1">
+          Bible verses traditionally read with {season.toLowerCase()}, offered for reflection.
+        </p>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {eb.biblicalSeason.verses.map((v) => (
+            <figure key={v.ref} className="curious-box m-0">
+              <blockquote className="readable-body m-0">“{v.text}”</blockquote>
+              <figcaption className="text-xs font-semibold mt-2 text-[color:var(--temporal-deep)]">{v.ref}</figcaption>
+            </figure>
+          ))}
+        </div>
+        <dl className="trad-facts mt-3">
+          <dt>On the land</dt>
+          <dd>{eb.biblicalSeason.agriculturalPhase}</dd>
+          <dt>Festival of this season</dt>
+          <dd>{eb.biblicalSeason.liturgicalEcho}</dd>
+        </dl>
+      </section>
+
+      {/* (c) Today's planet and this hour's planet */}
+      <section className="instrument-panel">
+        <CultureHeader culture="roman" title="Today’s planet and this hour’s planet" explain={false} />
+        <p className="readable-body mt-2">
+          The seven days of the week are named after the sun, the moon and the five planets you can see without a
+          telescope. The same seven also take turns naming each hour.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+          <div className="curious-box">
+            <p className="ui-eyebrow">Today’s planet</p>
+            <div className="trad-hero mt-2">
+              <span className="trad-hero-symbol">
+                <PlanetGlyph planet={planetId(today.planetaryRuler)} size={30} tinted />
+              </span>
+              <div>
+                <p className="trad-hero-value">{today.planetaryRuler}</p>
+                <p className="trad-hero-sub">
+                  {today.gregorianName} is the {today.planetaryRuler}’s day
+                </p>
               </div>
-              <p className="ui-eyebrow mt-1">
-                1 Enoch 72–82 · Tekufot verses · Chaldean hours · Compass flip triangulation
-              </p>
             </div>
+            <p className="readable-body mt-2">
+              Traditionally a day for {planetTheme(today.planetaryRuler)}. Good for:{' '}
+              {planetGoodFor(today.planetaryRuler, today.energy)}.
+            </p>
+            <p className="readable-muted text-xs mt-2">
+              Roman name: {today.latinDies}, after {today.romanDeity}. Traditional colour: {today.colorRay}.
+            </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-1">
-              {(
-                [
-                  { id: 'A' as const, label: 'Peek A · Civil' },
-                  { id: 'B' as const, label: 'Peek B · Enochian' },
-                  { id: 'COMPARE' as const, label: 'A/B Compare' }
-                ]
-              ).map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => setPeekMode(m.id)}
-                  className={`nav-tab ${
-                    peekMode === m.id
-                      ? 'nav-tab-active bg-amber-300/[0.06] text-[color:var(--solar-bright)]'
-                      : ''
-                  }`}
-                >
-                  {m.label}
-                </button>
-              ))}
+          <div className="curious-box">
+            <p className="ui-eyebrow">This hour’s planet</p>
+            <div className="trad-hero mt-2">
+              <span className="trad-hero-symbol">
+                <PlanetGlyph planet={planetId(hour.planet)} size={30} tinted />
+              </span>
+              <div>
+                <p className="trad-hero-value">{hour.planet}</p>
+                <p className="trad-hero-sub">
+                  {hour.formattedWindow} · {hour.isDayHour ? 'daytime' : 'night'} hour {hour.isDayHour ? hour.index : hour.index - 12} of 12
+                </p>
+              </div>
             </div>
-
-            {onEnableMapFlip && (
-              <button
-                onClick={() => onEnableMapFlip(!mapFlipEnabled)}
-                className={`cta-ghost min-h-0 px-3 py-2 text-[10px] uppercase ${
-                  mapFlipEnabled
-                    ? 'border-amber-300/40 bg-amber-300/[0.08] text-[color:var(--solar-bright)]'
-                    : ''
-                }`}
-                title="Toggle Enochian compass & world-map flip"
-              >
-                <FlipHorizontal2 className="w-3 h-3" />
-                Map Flip {mapFlipEnabled ? 'ON' : 'OFF'}
-              </button>
-            )}
+            <p className="readable-body mt-2">
+              Traditionally an hour for {planetTheme(hour.planet)}. Good for: {planetGoodFor(hour.planet, hour.counsel)}.
+            </p>
+            <p className="readable-muted text-xs mt-2">
+              You are in the {isFirstHalf ? 'first' : 'second'} half of this hour ({eb.currentHalfHour.formattedWindow}).{' '}
+              {halfPlain(isFirstHalf ? 'First half' : 'Second half')}
+            </p>
           </div>
         </div>
 
-        {/* A/B Peek Frames */}
-        <div className={`grid gap-3 ${peekMode === 'COMPARE' ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
-          {(peekMode === 'A' || peekMode === 'COMPARE') && (
-            <div className="rounded-[var(--radius-md)] border border-cyan-300/15 border-l-2 border-l-[color:var(--temporal)] bg-cyan-300/[0.035] p-4">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <Eye className="w-3 h-3 text-cyan-400" />
-                <span className="ui-eyebrow text-[color:var(--temporal)]">{eb.abPeek.pathA.label}</span>
-              </div>
-              <h4 className="font-cinzel text-sm text-white font-bold">{eb.abPeek.pathA.title}</h4>
-              <p className="font-serif text-[11px] text-gray-300 italic mt-1.5 leading-relaxed">
-                {eb.abPeek.pathA.summary}
+        <p className="trad-meaning mt-3">
+          <strong>In plain words:</strong> Planetary hours are not clock hours. The time from sunrise to sunset is
+          divided into 12 equal parts, and the night into another 12, so the “hours” are longer in summer daylight and
+          shorter in winter. The first hour after sunrise belongs to the day’s own planet; the rest follow in a fixed
+          order. Sunrise here is estimated from your place and date.
+        </p>
+
+        <div className="flex flex-wrap gap-2 mt-3">
+          <button
+            type="button"
+            onClick={() => setShowHourMatrix((p) => !p)}
+            className="cta-ghost"
+            aria-expanded={showHourMatrix}
+          >
+            {showHourMatrix ? 'Hide the 24 hours' : 'Show all 24 hours'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowHalfHours((p) => !p)}
+            className="cta-ghost"
+            aria-expanded={showHalfHours}
+          >
+            {showHalfHours ? 'Hide the half-hours' : 'Show the half-hours'}
+          </button>
+        </div>
+
+        {showHourMatrix && (
+          <div className="mt-4">
+            <p className="ui-eyebrow mb-2">All 24 planetary hours for this day</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {eb.planetaryHours.map((h) => {
+                const isNow = h.index === hour.index;
+                return (
+                  <div
+                    key={h.index}
+                    className={`rounded-[var(--radius-sm)] border p-2 text-xs ${
+                      isNow
+                        ? 'border-[color:var(--temporal-deep)] bg-[color:var(--surface-well)]'
+                        : 'border-[color:var(--line-soft)]'
+                    }`}
+                  >
+                    <p className="text-[color:var(--text-muted)]">
+                      {h.isDayHour ? 'Day' : 'Night'} {h.isDayHour ? h.index : h.index - 12}
+                      {isNow ? ' · now' : ''}
+                    </p>
+                    <p className="flex items-center gap-1.5 font-semibold text-[color:var(--text-primary)] text-sm">
+                      <PlanetGlyph planet={planetId(h.planet)} size={16} tinted />
+                      {h.planet}
+                    </p>
+                    <p className="text-[color:var(--text-secondary)]">{h.formattedWindow}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {showHalfHours && (
+          <div className="mt-4">
+            <p className="ui-eyebrow mb-1">Each hour in two halves</p>
+            <p className="field-help mb-2">
+              Some traditions split each planetary hour in two: the first half for starting, the second for adjusting
+              or finishing.
+            </p>
+            <div className="max-h-64 overflow-y-auto rounded-[var(--radius-sm)] border border-[color:var(--line-soft)]">
+              {eb.halfHourMeanings.map((h, i) => {
+                const label = halfLabel(h);
+                const isNow = h.formattedWindow === eb.currentHalfHour.formattedWindow;
+                return (
+                  <div
+                    key={i}
+                    className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 border-b border-[color:var(--line-soft)] px-3 py-2 text-xs ${
+                      isNow ? 'bg-[color:var(--surface-well)] font-semibold' : ''
+                    }`}
+                  >
+                    <span className="w-32 text-[color:var(--text-primary)]">{h.formattedWindow}</span>
+                    <span className="w-24 flex items-center gap-1.5 text-[color:var(--text-primary)]">
+                      <PlanetGlyph planet={planetId(h.planet)} size={14} tinted />
+                      {h.planet}
+                    </span>
+                    <span className="flex-1 min-w-[10rem] text-[color:var(--text-secondary)]">
+                      {label}
+                      {isNow ? ' · now' : ''}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* (d) Julian-calendar weekday */}
+        <p className="chart-note mt-4">
+          On the old Julian calendar today is {julian.gregorianName}, {jd.day}/{jd.month}/{jd.year} (day/month/year).
+          The Julian calendar was used across Europe before the modern one and runs some days behind it (13 days in this century). Its
+          weekday planet is {julian.planetaryRuler}.
+        </p>
+      </section>
+
+      {/* (e) Flipped map */}
+      <section className="instrument-panel">
+        <h3 className="panel-title">A south-facing view of the world</h3>
+        <p className="readable-body mt-1">
+          Modern maps put north at the top. The Book of Enoch describes the sky from a south-facing viewpoint, the way
+          you see it when you stand and watch the sun cross the sky. This optional view turns the world map upside-down
+          and mirrors it, so it matches that viewpoint. Nothing else in the app changes.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-center">
+          {(['North', 'East', 'South', 'West'] as const).map((d) => (
+            <div key={d} className="curious-box">
+              <p className="readable-muted text-xs">{d} on a modern map</p>
+              <p className="text-sm font-semibold text-[color:var(--text-primary)] mt-0.5">
+                becomes {eb.compassOrientation.directionRemap[d]}
               </p>
-              <ul className="mt-2 space-y-1">
-                {eb.abPeek.pathA.keySignals.map((s, i) => (
-                  <li key={i} className="text-[10px] text-gray-400 pl-2 border-l border-cyan-800">
-                    {s}
-                  </li>
-                ))}
-              </ul>
+            </div>
+          ))}
+        </div>
+        {onEnableMapFlip && (
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => onEnableMapFlip(!mapFlipEnabled)}
+              className="cta-primary"
+              aria-pressed={mapFlipEnabled}
+            >
+              <FlipHorizontal2 className="w-4 h-4" />
+              {mapFlipEnabled ? 'Turn off flipped map' : 'Flip the world map to this view'}
+            </button>
+            <p className="field-help mt-1.5">
+              {mapFlipEnabled
+                ? 'The world map under Traditions is currently flipped.'
+                : 'Turning this on opens the world map under Traditions.'}
+            </p>
+          </div>
+        )}
+      </section>
+
+      {/* Two ways to read today */}
+      <section className="instrument-panel">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="panel-title">Two ways to read today</h3>
+          <div className="seg" role="group" aria-label="Choose which view to show">
+            {(
+              [
+                { id: 'A' as const, label: 'Modern calendar view' },
+                { id: 'B' as const, label: 'Ancient season view' },
+                { id: 'COMPARE' as const, label: 'Side by side' }
+              ]
+            ).map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setPeekMode(m.id)}
+                aria-pressed={peekMode === m.id}
+                className={`seg-btn ${peekMode === m.id ? 'seg-btn-active' : ''}`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={`grid gap-3 mt-3 ${peekMode === 'COMPARE' ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
+          {(peekMode === 'A' || peekMode === 'COMPARE') && (
+            <div className="curious-box">
+              <p className="ui-eyebrow">Modern calendar view</p>
+              <p className="readable-body mt-1">The everyday calendar and clock most of the world shares.</p>
+              <dl className="trad-facts mt-2">
+                <dt>Weekday</dt>
+                <dd>
+                  {today.gregorianName} (the {today.planetaryRuler}’s day)
+                </dd>
+                <dt>Day’s theme</dt>
+                <dd>{planetTheme(today.planetaryRuler)}</dd>
+                <dt>This hour</dt>
+                <dd>
+                  {hour.planet}, {hour.formattedWindow}
+                </dd>
+                <dt>Map</dt>
+                <dd>North at the top</dd>
+              </dl>
             </div>
           )}
 
           {(peekMode === 'B' || peekMode === 'COMPARE') && (
-            <div className="rounded-[var(--radius-md)] border border-amber-300/15 border-l-2 border-l-[color:var(--solar)] bg-amber-300/[0.035] p-4">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <GitFork className="w-3 h-3 text-amber-400" />
-                <span className="ui-eyebrow text-[color:var(--solar)]">{eb.abPeek.pathB.label}</span>
-              </div>
-              <h4 className="font-cinzel text-sm text-white font-bold">{eb.abPeek.pathB.title}</h4>
-              <p className="font-serif text-[11px] text-gray-300 italic mt-1.5 leading-relaxed">
-                {eb.abPeek.pathB.summary}
-              </p>
-              <ul className="mt-2 space-y-1">
-                {eb.abPeek.pathB.keySignals.map((s, i) => (
-                  <li key={i} className="text-[10px] text-gray-400 pl-2 border-l border-amber-800">
-                    {s}
-                  </li>
-                ))}
-              </ul>
+            <div className="curious-box">
+              <p className="ui-eyebrow">Ancient season view</p>
+              <p className="readable-body mt-1">The 364-day calendar and the seasons as scripture describes them.</p>
+              <dl className="trad-facts mt-2">
+                <dt>Date</dt>
+                <dd>
+                  Month {eb.enochian.monthIndex}, day {eb.enochian.dayOfMonth} ({eb.enochian.monthName})
+                </dd>
+                <dt>Season</dt>
+                <dd>
+                  {season}, {gate}
+                </dd>
+                <dt>Verses</dt>
+                <dd>{eb.biblicalSeason.verses.map((v) => v.ref).join('; ')}</dd>
+                <dt>Old-calendar weekday</dt>
+                <dd>
+                  {julian.gregorianName} (the {julian.planetaryRuler}’s day)
+                </dd>
+                <dt>Map</dt>
+                <dd>{eb.compassOrientation.enochianPrimary} at the top, east and west swapped</dd>
+              </dl>
             </div>
           )}
         </div>
 
         {peekMode === 'COMPARE' && (
-          <div className="mt-4 rounded-[var(--radius-md)] border border-emerald-300/15 bg-emerald-300/[0.035] p-3">
-            <p className="ui-eyebrow text-emerald-400 mb-1">{eb.abPeek.synthesis.title}</p>
-            <p className="font-serif text-[11px] text-gray-300 leading-relaxed">{eb.abPeek.synthesis.summary}</p>
-          </div>
+          <p className="trad-meaning mt-3">
+            <strong>How to hold both:</strong> Use the modern view for appointments and everyday plans, and the ancient
+            view for reflection on the season. Where the two disagree, neither is wrong; they are counting time in
+            different ways.
+          </p>
         )}
-      </div>
+      </section>
 
-      {/* Core telemetry grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {/* Enochian Calendar */}
-        <div className="instrument-panel instrument-panel-solar !p-4">
-          <h4 className="ui-eyebrow text-[color:var(--solar)] border-b border-[color:var(--line-soft)] pb-2 mb-3">
-            Enochian 364-Day Computus
-          </h4>
-          <p className="font-cinzel text-sm text-white font-bold">{eb.enochian.formatted}</p>
-          <div className="mt-3 space-y-1.5 text-[11px]">
-            <div className="flex justify-between"><span className="text-gray-500">Season</span><span className="text-amber-200">{eb.enochian.seasonName}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Watch Gate</span><span className="text-cyan-300">{eb.enochian.watchGate}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Week of Year</span><span>{eb.enochian.weekOfYear} / 52</span></div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Intercalary</span>
-              <span className={eb.enochian.isIntercalaryDay ? 'text-amber-400 font-bold' : 'text-gray-500'}>
-                {eb.enochian.isIntercalaryDay ? 'PORTAL DAY' : 'Standard'}
-              </span>
-            </div>
-          </div>
-          <p className="text-[9px] text-gray-600 mt-2 italic">{eb.enochian.sourceAuthority}</p>
-        </div>
-
-        {/* Biblical Season + Verses */}
-        <div className="instrument-panel instrument-panel-maya !p-4 md:col-span-1 lg:col-span-2">
-          <h4 className="ui-eyebrow text-emerald-400 border-b border-[color:var(--line-soft)] pb-2 mb-3">
-            Biblical Tekufah Transit & Season Verses
-          </h4>
-          <p className="font-cinzel text-sm text-white font-bold">{eb.biblicalSeason.name}</p>
-          <p className="text-[10px] text-gray-400 mt-1">
-            {eb.biblicalSeason.hebrewTekufah} · {eb.biblicalSeason.agriculturalPhase}
-          </p>
-          <p className="font-serif text-[11px] text-gray-300 italic mt-2 leading-snug">
-            {eb.biblicalTransits.narrative}
-          </p>
-          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {eb.biblicalSeason.verses.map((v) => (
-              <div key={v.ref} className="rounded-[var(--radius-md)] border border-emerald-300/10 border-l-2 border-l-emerald-500 bg-emerald-300/[0.025] p-3">
-                <p className="text-[9px] font-bold text-emerald-400 uppercase">{v.ref}</p>
-                <p className="font-serif text-[10px] text-gray-400 italic mt-0.5 leading-snug">{v.text}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-[10px] text-amber-200/80 mt-2">
-            Liturgical echo: {eb.biblicalSeason.liturgicalEcho}
-          </p>
-        </div>
-
-        {/* Roman Day Deities */}
-        <div className="instrument-panel instrument-panel-solar !p-4">
-          <h4 className="ui-eyebrow text-orange-400 border-b border-[color:var(--line-soft)] pb-2 mb-3">
-            Gregorian Dies & Deity
-          </h4>
-          <p className="font-cinzel text-base text-white font-bold">{eb.gregorianWeekdayDeity.latinDies}</p>
-          <p className="text-xs text-orange-300 mt-0.5">{eb.gregorianWeekdayDeity.romanDeity}</p>
-          <p className="text-[10px] text-gray-400 mt-2">{eb.gregorianWeekdayDeity.energy}</p>
-          <p className="text-[9px] text-cyan-500 mt-1.5">{eb.gregorianWeekdayDeity.ritualTone}</p>
-          <div className="mt-2 flex justify-between text-[9px] text-gray-500">
-            <span>Ruler: {eb.gregorianWeekdayDeity.planetaryRuler}</span>
-            <span>Ray: {eb.gregorianWeekdayDeity.colorRay}</span>
-          </div>
-        </div>
-
-        <div className="instrument-panel !p-4">
-          <h4 className="ui-eyebrow text-[color:var(--temporal)] border-b border-[color:var(--line-soft)] pb-2 mb-3">
-            Julian Dies & Deity
-          </h4>
-          <p className="font-cinzel text-base text-white font-bold">{eb.julianWeekdayDeity.latinDies}</p>
-          <p className="text-xs text-[color:var(--temporal-bright)] mt-0.5">{eb.julianWeekdayDeity.romanDeity}</p>
-          <p className="text-[10px] text-gray-400 mt-2">
-            Julian calendar {ctx.temporal.julianCalendarDate.year}-{ctx.temporal.julianCalendarDate.month}-{ctx.temporal.julianCalendarDate.day} · {eb.julianWeekdayDeity.gregorianName}
-          </p>
-          <p className="text-[10px] text-gray-400 mt-1">{eb.julianWeekdayDeity.energy}</p>
-          <p className="text-[9px] text-[color:var(--temporal)] mt-1.5">Greek echo: {eb.julianWeekdayDeity.greekEcho}</p>
-        </div>
-
-        {/* Current Hour */}
-        <div className="instrument-panel !p-4">
-          <div className="flex items-center justify-between border-b border-[color:var(--line-soft)] pb-2 mb-3">
-            <h4 className="ui-eyebrow text-[color:var(--temporal)]">
-              Planetary Hour / Half-Hour
-            </h4>
-            <Clock className="w-3 h-3 text-cyan-500" />
-          </div>
-          <p className="font-cinzel text-sm text-white font-bold">
-            Hour of {eb.currentPlanetaryHour.planet}
-          </p>
-          <p className="data-readout mt-1">{eb.currentPlanetaryHour.formattedWindow}</p>
-          <p className="text-[10px] text-gray-400 mt-1.5">{eb.currentPlanetaryHour.quality}</p>
-          <p className="font-serif text-[11px] text-gray-300 italic mt-1">{eb.currentPlanetaryHour.counsel}</p>
-          <div className="mt-3 rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-3">
-            <p className="text-[8px] uppercase text-amber-500 font-bold">Half-Hour Phase</p>
-            <p className="text-[10px] text-white mt-0.5">{eb.currentHalfHour.phase}</p>
-            <p className="text-[9px] text-gray-400 mt-0.5">{eb.currentHalfHour.meaning}</p>
-          </div>
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={() => setShowHourMatrix((p) => !p)}
-              className="cta-ghost min-h-0 px-3 py-2 text-[9px] uppercase"
-            >
-              {showHourMatrix ? 'Hide' : 'Show'} 24h Matrix
-            </button>
-            <button
-              onClick={() => setShowHalfHours((p) => !p)}
-              className="cta-ghost min-h-0 px-3 py-2 text-[9px] uppercase"
-            >
-              {showHalfHours ? 'Hide' : 'Show'} Half-Hours
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Compass Flip Connotation */}
-      <div className="instrument-panel instrument-panel-solar">
-        <div className="flex items-center gap-2 mb-3 border-b border-[color:var(--line-soft)] pb-2">
-          <Compass className="w-3.5 h-3.5 text-amber-400" />
-          <h4 className="ui-eyebrow text-[color:var(--solar)]">
-            Enochian Compass Directional Flip
-          </h4>
-          <span className="text-[8px] px-1.5 py-0.5 bg-amber-950/80 text-amber-300 border border-amber-800 uppercase font-bold">
-            +{eb.compassOrientation.headingOffsetDegrees}° · Mirror E↔W
-          </span>
-        </div>
-        <p className="font-serif text-[11px] text-gray-300 italic leading-relaxed">
-          {eb.compassOrientation.connotation}
+      {/* Technical summary */}
+      <details className="instrument-panel curious">
+        <summary className="cursor-pointer font-semibold text-[color:var(--text-primary)]">Technical summary</summary>
+        <p className="readable-muted text-xs mt-3">
+          The app’s raw working notes for this page, using the traditions’ own terms. Source for the 364-day calendar:{' '}
+          {eb.enochian.sourceAuthority}.
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-center text-[10px]">
-          {(['North', 'East', 'South', 'West'] as const).map((d) => (
-            <div key={d} className="rounded-[var(--radius-md)] border border-[color:var(--line-soft)] bg-white/[0.025] p-3">
-              <p className="text-gray-500 uppercase text-[8px]">Civil {d}</p>
-              <p className="text-amber-300 font-bold mt-0.5">→ {eb.compassOrientation.directionRemap[d]}</p>
-            </div>
-          ))}
-        </div>
-        <ul className="mt-3 space-y-1">
-          {eb.compassOrientation.triangulationNotes.map((n, i) => (
-            <li key={i} className="text-[10px] text-gray-400 pl-2 border-l border-amber-900">
-              {n}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Hour matrices (toggleable) */}
-      {showHourMatrix && (
-        <div className="instrument-panel overflow-x-auto">
-          <h4 className="ui-eyebrow text-[color:var(--temporal)] mb-3">
-            24 Planetary Hours (Chaldean Sequence)
-          </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5">
-            {eb.planetaryHours.map((h) => (
-              <div
-                key={h.index}
-                className={`rounded-[var(--radius-sm)] border p-2 text-[9px] ${
-                  h.index === eb.currentPlanetaryHour.index
-                    ? 'border-cyan-300/40 bg-cyan-300/[0.08] shadow-[var(--glow-temporal)]'
-                    : 'border-[color:var(--line-soft)] bg-white/[0.025]'
-                }`}
-              >
-                <p className="text-gray-500">H{h.index} {h.isDayHour ? '☀' : '☾'}</p>
-                <p className="text-white font-bold">{h.planet}</p>
-                <p className="text-gray-400">{h.formattedWindow}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {showHalfHours && (
-        <div className="instrument-panel instrument-panel-solar max-h-64 overflow-y-auto">
-          <h4 className="ui-eyebrow text-[color:var(--solar)] mb-3 sticky top-0 bg-[color:var(--void-850)]/95 py-2 backdrop-blur-md">
-            Half-Hour Meanings (Ingress Crest / Mid-Hour Echo)
-          </h4>
-          <div className="space-y-1">
-            {eb.halfHourMeanings.map((h, i) => (
-              <div
-                key={i}
-                className={`flex flex-wrap gap-2 border-b border-[color:var(--line-soft)] p-2 text-[9px] ${
-                  h.formattedWindow === eb.currentHalfHour.formattedWindow ? 'bg-amber-300/[0.06]' : ''
-                }`}
-              >
-                <span className="text-amber-400 font-bold w-28">{h.formattedWindow}</span>
-                <span className="text-white w-16">{h.planet}</span>
-                <span className="text-cyan-500 w-24">{h.phase}</span>
-                <span className="text-gray-400 flex-1">{h.meaning}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Triangulation dossier */}
-      <div className="instrument-panel instrument-panel-solar">
-        <h4 className="ui-eyebrow text-[color:var(--solar)] mb-3">
-          Final-Output Triangulation Dossier
-        </h4>
-        <pre className="whitespace-pre-wrap font-serif text-[11px] text-gray-300 leading-relaxed">
+        <pre className="whitespace-pre-wrap text-xs leading-relaxed mt-2 text-[color:var(--text-secondary)]">
           {eb.triangulationDossier}
         </pre>
-      </div>
+        <ul className="curious-list mt-2 text-xs">
+          <li>{eb.enochian.formatted}</li>
+          <li>{eb.biblicalTransits.narrative}</li>
+          <li>{eb.compassOrientation.connotation}</li>
+          {eb.compassOrientation.triangulationNotes.map((n, i) => (
+            <li key={i}>{n}</li>
+          ))}
+          <li>
+            {eb.abPeek.pathA.title}: {eb.abPeek.pathA.summary}
+          </li>
+          <li>
+            {eb.abPeek.pathB.title}: {eb.abPeek.pathB.summary}
+          </li>
+          <li>{eb.abPeek.synthesis.summary}</li>
+        </ul>
+      </details>
     </div>
   );
 };

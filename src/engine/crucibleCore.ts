@@ -79,14 +79,14 @@ export function executeCrucibleCalculation(
     geneKeysSun,
     geneKeysEarth,
     celestialBodies,
-    twelveTribesScores: synthesis.twelveTribesScores,
-    topTribe: synthesis.topResonatingTribe
+    callingScores: synthesis.callingScores,
+    topCalling: synthesis.topCalling
   });
 
-  synthesis.twelveTribesScores = intertwining.twelveTribesEnriched;
-  synthesis.topResonatingTribe = intertwining.twelveTribesEnriched[0] || synthesis.topResonatingTribe;
-  const life = intertwining.primaryTribeLife;
-  synthesis.recommendedFocus = `Strongest archetypal alignment under this methodology: ${life.tribe}. Explore: ${life.giftToEmbody} Today: ${life.dayPractice} Refuse: ${life.shadowToWatch}`;
+  synthesis.callingScores = intertwining.callingsEnriched;
+  synthesis.topCalling = intertwining.callingsEnriched[0] || synthesis.topCalling;
+  const life = intertwining.primaryCallingLife;
+  synthesis.recommendedFocus = `Strongest archetypal alignment under this methodology: ${life.calling}. Explore: ${life.giftToEmbody} Today: ${life.dayPractice} Refuse: ${life.shadowToWatch}`;
 
   // Partial context for Gaia (needs celestial + chinese + numerology minimum)
   const partialForGaia = {
@@ -133,14 +133,14 @@ export function executeCrucibleCalculation(
       epistemicClass: gaia.epistemicClass
     };
     dialecticalForks = toSharedDialecticalForks(
-      buildDialecticalForks(partialForGaia, gaia, input.querentName || 'Querent')
+      buildDialecticalForks(partialForGaia, gaia, input.querentName || 'you')
     );
   }
 
   const endTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
   const executionDurationMs = Math.round((endTime - startTime) * 1000) / 1000;
 
-  const canonicalString = `${temporal.julianDayUT}|${methodology.version}|${mayan.longCount.formatted}|${dreamspell.signature}|${chinese.yearPillar.stemPinYin}-${chinese.yearPillar.branchPinYin}|${numerology.lifePathNumber}|${enochianBiblical.enochian.formatted}|${synthesis.topResonatingTribe.tribe}|${vedic?.nakshatraName || 'none'}`;
+  const canonicalString = `${temporal.julianDayUT}|${methodology.version}|${mayan.longCount.formatted}|${dreamspell.signature}|${chinese.yearPillar.stemPinYin}-${chinese.yearPillar.branchPinYin}|${numerology.lifePathNumber}|${enochianBiblical.enochian.formatted}|${synthesis.topCalling.calling}|${vedic?.nakshatraName || 'none'}`;
   const rulesetHash = hashString(canonicalString);
   const calculationId = `CRUCIBLE-${rulesetHash.toUpperCase()}-${Math.floor(temporal.julianDayUT)}`;
 

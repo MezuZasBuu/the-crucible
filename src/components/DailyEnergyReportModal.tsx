@@ -1,36 +1,26 @@
 /**
- * The Crucible — Today's Daily Report & Energy of the Day Dossier
- * Comprehensive, novel-like analysis of Gaia's energetic overcast and celestial transits.
+ * The Crucible — detailed report for one day.
+ * A long modal with the day's full reading and a plain-text export.
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  X,
-  Sun,
-  Moon,
-  Compass,
-  Copy,
-  Check,
-  Download,
-  Calendar,
-  Sparkles,
-  Flame,
-  Globe,
-  Radio,
-  Share2,
-  ShieldCheck,
-  ChevronRight,
-  GitFork,
-  BookOpen,
-  Zap
-} from 'lucide-react';
+import { X, Copy, Check, Download, Calendar, Sparkles } from 'lucide-react';
 import { DailyEnergyReport, CompleteCalculationContext } from '../types';
 import { generateTodayDailyReport } from '../engine/dailyEnergyReport';
 import { getActiveProfile } from '../engine/crucibleProfile';
 import { executeCrucibleCalculation } from '../engine/crucibleCore';
 import { buildChartDynamicsReport } from '../engine/chartDynamics';
 import { buildCompassContextPacket } from '../engine/almanac';
-import { ScrollCard, ScrollMetric, ScrollProse } from './ui/ScrollCard';
+import { SignGlyph, PlanetGlyph, AspectGlyph } from './symbols/AstroGlyph';
+import { CultureHeader, CallingEmblem } from './symbols/CultureSymbols';
+
+/** Glyph id for a planet name, e.g. "North Node" → "north_node". */
+const planetId = (name: string) => String(name).trim().toLowerCase().replace(/\s+/g, '_');
+/** First word of a position such as "Leo 12.34° (Direct)" → "Leo". */
+const signOf = (position: string) => String(position).trim().split(/\s+/)[0] || '';
+/** Plain wording for a position string. */
+const plainPosition = (position: string) =>
+  String(position).replace(' (Direct)', '').replace('(Rx)', '(appearing to move backward)');
 
 interface DailyEnergyReportModalProps {
   isOpen: boolean;
@@ -85,51 +75,51 @@ export const DailyEnergyReportModal: React.FC<DailyEnergyReportModalProps> = ({
 
 
   const handleCopy = () => {
-    const text = `THE CRUCIBLE — DAILY BRIEFING
-${report.gregorianFormatted} (JD ${report.julianDayUT})
-Universal Day ${report.universalDayNumber} · ${report.dominantTone}
+    const text = `The Crucible — detailed report for the day
+${report.gregorianFormatted} (Julian day ${report.julianDayUT})
+Day number ${report.universalDayNumber} · ${report.dominantTone}
 
 ${report.executiveSynthesis}
 
 ---
-FIELD [speculative overlay]
-- Geomagnetic Field: ${report.gaiaOvercast.geomagneticStatus} (Kp: ${report.gaiaOvercast.geomagneticKp})
-- Schumann Resonance: ${report.gaiaOvercast.schumannFrequencyHz} Hz
-- Cosmic Tension Score: ${report.gaiaOvercast.aspectTensionScore}/100
-- Collective Polarity: ${report.gaiaOvercast.collectivePolarity}
-- Lunar Illumination: ${report.gaiaOvercast.lunarIlluminationPercent}% (${report.gaiaOvercast.lunarPhaseName})
-- Solar Term: ${report.gaiaOvercast.solarTerm}
+Earth conditions (estimates worked out from the date, not live measurements)
+- Magnetic activity: ${report.gaiaOvercast.geomagneticStatus} (Kp index ${report.gaiaOvercast.geomagneticKp} of 9)
+- Earth's background hum (Schumann resonance): ${report.gaiaOvercast.schumannFrequencyHz} Hz
+- Tension between the planets: ${report.gaiaOvercast.aspectTensionScore} out of 100
+- Overall mood: ${report.gaiaOvercast.collectivePolarity}
+- Moon: ${report.gaiaOvercast.lunarIlluminationPercent}% lit (${report.gaiaOvercast.lunarPhaseName})
+- Chinese solar term (season marker): ${report.gaiaOvercast.solarTerm}
 
-SKY
+Sun, Moon and planets
 - Sun: ${report.celestialWeather.sunPosition}
-- Moon: ${report.celestialWeather.moonPosition}
-- Retrograde Spheres: ${report.celestialWeather.retrogradeBodies.join(', ')}
+- Moon: ${plainPosition(report.celestialWeather.moonPosition)}
+- Planets appearing to move backward (retrograde): ${report.celestialWeather.retrogradeBodies.join(', ')}
 
-CALENDARS
-- Mayan: Long Count ${report.mayanProfile.longCount} | Kin ${report.mayanProfile.kinNumber} (${report.mayanProfile.tzolkinFormatted}) | Tone ${report.mayanProfile.solarTone} | Haab' ${report.mayanProfile.haabFormatted}
-- Chinese BaZi: Day ${report.chineseProfile.dayPillar} | Month ${report.chineseProfile.monthPillar} | Year ${report.chineseProfile.yearPillar}
-- Egyptian Civil: ${report.ancientCalendars.egyptian}
-- Ethiopian Ge'ez: ${report.ancientCalendars.ethiopian}
-- Greek Attic: ${report.ancientCalendars.greekAttic}
+Calendars
+- Maya: Long Count ${report.mayanProfile.longCount} | day ${report.mayanProfile.kinNumber} of 260 (${report.mayanProfile.tzolkinFormatted}) | tone ${report.mayanProfile.solarTone} | 365-day year: ${report.mayanProfile.haabFormatted}
+- Chinese: day ${report.chineseProfile.dayPillar} | month ${report.chineseProfile.monthPillar} | year ${report.chineseProfile.yearPillar}
+- Egyptian: ${report.ancientCalendars.egyptian}
+- Ethiopian: ${report.ancientCalendars.ethiopian}
+- Athenian: ${report.ancientCalendars.greekAttic}
 
-GENE KEYS & TRIBE LENS
-- Solar Transit: Gate ${report.geneKeyTransit.sunGate}.${report.geneKeyTransit.line} (${report.geneKeyTransit.name})
-  Shadow: ${report.geneKeyTransit.shadow} -> Gift: ${report.geneKeyTransit.gift} -> Siddhi: ${report.geneKeyTransit.siddhi}
-- Twelve Tribes Alignment: ${report.twelveTribesResonance.primaryTribe} (${report.twelveTribesResonance.campDirection} Camp, Stone: ${report.twelveTribesResonance.gemstone})
+Gene Keys & calling
+- Gene Key from the Sun's position: key ${report.geneKeyTransit.sunGate}, line ${report.geneKeyTransit.line} (${report.geneKeyTransit.name})
+  Difficulty: ${report.geneKeyTransit.shadow} -> Strength: ${report.geneKeyTransit.gift} -> Highest form: ${report.geneKeyTransit.siddhi}
+- Today's calling: ${report.callingResonance.primaryCalling} (${report.callingResonance.quarter} quarter, stone: ${report.callingResonance.gemstone})
 
-TODAY'S MOVE
+What to do today
 ${report.dailyStrategicActionPlan.goldenThread}
-- Peak Power Window: ${report.dailyStrategicActionPlan.peakPowerWindow}
-- What to Harness:
+- Best time of day: ${report.dailyStrategicActionPlan.peakPowerWindow}
+- What to use:
 ${report.dailyStrategicActionPlan.whatToHarness.map((h) => `  * ${h}`).join('\n')}
-- What to Avoid:
+- What to watch out for:
 ${report.dailyStrategicActionPlan.whatToAvoid.map((a) => `  * ${a}`).join('\n')}
 
-THE FORK
+A choice for today
 ${report.dailyStrategicActionPlan.dialecticalFork.title}
-A: ${report.dailyStrategicActionPlan.dialecticalFork.choiceA}
-B: ${report.dailyStrategicActionPlan.dialecticalFork.choiceB}
-Third read: ${report.dailyStrategicActionPlan.dialecticalFork.syntheticResolution}
+Option A: ${report.dailyStrategicActionPlan.dialecticalFork.choiceA}
+Option B: ${report.dailyStrategicActionPlan.dialecticalFork.choiceB}
+A middle way: ${report.dailyStrategicActionPlan.dialecticalFork.syntheticResolution}
 `;
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -168,493 +158,384 @@ Third read: ${report.dailyStrategicActionPlan.dialecticalFork.syntheticResolutio
       }
     } catch (err: any) {
       console.error('Monograph expansion failed:', err);
-      setExpansionError(err.message || 'Expansion request timed out.');
+      setExpansionError(err.message || 'The request timed out.');
     } finally {
       setIsExpanding(false);
     }
   };
 
+
   const currentMonographText = expandedMonograph || report.extendedMonograph || report.executiveSynthesis;
+  const wordCount = Math.round(currentMonographText.split(/\s+/).length).toLocaleString();
+  const topCalling = ctx?.synthesis.topCalling;
+  const callingMatches = topCalling && topCalling.calling === report.callingResonance.primaryCalling;
+  const moonSign = signOf(report.celestialWeather.moonPosition);
+  const sunSign = signOf(report.celestialWeather.sunPosition);
+  const kpPercent = Math.max(0, Math.min(100, (report.gaiaOvercast.geomagneticKp / 9) * 100));
+  const tensionPercent = Math.max(0, Math.min(100, report.gaiaOvercast.aspectTensionScore));
+
+  const tabs = [
+    { id: 'OVERVIEW', label: 'Summary' },
+    { id: 'STRATEGY', label: 'What to do' },
+    { id: 'TRANSITS', label: `Planets today (${report.celestialWeather.activeAspects.length})` },
+    { id: 'CALENDRICS', label: 'Calendars' },
+    { id: 'GAIA', label: 'Earth conditions' },
+    { id: 'VEDIC_SIDEREAL_ASTEROIDS', label: 'Vedic, stars and world' },
+    { id: 'MONOGRAPH', label: 'Full written report' }
+  ] as const;
+
+  const isChapterHeading = (paragraph: string) => {
+    const t = paragraph.trim();
+    return t.startsWith('Chapter') || /^(I|II|III|IV|V|VI|VII|VIII|IX|X|XI|XII|XIII)\./.test(t);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(44,36,25,0.45)] backdrop-blur-sm p-3 sm:p-6 overflow-y-auto">
-      <div className="relative w-full max-w-5xl scroll-sheet parchment-surface rounded-[var(--radius-lg)] flex flex-col max-h-[92vh] overflow-hidden motion-enter">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[color:var(--line-soft)] bg-[color:var(--surface-raised)]">
-          <div className="flex items-center gap-3">
-            <div className="p-2 border border-[color:var(--line-medium)] text-[color:var(--accent-ochre)] bg-[color:var(--surface-well)] rounded-[var(--radius-sm)]">
-              <Sun className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="scroll-label !mb-0">Daily briefing</span>
-                <span className="text-[10px] font-semibold px-2 py-0.5 border border-[color:var(--line-medium)] text-[color:var(--text-secondary)] rounded-full">
-                  UD {report.universalDayNumber}
-                </span>
-                {report.mayanProfile.isGalacticPortalDay && (
-                  <span className="text-[10px] font-mono px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                    GALACTIC PORTAL
-                  </span>
-                )}
-              </div>
-              <h2 className="text-xl font-cinzel text-[color:var(--text-primary)] tracking-wide mt-1">
-                {report.gregorianFormatted}
-              </h2>
-            </div>
+    <div className="guide-overlay overflow-y-auto" role="dialog" aria-modal="true" aria-label="Detailed report for the day">
+      <div className="guide-sheet motion-enter">
+        <div className="guide-head">
+          <div className="min-w-0">
+            <p className="ui-eyebrow">Detailed report for the day</p>
+            <h2 className="guide-title">{report.gregorianFormatted}</h2>
+            <p className="readable-muted mt-1">
+              Day number {report.universalDayNumber} in numerology
+              {report.mayanProfile.isGalacticPortalDay
+                ? ' · Portal day (a marked day in the Dreamspell calendar)'
+                : ''}
+            </p>
           </div>
+          <button type="button" onClick={onClose} className="guide-close" aria-label="Close">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-          <div className="flex items-center gap-2">
+        <div className="guide-body space-y-5">
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-2">
             {onSyncToday && (
-              <button
-                onClick={onSyncToday}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono cta-ghost"
-                title="Synchronize Crucible to Current Moment"
-              >
-                <Calendar className="w-3.5 h-3.5 text-amber-400" />
-                <span>Sync Anchor</span>
+              <button type="button" onClick={onSyncToday} className="cta-ghost" title="Show the report for the present moment">
+                <Calendar className="w-4 h-4" />
+                <span>Jump to now</span>
               </button>
             )}
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono cta-ghost"
-              title="Copy formatted dossier to clipboard"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
-              <span>{copied ? 'Copied' : 'Copy'}</span>
+            <button type="button" onClick={handleCopy} className="cta-ghost" title="Copy the whole report as plain text">
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>{copied ? 'Copied' : 'Copy as text'}</span>
             </button>
-            <button
-              onClick={handleDownload}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono cta-ghost"
-              title="Download raw report JSON"
-            >
-              <Download className="w-3.5 h-3.5 text-sky-400" />
-              <span className="hidden sm:inline">JSON</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 text-report-muted hover:text-[color:var(--text-primary)] hover:bg-[color:var(--surface-well)] transition-colors ml-1"
-              aria-label="Close modal"
-            >
-              <X className="w-5 h-5" />
+            <button type="button" onClick={handleDownload} className="cta-ghost" title="Download the report as a data file">
+              <Download className="w-4 h-4" />
+              <span>Download JSON</span>
             </button>
           </div>
-        </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-1 px-5 py-2 border-b border-[color:var(--line-soft)] bg-[color:var(--void-900)] overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('MONOGRAPH')}
-            className={`nav-tab whitespace-nowrap flex items-center gap-1.5 ${activeTab === 'MONOGRAPH' ? 'nav-tab-active' : ''}`}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Full briefing</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('VEDIC_SIDEREAL_ASTEROIDS')}
-            className={`px-3 py-1.5 transition-colors uppercase whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === 'VEDIC_SIDEREAL_ASTEROIDS'
-                ? 'bg-amber-500/15 text-amber-300 border-b-2 border-amber-400 font-bold'
-                : 'text-report-muted hover:text-gray-200'
-            }`}
-          >
-            <Globe className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Vedic, Sidereal & Global Grid</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('OVERVIEW')}
-            className={`px-3 py-1.5 transition-colors uppercase whitespace-nowrap ${
-              activeTab === 'OVERVIEW'
-                ? 'bg-amber-500/10 text-amber-300 border-b-2 border-amber-400 font-bold'
-                : 'text-report-muted hover:text-gray-200'
-            }`}
-          >
-            Synthesis & Tone
-          </button>
-          <button
-            onClick={() => setActiveTab('GAIA')}
-            className={`px-3 py-1.5 transition-colors uppercase whitespace-nowrap ${
-              activeTab === 'GAIA'
-                ? 'bg-amber-500/10 text-amber-300 border-b-2 border-amber-400 font-bold'
-                : 'text-report-muted hover:text-gray-200'
-            }`}
-          >
-            Speculative Field Overlay
-          </button>
-          <button
-            onClick={() => setActiveTab('TRANSITS')}
-            className={`px-3 py-1.5 transition-colors uppercase whitespace-nowrap ${
-              activeTab === 'TRANSITS'
-                ? 'bg-amber-500/10 text-amber-300 border-b-2 border-amber-400 font-bold'
-                : 'text-report-muted hover:text-gray-200'
-            }`}
-          >
-            Celestial Transits ({report.celestialWeather.activeAspects.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('CALENDRICS')}
-            className={`px-3 py-1.5 transition-colors uppercase whitespace-nowrap ${
-              activeTab === 'CALENDRICS'
-                ? 'bg-amber-500/10 text-amber-300 border-b-2 border-amber-400 font-bold'
-                : 'text-report-muted hover:text-gray-200'
-            }`}
-          >
-            Sacred Calendars
-          </button>
-          <button
-            onClick={() => setActiveTab('STRATEGY')}
-            className={`px-3 py-1.5 transition-colors uppercase whitespace-nowrap ${
-              activeTab === 'STRATEGY'
-                ? 'bg-amber-500/10 text-amber-300 border-b-2 border-amber-400 font-bold'
-                : 'text-report-muted hover:text-gray-200'
-            }`}
-          >
-            Forks & Strategic Action
-          </button>
-        </div>
-
-        {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 bg-[color:var(--void-900)]">
+          {/* At a glance */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <ScrollMetric
-              label="Maya"
-              value={report.mayanProfile.tzolkinFormatted}
-              sub={`Kin ${report.mayanProfile.kinNumber} · ${report.mayanProfile.solarTone}`}
-              accent="ochre"
-            />
-            <ScrollMetric
-              label="BaZi day"
-              value={report.chineseProfile.dayPillar}
-              sub={report.chineseProfile.solarTerm}
-              accent="sage"
-            />
-
-            <ScrollMetric
-              label="Field"
-              value={`${report.gaiaOvercast.schumannFrequencyHz} Hz`}
-              sub={`Kp ${report.gaiaOvercast.geomagneticKp} · ${report.gaiaOvercast.geomagneticStatus}`}
-              accent="indigo"
-            />
-            <ScrollMetric
-              label="Moon"
-              value={`${report.gaiaOvercast.lunarIlluminationPercent}%`}
-              sub={`${report.gaiaOvercast.lunarPhaseName} · ${report.celestialWeather.moonPosition}`}
-              accent="rose"
-            />
+            <div className="curious-box">
+              <p className="readable-muted">Maya day</p>
+              <p className="trad-hero-value">{report.mayanProfile.tzolkinFormatted}</p>
+              <p className="readable-muted">
+                Day {report.mayanProfile.kinNumber} of 260 · tone {report.mayanProfile.solarTone}
+              </p>
+            </div>
+            <div className="curious-box">
+              <p className="readable-muted">Chinese day</p>
+              <p className="trad-hero-value">{report.chineseProfile.dayPillar}</p>
+              <p className="readable-muted">Season marker: {report.chineseProfile.solarTerm}</p>
+            </div>
+            <div className="curious-box">
+              <p className="readable-muted">Magnetic activity (estimate)</p>
+              <p className="trad-hero-value">{report.gaiaOvercast.geomagneticStatus}</p>
+              <p className="readable-muted">Kp index {report.gaiaOvercast.geomagneticKp} of 9</p>
+            </div>
+            <div className="curious-box">
+              <p className="readable-muted">Moon</p>
+              <p className="trad-hero-value">
+                <SignGlyph sign={moonSign} size={18} tinted /> {report.gaiaOvercast.lunarIlluminationPercent}% lit
+              </p>
+              <p className="readable-muted">
+                {report.gaiaOvercast.lunarPhaseName} · in {plainPosition(report.celestialWeather.moonPosition)}
+              </p>
+            </div>
           </div>
 
-          {/* TAB: EXTENDED MONOGRAPH (~20k TOKEN TARGET) */}
+          {/* Tabs */}
+          <div className="explore-tabs" role="tablist" aria-label="Report sections">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`explore-tab whitespace-nowrap ${activeTab === tab.id ? 'explore-tab-active' : ''}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Full written report */}
           {activeTab === 'MONOGRAPH' && (
-            <div className="space-y-6">
-              <div className="report-well border border-[#262833] p-5 relative overflow-hidden">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#20222c] pb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300/50 text-[9px] font-mono font-bold uppercase rounded-sm flex items-center gap-1">
-                        <BookOpen className="w-3 h-3 text-amber-700" />
-                        Energy Compass Briefing
-                      </span>
-                      <span className="px-2 py-0.5 bg-[color:var(--surface-well)] text-[color:var(--temporal-deep)] border border-[color:var(--line-medium)] text-[9px] font-mono uppercase rounded-sm">
-                        ~{Math.round((report.extendedMonograph || '').split(/\s+/).length).toLocaleString()} words · 12 sections
-                      </span>
-                    </div>
-                    <h3 className="panel-title">Full briefing · {report.gregorianFormatted}</h3>
-                    <p className="text-sm text-[color:var(--text-muted)] mt-1">
-                      Expert-to-expert read — all systems, connected observations, explicit forks.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleExpandMonograph}
-                      disabled={isExpanding}
-                      className="px-3 py-1.5 cta-ghost text-xs uppercase tracking-wider flex items-center gap-2 disabled:opacity-50"
-                      title="Expand monograph to maximum literary volume with Gemini 3.8 Flash"
-                    >
-                      <Sparkles className={`w-3.5 h-3.5 text-amber-400 ${isExpanding ? 'animate-spin' : ''}`} />
-                      <span>{isExpanding ? 'Deepening with Gemini...' : expandedMonograph ? 'Re-expand briefing' : 'Expand via Gemini'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(currentMonographText);
-                        setCopied(true);
-                        setTimeout(() => setCopied(false), 2000);
-                      }}
-                      className="cta-ghost !min-h-[36px] font-mono text-xs uppercase"
-                      title="Copy full treatise text"
-                    >
-                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
-                      <span>{copied ? 'Copied' : 'Copy'}</span>
-                    </button>
-                  </div>
+            <div className="space-y-4">
+              <div className="instrument-panel space-y-3">
+                <div>
+                  <h3 className="panel-title">Full written report</h3>
+                  <p className="readable-muted mt-1">
+                    The whole day in one long read, about {wordCount} words. It covers every tradition, how they
+                    connect, and where they disagree.
+                  </p>
                 </div>
 
-                {/* Volume & Token Depth Indicator Strip */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-xs font-mono">
-                  <div className="report-well-nested p-2.5 rounded-sm border border-[#1e2029]">
-                    <span className="text-report-muted text-[9px] uppercase">Word Count Depth</span>
-                    <div className="text-[color:var(--text-primary)] font-bold text-sm mt-0.5">
-                      ~{Math.round(currentMonographText.split(/\s+/).length).toLocaleString()} Words
-                    </div>
-                  </div>
-                  <div className="report-well-nested p-2.5 rounded-sm border border-[#1e2029]">
-                    <span className="text-report-muted text-[9px] uppercase">Calculated Token Volume</span>
-                    <div className="text-amber-300 font-bold text-sm mt-0.5">
-                      ~{Math.round(currentMonographText.length / 3.8).toLocaleString()} Tokens
-                    </div>
-                  </div>
-                  <div className="report-well-nested p-2.5 rounded-sm border border-[#1e2029]">
-                    <span className="text-report-muted text-[9px] uppercase">Structural Chapters</span>
-                    <div className="text-[color:var(--temporal-deep)] font-bold text-sm mt-0.5">
-                      XII structured sections
-                    </div>
-                  </div>
-                  <div className="report-well-nested p-2.5 rounded-sm border border-[color:var(--line-soft)]">
-                    <span className="text-report-muted text-[9px] uppercase">Voice</span>
-                    <div className="text-[color:var(--accent-sage)] font-bold text-sm mt-0.5">
-                      Expert compass · life impact
-                    </div>
-                  </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExpandMonograph}
+                    disabled={isExpanding}
+                    className="cta-primary"
+                    title="Ask for a longer, AI-written reading of this day"
+                  >
+                    <Sparkles className={`w-4 h-4 ${isExpanding ? 'animate-pulse' : ''}`} />
+                    <span>
+                      {isExpanding
+                        ? 'Writing the in-depth reading…'
+                        : expandedMonograph
+                          ? 'Write the in-depth reading again'
+                          : 'Get an in-depth reading'}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(currentMonographText);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="cta-ghost"
+                    title="Copy the text of this written report"
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    <span>{copied ? 'Copied' : 'Copy this text'}</span>
+                  </button>
                 </div>
+                <p className="field-help">
+                  The in-depth reading is AI-written and takes a little while.
+                  {expandedMonograph ? ' You are reading it now.' : ''}
+                </p>
 
                 {expansionError && (
-                  <div className="mt-3 p-2 bg-rose-950/40 border border-rose-800 text-rose-300 text-xs font-mono">
-                    {expansionError}
-                  </div>
+                  <p className="chart-note" style={{ color: 'var(--el-fire)' }}>
+                    The in-depth reading could not be written just now ({expansionError}). The standard report is
+                    shown below.
+                  </p>
                 )}
               </div>
 
-              {/* The Novel-Like Monograph Text Reader */}
-              <div className="bg-[#101218] border border-[#222530] p-6 sm:p-8 rounded-sm space-y-6">
-                <div className="prose prose-invert max-w-none font-serif text-gray-200 text-sm sm:text-base leading-relaxed space-y-4">
-                  {currentMonographText.split('\n\n').map((paragraph, pIdx) => {
-                    const isChapterHeader = paragraph.trim().startsWith('Chapter') || 
-                                           paragraph.trim().startsWith('I.') ||
-                                           paragraph.trim().startsWith('II.') ||
-                                           paragraph.trim().startsWith('III.') ||
-                                           paragraph.trim().startsWith('IV.') ||
-                                           paragraph.trim().startsWith('V.') ||
-                                           paragraph.trim().startsWith('VI.') ||
-                                           paragraph.trim().startsWith('VII.') ||
-                                           paragraph.trim().startsWith('VIII.') ||
-                                           paragraph.trim().startsWith('IX.') ||
-                                           paragraph.trim().startsWith('X.') ||
-                                           paragraph.trim().startsWith('XI.') ||
-                                           paragraph.trim().startsWith('XII.') ||
-                                           paragraph.trim().startsWith('XIII.');
-
-                    if (isChapterHeader) {
-                      return (
-                        <div key={pIdx} className="pt-6 pb-2 border-b border-[#242733] my-4">
-                          <h4 className="text-lg sm:text-xl font-serif text-amber-300 tracking-wide font-normal">
-                            {paragraph}
-                          </h4>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <p key={pIdx} className="leading-relaxed text-report text-justify">
-                        {paragraph}
-                      </p>
-                    );
-                  })}
-                </div>
+              <div className="instrument-panel space-y-4">
+                {currentMonographText.split('\n\n').map((paragraph, pIdx) =>
+                  isChapterHeading(paragraph) ? (
+                    <h4 key={pIdx} className="panel-title pt-4 border-t border-[color:var(--line-soft)] first:border-0 first:pt-0">
+                      {paragraph}
+                    </h4>
+                  ) : (
+                    <p key={pIdx} className="readable-body whitespace-pre-line">
+                      {paragraph}
+                    </p>
+                  )
+                )}
               </div>
             </div>
           )}
 
-          {/* TAB: VEDIC, SIDEREAL, ASTEROIDS & GLOBAL CONTINENTAL GRID */}
+          {/* Vedic, stars and world */}
           {activeTab === 'VEDIC_SIDEREAL_ASTEROIDS' && (
-            <div className="space-y-6">
-              {/* Vedic Jyotish Profile */}
+            <div className="space-y-4">
               {report.vedicProfile && (
-                <div className="report-well border border-[#262833] p-5 space-y-4">
-                  <div className="flex items-center justify-between border-b border-[#20222c] pb-3">
-                    <span className="text-amber-400 font-bold text-xs uppercase font-mono flex items-center gap-1.5">
-                      <Moon className="w-4 h-4" />
-                      Vedic Jyotish & 27 Nakshatras Panchanga
-                    </span>
-                    <span className="text-xs text-report-muted font-mono">
-                      Lahiri Ayanamsha: -{report.vedicProfile.lahiriAyanamshaDeg}°
-                    </span>
+                <div className="instrument-panel space-y-4">
+                  <CultureHeader culture="vedic" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="curious-box space-y-2">
+                      <p className="readable-muted">Nakshatra (lunar mansion, the star group the Moon is in)</p>
+                      <p className="trad-hero-value">{report.vedicProfile.nakshatra.name}</p>
+                      <dl className="trad-facts">
+                        <dt>Quarter</dt>
+                        <dd>{report.vedicProfile.nakshatra.pada} of 4</dd>
+                        <dt>Ruling planet</dt>
+                        <dd>
+                          <PlanetGlyph planet={planetId(report.vedicProfile.nakshatra.rulingPlanet)} size={16} tinted />{' '}
+                          {report.vedicProfile.nakshatra.rulingPlanet}
+                        </dd>
+                        <dt>Deity</dt>
+                        <dd>{report.vedicProfile.nakshatra.deity}</dd>
+                        <dt>Its power</dt>
+                        <dd>{report.vedicProfile.nakshatra.shakti}</dd>
+                        <dt>Symbol</dt>
+                        <dd>{report.vedicProfile.nakshatra.symbol}</dd>
+                      </dl>
+                    </div>
+
+                    <div className="curious-box space-y-2">
+                      <p className="readable-muted">Tithi (lunar day, one of 30 in a lunar month)</p>
+                      <p className="trad-hero-value">{report.vedicProfile.tithi.name}</p>
+                      <dl className="trad-facts">
+                        <dt>Number</dt>
+                        <dd>{report.vedicProfile.tithi.number}</dd>
+                        <dt>Half of month</dt>
+                        <dd>{report.vedicProfile.tithi.paksha}</dd>
+                        <dt>Character</dt>
+                        <dd>{report.vedicProfile.tithi.nature}</dd>
+                      </dl>
+                    </div>
+
+                    <div className="curious-box space-y-2">
+                      <p className="readable-muted">Yoga (a Sun and Moon combination, one of 27)</p>
+                      <p className="trad-hero-value">{report.vedicProfile.yoga.name}</p>
+                      <dl className="trad-facts">
+                        <dt>Quality</dt>
+                        <dd>{report.vedicProfile.yoga.quality}</dd>
+                        <dt>Karana</dt>
+                        <dd>{report.vedicProfile.karana.name} (half of a lunar day)</dd>
+                      </dl>
+                    </div>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
-                    <div className="report-well-nested p-3 rounded-sm border border-[#1e2029] space-y-1.5">
-                      <span className="text-report-muted text-[10px] uppercase block">Active Nakshatra</span>
-                      <div className="text-amber-300 font-bold text-sm font-serif">
-                        {report.vedicProfile.nakshatra.name} (Pada {report.vedicProfile.nakshatra.pada})
-                      </div>
-                      <div className="text-report-muted text-[11px]">Planetary Lord: {report.vedicProfile.nakshatra.rulingPlanet}</div>
-                      <div className="text-report-muted text-[11px]">Deity: {report.vedicProfile.nakshatra.deity}</div>
-                      <div className="text-report-muted text-[11px]">Shakti: {report.vedicProfile.nakshatra.shakti}</div>
-                      <div className="text-report-muted text-[11px]">Symbol: {report.vedicProfile.nakshatra.symbol}</div>
-                    </div>
-
-                    <div className="report-well-nested p-3 rounded-sm border border-[#1e2029] space-y-1.5">
-                      <span className="text-report-muted text-[10px] uppercase block">Tithi & Lunar Phase</span>
-                      <div className="text-[color:var(--text-primary)] font-bold text-sm">
-                        {report.vedicProfile.tithi.name} (Tithi #{report.vedicProfile.tithi.number})
-                      </div>
-                      <div className="text-cyan-400 text-[11px]">Paksha: {report.vedicProfile.tithi.paksha}</div>
-                      <div className="text-report-muted text-[11px]">Nature: {report.vedicProfile.tithi.nature}</div>
-                    </div>
-
-                    <div className="report-well-nested p-3 rounded-sm border border-[#1e2029] space-y-1.5">
-                      <span className="text-report-muted text-[10px] uppercase block">Yoga & Karana</span>
-                      <div className="text-emerald-400 font-bold text-sm">
-                        Yoga: {report.vedicProfile.yoga.name}
-                      </div>
-                      <div className="text-report-muted text-[11px]">Karana: {report.vedicProfile.karana.name}</div>
-                      <div className="text-report-muted text-[11px]">Quality: {report.vedicProfile.yoga.quality}</div>
-                    </div>
-                  </div>
+                  <details>
+                    <summary className="readable-muted cursor-pointer">Technical details</summary>
+                    <p className="readable-muted mt-2">
+                      Zodiac shift used (Lahiri ayanamsha, the gap between the seasonal and star-based zodiacs): −
+                      {report.vedicProfile.lahiriAyanamshaDeg}°
+                    </p>
+                  </details>
                 </div>
               )}
 
-              {/* Sidereal Astronomical IAU Constellations */}
               {report.siderealProfile && (
-                <div className="report-well border border-[#262833] p-5 space-y-4">
-                  <div className="flex items-center justify-between border-b border-[#20222c] pb-3">
-                    <span className="text-cyan-400 font-bold text-xs uppercase font-mono flex items-center gap-1.5">
-                      <Compass className="w-4 h-4" />
-                      True Sidereal Constellations (IAU Astronomical Sky)
-                    </span>
-                    <span className="text-xs text-cyan-300 font-mono">
-                      Precessional Shift: ~{report.siderealProfile.ayanamshaOffsetDeg}°
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
-                    <div className="report-well-nested p-3 rounded-sm border border-[#1e2029] space-y-1">
-                      <span className="text-report-muted text-[10px] uppercase">Sidereal Sun Coordinate</span>
-                      <div className="text-amber-300 font-bold text-sm">
-                        {report.siderealProfile.sunSign} ({report.siderealProfile.sunDegree}°)
-                      </div>
-                      <div className="text-report-muted text-[11px]">
-                        Physical Constellation: <strong className="text-[color:var(--text-primary)]">{report.siderealProfile.iauConstellationSun}</strong>
+                <div className="instrument-panel space-y-4">
+                  <CultureHeader culture="western" title="Signs measured against the actual stars" explain={false} />
+                  <p className="trad-meaning">
+                    <strong>In plain words:</strong> the usual zodiac is tied to the seasons. Measured against the real
+                    stars it has drifted by about {report.siderealProfile.ayanamshaOffsetDeg}°, so the Sun and Moon can
+                    land in a different sign here.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="trad-hero">
+                      <span className="trad-hero-symbol">
+                        <SignGlyph sign={report.siderealProfile.sunSign} size={26} tinted />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="trad-hero-value">
+                          <PlanetGlyph planet="sun" size={18} tinted /> Sun in {report.siderealProfile.sunSign},{' '}
+                          {report.siderealProfile.sunDegree}°
+                        </p>
+                        <p className="trad-hero-sub">
+                          Constellation behind it: {report.siderealProfile.iauConstellationSun}
+                        </p>
                       </div>
                     </div>
-
-                    <div className="report-well-nested p-3 rounded-sm border border-[#1e2029] space-y-1">
-                      <span className="text-report-muted text-[10px] uppercase">Sidereal Moon Coordinate</span>
-                      <div className="text-cyan-300 font-bold text-sm">
-                        {report.siderealProfile.moonSign} ({report.siderealProfile.moonDegree}°)
-                      </div>
-                      <div className="text-report-muted text-[11px]">
-                        Physical Constellation: <strong className="text-[color:var(--text-primary)]">{report.siderealProfile.iauConstellationMoon}</strong>
+                    <div className="trad-hero">
+                      <span className="trad-hero-symbol">
+                        <SignGlyph sign={report.siderealProfile.moonSign} size={26} tinted />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="trad-hero-value">
+                          <PlanetGlyph planet="moon" size={18} tinted /> Moon in {report.siderealProfile.moonSign},{' '}
+                          {report.siderealProfile.moonDegree}°
+                        </p>
+                        <p className="trad-hero-sub">
+                          Constellation behind it: {report.siderealProfile.iauConstellationMoon}
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Asteroids & Moons of the Solar System */}
               {report.asteroidsAndOtherMoons && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="report-well border border-[#262833] p-5 space-y-3 font-mono text-xs">
-                    <span className="text-amber-400 font-bold text-xs uppercase flex items-center gap-1.5 border-b border-[#20222c] pb-2">
-                      <Zap className="w-4 h-4" />
-                      Major Asteroids & Centaurs Telemetry
-                    </span>
-                    <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="instrument-panel space-y-3">
+                    <p className="ui-eyebrow">Asteroids and other small bodies</p>
+                    <ul className="space-y-2">
                       {report.asteroidsAndOtherMoons.asteroids.map((ast) => (
-                        <div key={ast.name} className="p-2 report-well-nested rounded-sm border border-[#1e2029] flex items-center justify-between">
-                          <div>
-                            <span className="text-[color:var(--text-primary)] font-bold">{ast.name}</span>
-                            <span className="text-report-muted text-[11px] block">{ast.theme}</span>
+                        <li key={ast.name} className="curious-box flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-[color:var(--text-primary)]">{ast.name}</p>
+                            <p className="readable-muted">{ast.theme}</p>
                           </div>
-                          <span className="text-amber-300 font-bold text-xs">{ast.sign} {ast.degree}°</span>
-                        </div>
+                          <p className="text-sm text-[color:var(--text-primary)] whitespace-nowrap">
+                            <SignGlyph sign={ast.sign} size={16} tinted /> {ast.sign} {ast.degree}°
+                          </p>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
 
-                  <div className="report-well border border-[#262833] p-5 space-y-3 font-mono text-xs">
-                    <span className="text-cyan-400 font-bold text-xs uppercase flex items-center gap-1.5 border-b border-[#20222c] pb-2">
-                      <Moon className="w-4 h-4" />
-                      Planetary Moons of the Solar System
-                    </span>
-                    <div className="space-y-2">
+                  <div className="instrument-panel space-y-3">
+                    <p className="ui-eyebrow">Moons of other planets</p>
+                    <ul className="space-y-2">
                       {report.asteroidsAndOtherMoons.solarMoons.map((m) => (
-                        <div key={m.name} className="p-2 report-well-nested rounded-sm border border-[#1e2029] flex items-center justify-between">
-                          <div>
-                            <span className="text-[color:var(--text-primary)] font-bold">{m.name} ({m.parentPlanet})</span>
-                            <span className="text-report-muted text-[11px] block">{m.astrologicalQuality}</span>
-                          </div>
-                          <span className="text-cyan-300 text-[11px]">{m.tidalStress}</span>
-                        </div>
+                        <li key={m.name} className="curious-box space-y-1">
+                          <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+                            {m.name}, a moon of {m.parentPlanet}
+                          </p>
+                          <p className="readable-muted">{m.astrologicalQuality}</p>
+                          <p className="readable-muted">Pull on its planet: {m.tidalStress}</p>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 </div>
               )}
 
-              {/* Eclipse Status */}
               {report.eclipseStatus && (
-                <div className="report-well border border-[#262833] p-4 font-mono text-xs flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-report-muted uppercase block">Eclipse Season Proximity</span>
-                    <div className="text-[color:var(--text-primary)] font-bold text-sm mt-0.5">
-                      {report.eclipseStatus.isNearEclipseSeason ? 'Active Eclipse Window' : 'Intersession Interval'} · {report.eclipseStatus.daysToNearestEclipse} Days to {report.eclipseStatus.nearestEclipseType}
-                    </div>
-                    <div className="text-report-muted text-[11px] mt-0.5">
-                      Nodal Axis: <strong className="text-amber-300">{report.eclipseStatus.nodalAxisSign}</strong> · {report.eclipseStatus.esotericImpact}
-                    </div>
-                  </div>
-                  <div className={`px-3 py-1 text-xs font-bold uppercase rounded-sm border ${
-                    report.eclipseStatus.isNearEclipseSeason
-                      ? 'bg-rose-950/60 border-rose-800 text-rose-300'
-                      : 'bg-emerald-950/60 border-emerald-800 text-emerald-300'
-                  }`}>
-                    {report.eclipseStatus.nearestEclipseType}
-                  </div>
+                <div className="instrument-panel space-y-2">
+                  <p className="ui-eyebrow">Eclipses</p>
+                  <p className="trad-hero-value">
+                    {report.eclipseStatus.daysToNearestEclipse} days to the nearest eclipse (
+                    {report.eclipseStatus.nearestEclipseType})
+                  </p>
+                  <p className="readable-body">
+                    {report.eclipseStatus.isNearEclipseSeason
+                      ? 'We are in an eclipse season, the few weeks around an eclipse.'
+                      : 'We are between eclipse seasons.'}{' '}
+                    The Moon’s nodes (the two points where eclipses can happen) are in{' '}
+                    {report.eclipseStatus.nodalAxisSign}. {report.eclipseStatus.esotericImpact}
+                  </p>
                 </div>
               )}
 
-              {/* Continental & Global Geodetic Overcast Grid */}
               {report.continentalAndCityOvercast && (
-                <div className="report-well border border-[#262833] p-5 space-y-4 font-mono text-xs">
-                  <div className="flex items-center justify-between border-b border-[#20222c] pb-3">
-                    <span className="text-emerald-400 font-bold text-xs uppercase flex items-center gap-1.5">
-                      <Globe className="w-4 h-4" />
-                      Continental & Global Terrestrial Geodetic Overcast
-                    </span>
-                    <span className="text-report-muted text-[10px]">All 7 Continents Monitored</span>
+                <div className="instrument-panel space-y-4">
+                  <div>
+                    <p className="ui-eyebrow">Around the world</p>
+                    <p className="chart-note mt-2">
+                      These are estimates worked out from the date for each continent. They are not live
+                      measurements.
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {report.continentalAndCityOvercast.continents.map((cont) => (
-                      <div key={cont.continent} className="p-3 report-well-nested rounded-sm border border-[#1e2029] space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[color:var(--text-primary)] font-bold text-sm font-serif">{cont.continent}</span>
-                          <span className="px-1.5 py-0.5 bg-[#181a22] text-emerald-300 border border-[#282b38] text-[9px]">
-                            {cont.dominantElement}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-report-muted">
-                          Geomagnetic: <strong className="text-cyan-300">{cont.geomagneticCurrent}</strong>
-                        </div>
-                        <p className="text-[11px] text-report leading-tight pt-1 border-t border-[#1a1c24]">
-                          {cont.esotericOvercast}
-                        </p>
+                      <div key={cont.continent} className="curious-box space-y-2">
+                        <p className="trad-hero-value">{cont.continent}</p>
+                        <dl className="trad-facts">
+                          <dt>Element</dt>
+                          <dd>{cont.dominantElement}</dd>
+                          <dt>Magnetic activity</dt>
+                          <dd>{cont.geomagneticCurrent}</dd>
+                        </dl>
+                        <p className="text-sm text-[color:var(--text-secondary)]">{cont.esotericOvercast}</p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Anchor Cities Table */}
-                  <div className="pt-3 border-t border-[#20222c]">
-                    <span className="text-[10px] text-report-muted uppercase block mb-2 font-bold">
-                      Key Terrestrial Anchor Cities & Resonance Affinities
-                    </span>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-[11px]">
+                  <div>
+                    <p className="ui-eyebrow">Cities and how well they match the day</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
                       {report.continentalAndCityOvercast.anchorCities.map((city) => (
-                        <div key={city.name} className="p-2 bg-[#0d0e13] rounded-sm border border-[#1e2029]">
-                          <div className="text-[color:var(--text-primary)] font-medium">{city.name}</div>
-                          <div className="text-report-muted text-[10px]">{city.country}</div>
-                          <div className="text-emerald-400 font-bold text-[10px] mt-1">
-                            {city.resonanceAffinityScore}% Affinity
-                          </div>
+                        <div key={city.name} className="curious-box">
+                          <p className="text-sm font-semibold text-[color:var(--text-primary)]">{city.name}</p>
+                          <p className="readable-muted">{city.country}</p>
+                          <p className="text-sm text-[color:var(--text-primary)] mt-1">
+                            Match score {city.resonanceAffinityScore}%
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -664,218 +545,239 @@ Third read: ${report.dailyStrategicActionPlan.dialecticalFork.syntheticResolutio
             </div>
           )}
 
-          {/* TAB 1: OVERVIEW & NOVEL-LIKE NOVEL SYNTHESIS */}
+          {/* Summary */}
           {activeTab === 'OVERVIEW' && (
-            <div className="space-y-5">
-              <ScrollCard label="Opening read" accent="ochre">
-                <ScrollProse>{report.executiveSynthesis}</ScrollProse>
-                <div className="scroll-divider" />
-                <p className="text-xs text-[color:var(--text-muted)] data-readout">
-                  UD {report.universalDayNumber} ({report.universalDayVibration}) · JD {report.julianDayUT}
+            <div className="space-y-4">
+              <div className="instrument-panel space-y-3">
+                <p className="ui-eyebrow">Summary</p>
+                <p className="readable-body whitespace-pre-line">{report.executiveSynthesis}</p>
+                <p className="readable-muted">
+                  Numerology day number {report.universalDayNumber}: {report.universalDayVibration}
                 </p>
-              </ScrollCard>
+              </div>
+
+              <div className="instrument-panel space-y-2">
+                <p className="ui-eyebrow">Main theme for the day</p>
+                <p className="readable-body">{report.dailyStrategicActionPlan.goldenThread}</p>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ScrollCard label="Today's thread" accent="terracotta">
-                  <p className="font-garamond text-[1.05rem] leading-relaxed text-[color:var(--text-secondary)]">
-                    {report.dailyStrategicActionPlan.goldenThread}
-                  </p>
-                </ScrollCard>
-
-                <ScrollCard label="Tribe lens" accent="sage">
-                  <p className="font-garamond text-[1.05rem] leading-relaxed text-[color:var(--text-secondary)]">
-                    {report.twelveTribesResonance.guidance}
-                  </p>
-                </ScrollCard>
-              </div>
-
-              {/* Gene Keys Evolutionary Transit */}
-              <div className="report-well border border-[#222633] p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-mono font-bold text-purple-300 uppercase">
-                    Gene Keys Current Solar Gate Transit
-                  </div>
-                  <span className="text-xs font-mono text-report-muted">
-                    Gate {report.geneKeyTransit.sunGate}.{report.geneKeyTransit.line} ({report.geneKeyTransit.name})
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs font-mono">
-                  <div className="bg-[#181a24] p-2 border border-red-500/20">
-                    <div className="text-[10px] text-red-400 uppercase">Shadow Frequency</div>
-                    <div className="font-bold text-gray-200 mt-0.5">{report.geneKeyTransit.shadow}</div>
-                  </div>
-                  <div className="bg-[#181a24] p-2 border border-emerald-500/20">
-                    <div className="text-[10px] text-emerald-400 uppercase">Gift Frequency</div>
-                    <div className="font-bold text-gray-200 mt-0.5">{report.geneKeyTransit.gift}</div>
-                  </div>
-                  <div className="bg-[#181a24] p-2 border border-purple-500/20">
-                    <div className="text-[10px] text-purple-400 uppercase">Siddhi (Divine)</div>
-                    <div className="font-bold text-gray-200 mt-0.5">{report.geneKeyTransit.siddhi}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: GAIA'S OVERCAST & TERRESTRIAL FIELD */}
-          {activeTab === 'GAIA' && (
-            <div className="space-y-5">
-              <div className="report-well border border-[#222633] p-4">
-                <div className="text-xs font-mono font-bold text-sky-400 uppercase mb-2">
-                  Planetary Magnetospheric & Atmospheric Resonance
-                </div>
-                <p className="text-xs sm:text-sm text-report leading-relaxed">
-                  {report.gaiaOvercast.atmosphericNarrative}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="report-well border border-[#222633] p-4 space-y-3">
-                  <div className="text-xs font-mono text-report-muted uppercase">Geomagnetic Tension & Kp Index</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-200">{report.gaiaOvercast.geomagneticStatus}</span>
-                    <span className="text-lg font-mono font-bold text-amber-400">Kp {report.gaiaOvercast.geomagneticKp}</span>
-                  </div>
-                  <div className="w-full bg-gray-800 h-2">
-                    <div
-                      className="bg-amber-400 h-2 transition-all"
-                      style={{ width: `${Math.min(100, (report.gaiaOvercast.geomagneticKp / 9) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="report-well border border-[#222633] p-4 space-y-3">
-                  <div className="text-xs font-mono text-report-muted uppercase">Schumann Cavity Frequency</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-200">Fundamental Ionospheric Peak</span>
-                    <span className="text-lg font-mono font-bold text-sky-400">{report.gaiaOvercast.schumannFrequencyHz} Hz</span>
-                  </div>
-                  <div className="text-xs text-report-muted">
-                    Base standard: 7.83 Hz. Current deviation: {(report.gaiaOvercast.schumannFrequencyHz - 7.83).toFixed(2)} Hz.
-                  </div>
-                </div>
-
-                <div className="report-well border border-[#222633] p-4 space-y-3">
-                  <div className="text-xs font-mono text-report-muted uppercase">Aspect Tension Score</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-200">Collective Astrological Friction</span>
-                    <span className="text-lg font-mono font-bold text-red-400">{report.gaiaOvercast.aspectTensionScore} / 100</span>
-                  </div>
-                  <div className="w-full bg-gray-800 h-2">
-                    <div
-                      className="bg-red-400 h-2 transition-all"
-                      style={{ width: `${report.gaiaOvercast.aspectTensionScore}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="report-well border border-[#222633] p-4 space-y-3">
-                  <div className="text-xs font-mono text-report-muted uppercase">Dominant Elemental Vector</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-200">Five Element (Wu Xing) Direction</span>
-                    <span className="text-lg font-serif font-bold text-emerald-400">{report.gaiaOvercast.dominantElement}</span>
-                  </div>
-                  <div className="text-xs text-report-muted">
-                    Collective Polarity: {report.gaiaOvercast.collectivePolarity}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: CELESTIAL TRANSITS & ASPECTS */}
-          {activeTab === 'TRANSITS' && (
-            <div className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="report-well border border-[#222633] p-4">
-                  <div className="text-[10px] font-mono text-report-muted uppercase">Sun Current Coordinate</div>
-                  <div className="text-base font-serif font-bold text-amber-300 mt-1">
-                    {report.celestialWeather.sunPosition}
-                  </div>
-                </div>
-                <div className="report-well border border-[#222633] p-4">
-                  <div className="text-[10px] font-mono text-report-muted uppercase">Moon Current Coordinate & Tone</div>
-                  <div className="text-base font-serif font-bold text-purple-300 mt-1">
-                    {report.celestialWeather.moonPosition}
-                  </div>
-                  <div className="text-xs text-report-muted mt-0.5">{report.gaiaOvercast.lunarTone}</div>
-                </div>
-              </div>
-
-              {/* Active Aspects Table */}
-              <div className="report-well border border-[#222633] p-4 space-y-3">
-                <div className="text-xs font-mono font-bold text-report uppercase">
-                  Active Major Interplanetary Aspects Today
-                </div>
-                <div className="space-y-2">
-                  {report.celestialWeather.activeAspects.map((asp, idx) => (
-                    <div key={idx} className="report-well-nested border border-[#212430] p-3 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-200">
-                          {asp.body1} {asp.aspect} {asp.body2}
-                        </span>
-                        <span
-                          className={`text-[10px] font-mono px-2 py-0.5 ${
-                            asp.nature === 'Harmonious'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                          }`}
-                        >
-                          {asp.nature} (Orb: {asp.orb}°)
-                        </span>
-                      </div>
-                      <div className="text-report-muted text-xs sm:max-w-md sm:text-right">
-                        {asp.meaning}
-                      </div>
+                <div className="instrument-panel space-y-3">
+                  <CultureHeader culture="callings" title="Today's calling" />
+                  <div className="trad-hero">
+                    {callingMatches && (
+                      <span className="trad-hero-symbol">
+                        <CallingEmblem emblemId={topCalling.emblemId} size={26} />
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="trad-hero-value">{report.callingResonance.primaryCalling}</p>
+                      {callingMatches && <p className="trad-hero-sub">{topCalling.motto}</p>}
                     </div>
-                  ))}
+                  </div>
+                  <dl className="trad-facts">
+                    <dt>Quarter</dt>
+                    <dd>{report.callingResonance.quarter}</dd>
+                    <dt>Gemstone</dt>
+                    <dd>{report.callingResonance.gemstone}</dd>
+                  </dl>
+                  <p className="readable-body">{report.callingResonance.guidance}</p>
+                </div>
+
+                <div className="instrument-panel space-y-3">
+                  <CultureHeader culture="gene_keys" />
+                  <p className="trad-hero-value">
+                    Key {report.geneKeyTransit.sunGate}, line {report.geneKeyTransit.line}: {report.geneKeyTransit.name}
+                  </p>
+                  <p className="readable-muted">
+                    Taken from where the Sun is today. Each key names a difficulty, the strength it can turn into, and
+                    its highest form.
+                  </p>
+                  <dl className="trad-facts">
+                    <dt>Difficulty (“shadow”)</dt>
+                    <dd>{report.geneKeyTransit.shadow}</dd>
+                    <dt>Strength (“gift”)</dt>
+                    <dd>{report.geneKeyTransit.gift}</dd>
+                    <dt>Highest form (“siddhi”)</dt>
+                    <dd>{report.geneKeyTransit.siddhi}</dd>
+                  </dl>
                 </div>
               </div>
 
-              <div className="report-well border border-[#222633] p-4 space-y-2">
-                <div className="text-xs font-mono font-bold text-amber-400 uppercase">Cosmic Counsel for Retrograde Spheres</div>
-                <p className="text-xs sm:text-sm text-report leading-relaxed">
-                  {report.celestialWeather.cosmicCounsel}
+              <p className="chart-note">
+                These readings come from traditions and are offered for reflection. They are not predictions.
+              </p>
+            </div>
+          )}
+
+          {/* Earth conditions */}
+          {activeTab === 'GAIA' && (
+            <div className="space-y-4">
+              <div className="instrument-panel space-y-3">
+                <p className="ui-eyebrow">Earth conditions</p>
+                <p className="chart-note">
+                  These figures are estimates worked out from the date. They are not live measurements.
                 </p>
-                <div className="text-xs font-mono text-report-muted pt-1">
-                  Active Retrogrades: {report.celestialWeather.retrogradeBodies.join(', ')}
+                <p className="readable-body">{report.gaiaOvercast.atmosphericNarrative}</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="instrument-panel space-y-2">
+                  <p className="readable-muted">Magnetic activity around the Earth</p>
+                  <p className="trad-hero-value">{report.gaiaOvercast.geomagneticStatus}</p>
+                  <div className="score-track">
+                    <div className="score-fill" style={{ width: `${kpPercent}%` }} />
+                  </div>
+                  <p className="readable-muted">
+                    Kp index {report.gaiaOvercast.geomagneticKp} on a scale of 0 (calm) to 9 (severe storm).
+                  </p>
                 </div>
+
+                <div className="instrument-panel space-y-2">
+                  <p className="readable-muted">Earth’s background hum</p>
+                  <p className="trad-hero-value">{report.gaiaOvercast.schumannFrequencyHz} Hz</p>
+                  <p className="readable-muted">
+                    This is the Schumann resonance, a natural radio hum between the ground and the upper atmosphere.
+                    The usual value is 7.83 Hz; today’s estimate differs by{' '}
+                    {(report.gaiaOvercast.schumannFrequencyHz - 7.83).toFixed(2)} Hz.
+                  </p>
+                </div>
+
+                <div className="instrument-panel space-y-2">
+                  <p className="readable-muted">Tension between the planets</p>
+                  <p className="trad-hero-value">{report.gaiaOvercast.aspectTensionScore} out of 100</p>
+                  <div className="score-track">
+                    <div className="score-fill" style={{ width: `${tensionPercent}%` }} />
+                  </div>
+                  <p className="readable-muted">
+                    Higher means more planets sit at angles astrologers read as difficult.
+                  </p>
+                </div>
+
+                <div className="instrument-panel space-y-2">
+                  <p className="readable-muted">Leading element (of the five Chinese elements)</p>
+                  <p className="trad-hero-value">{report.gaiaOvercast.dominantElement}</p>
+                  <p className="readable-muted">Overall mood: {report.gaiaOvercast.collectivePolarity}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Planets today */}
+          {activeTab === 'TRANSITS' && (
+            <div className="space-y-4">
+              <div className="instrument-panel space-y-4">
+                <CultureHeader culture="western" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="trad-hero">
+                    <span className="trad-hero-symbol">
+                      <SignGlyph sign={sunSign} size={26} tinted />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="trad-hero-value">
+                        <PlanetGlyph planet="sun" size={18} tinted /> Sun in {report.celestialWeather.sunPosition}
+                      </p>
+                      <p className="trad-hero-sub">Degrees count how far through the sign it is, from 0 to 30.</p>
+                    </div>
+                  </div>
+                  <div className="trad-hero">
+                    <span className="trad-hero-symbol">
+                      <SignGlyph sign={moonSign} size={26} tinted />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="trad-hero-value">
+                        <PlanetGlyph planet="moon" size={18} tinted /> Moon in{' '}
+                        {plainPosition(report.celestialWeather.moonPosition)}
+                      </p>
+                      <p className="trad-hero-sub">{report.gaiaOvercast.lunarTone}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="instrument-panel space-y-3">
+                <div>
+                  <p className="ui-eyebrow">Angles between planets today</p>
+                  <p className="readable-muted mt-1">
+                    When two planets sit at certain angles, astrologers read them as working together or pulling
+                    against each other.
+                  </p>
+                </div>
+                <ul className="space-y-2">
+                  {report.celestialWeather.activeAspects.map((asp, idx) => (
+                    <li key={idx} className="curious-box space-y-1">
+                      <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+                        <PlanetGlyph planet={planetId(asp.body1)} size={16} tinted /> {asp.body1}{' '}
+                        <AspectGlyph aspect={String(asp.aspect).split(' ')[0]} size={16} />{' '}
+                        {String(asp.aspect).toLowerCase()}{' '}
+                        <PlanetGlyph planet={planetId(asp.body2)} size={16} tinted /> {asp.body2}
+                      </p>
+                      <p
+                        className="text-sm"
+                        style={{ color: asp.nature === 'Harmonious' ? 'var(--temporal-deep)' : 'var(--el-fire)' }}
+                      >
+                        {asp.nature === 'Harmonious' ? 'Easy' : 'Tense'} · {asp.orb}° away from exact
+                      </p>
+                      <p className="text-sm text-[color:var(--text-secondary)]">{asp.meaning}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="instrument-panel space-y-2">
+                <p className="ui-eyebrow">Planets appearing to move backward (retrograde)</p>
+                <p className="readable-body">{report.celestialWeather.retrogradeBodies.join(', ')}</p>
+                <p className="readable-body">{report.celestialWeather.cosmicCounsel}</p>
               </div>
 
               {chartDynamics && (
-                <div className="space-y-3">
-                  <ScrollCard label="Your natal overlay (active profile)" accent="indigo">
-                    <ScrollProse className="text-sm">{chartDynamics.openingBriefing}</ScrollProse>
-                  </ScrollCard>
+                <div className="space-y-4">
+                  <div className="instrument-panel space-y-2">
+                    <p className="ui-eyebrow">How today meets your birth chart</p>
+                    <p className="readable-muted">Uses the birth details saved in My chart.</p>
+                    <p className="readable-body whitespace-pre-line">{chartDynamics.openingBriefing}</p>
+                  </div>
                   {chartDynamics.transitToNatal.length > 0 && (
-                    <div className="report-well border border-indigo-500/30 p-4 space-y-2">
-                      <div className="text-xs font-mono font-bold text-indigo-300 uppercase">
-                        Transit-to-natal hits
-                      </div>
-                      {chartDynamics.transitToNatal.slice(0, 8).map((hit, idx) => (
-                        <div key={idx} className="text-xs text-report border-b border-[#1e212c] pb-2 last:border-0">
-                          <span className="text-gray-100 font-semibold">
-                            {hit.transitingName} {hit.aspectType} {hit.natalName}
-                          </span>
-                          <span className="text-report-muted ml-2">({hit.orbDeg}°)</span>
-                          <p className="text-report-muted mt-0.5">{hit.briefing}</p>
-                        </div>
-                      ))}
+                    <div className="instrument-panel space-y-3">
+                      <p className="ui-eyebrow">Today’s planets touching your birth planets</p>
+                      <ul className="space-y-2">
+                        {chartDynamics.transitToNatal.slice(0, 8).map((hit, idx) => (
+                          <li key={idx} className="curious-box space-y-1">
+                            <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+                              <PlanetGlyph planet={planetId(hit.transitingName)} size={16} tinted /> Today’s{' '}
+                              {hit.transitingName} <AspectGlyph aspect={String(hit.aspectType)} size={16} />{' '}
+                              {String(hit.aspectType).toLowerCase()} your birth{' '}
+                              <PlanetGlyph planet={planetId(hit.natalName)} size={16} tinted /> {hit.natalName}
+                              <span className="font-normal text-[color:var(--text-muted)]">
+                                {' '}
+                                ({hit.orbDeg}° away from exact)
+                              </span>
+                            </p>
+                            <p className="text-sm text-[color:var(--text-secondary)]">{hit.briefing}</p>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                   {chartDynamics.returns.some((r) => r.applicable) && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {chartDynamics.returns
-                        .filter((r) => r.applicable)
-                        .map((r) => (
-                          <ScrollMetric
-                            key={r.kind}
-                            label={r.label}
-                            value={r.momentIso.slice(0, 10)}
-                            sub={r.briefing.slice(0, 80)}
-                            accent="rose"
-                          />
-                        ))}
+                    <div className="instrument-panel space-y-3">
+                      <div>
+                        <p className="ui-eyebrow">Returns</p>
+                        <p className="readable-muted mt-1">
+                          A return is when a planet comes back to where it was when you were born.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {chartDynamics.returns
+                          .filter((r) => r.applicable)
+                          .map((r) => (
+                            <div key={r.kind} className="curious-box">
+                              <p className="readable-muted">{r.label}</p>
+                              <p className="trad-hero-value">{r.momentIso.slice(0, 10)}</p>
+                              <p className="readable-muted">{r.briefing}</p>
+                            </div>
+                          ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -883,84 +785,102 @@ Third read: ${report.dailyStrategicActionPlan.dialecticalFork.syntheticResolutio
             </div>
           )}
 
-          {/* TAB 4: SACRED CALENDRICS */}
+          {/* Calendars */}
           {activeTab === 'CALENDRICS' && (
             <div className="space-y-4">
-              {/* Mayan */}
-              <div className="report-well border border-[#222633] p-4 space-y-2">
-                <div className="text-xs font-mono font-bold text-amber-400 uppercase">
-                  Maya Classical & Dreamspell Computus
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
-                  <div>Long Count: <strong className="text-gray-200">{report.mayanProfile.longCount}</strong></div>
-                  <div>Tzolk'in Kin: <strong className="text-amber-300">Kin {report.mayanProfile.kinNumber} ({report.mayanProfile.tzolkinFormatted})</strong></div>
-                  <div>Galactic Tone: <strong className="text-gray-200">{report.mayanProfile.solarTone}</strong></div>
-                  <div>Haab' Solar Date: <strong className="text-gray-200">{report.mayanProfile.haabFormatted}</strong></div>
-                  <div>Wavespell Architecture: <strong className="text-gray-200">{report.mayanProfile.wavespellName}</strong></div>
-                  <div>Fifth Force Guide: <strong className="text-emerald-300">{report.mayanProfile.fifthForceGuide}</strong></div>
-                </div>
-                <p className="text-xs text-report-muted pt-2 border-t border-[#1e212c]">
-                  Spiritual Protocol: {report.mayanProfile.spiritualProtocol}
-                </p>
+              <div className="instrument-panel space-y-3">
+                <CultureHeader culture="maya" title="Maya calendar and Dreamspell" />
+                <dl className="trad-facts">
+                  <dt>Long Count</dt>
+                  <dd>{report.mayanProfile.longCount} (a running count of days)</dd>
+                  <dt>Tzolk'in</dt>
+                  <dd>
+                    {report.mayanProfile.tzolkinFormatted}, day {report.mayanProfile.kinNumber} of the 260-day sacred
+                    count
+                  </dd>
+                  <dt>Tone</dt>
+                  <dd>{report.mayanProfile.solarTone} (the day’s number from 1 to 13)</dd>
+                  <dt>Haab'</dt>
+                  <dd>{report.mayanProfile.haabFormatted} (the 365-day year)</dd>
+                  <dt>13-day period</dt>
+                  <dd>{report.mayanProfile.wavespellName} (Dreamspell calls this a “wavespell”)</dd>
+                  <dt>Guide sign</dt>
+                  <dd>{report.mayanProfile.fifthForceGuide} (a helper sign in Dreamspell)</dd>
+                </dl>
+                <p className="readable-body">Suggested practice: {report.mayanProfile.spiritualProtocol}</p>
               </div>
 
-              {/* Chinese */}
-              <div className="report-well border border-[#222633] p-4 space-y-2">
-                <div className="text-xs font-mono font-bold text-emerald-400 uppercase">
-                  Chinese Sexagenary Computus (Four Pillars / BaZi)
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-                  <div>Day Pillar: <strong className="text-emerald-300">{report.chineseProfile.dayPillar}</strong></div>
-                  <div>Month Pillar: <strong className="text-gray-200">{report.chineseProfile.monthPillar}</strong></div>
-                  <div>Year Pillar: <strong className="text-gray-200">{report.chineseProfile.yearPillar}</strong></div>
-                </div>
-                <div className="text-xs text-report pt-1">
-                  Solar Term: {report.chineseProfile.solarTerm} · {report.chineseProfile.wuXingDynamic}
-                </div>
+              <div className="instrument-panel space-y-3">
+                <CultureHeader culture="chinese" />
+                <dl className="trad-facts">
+                  <dt>Day</dt>
+                  <dd>{report.chineseProfile.dayPillar}</dd>
+                  <dt>Month</dt>
+                  <dd>{report.chineseProfile.monthPillar}</dd>
+                  <dt>Year</dt>
+                  <dd>{report.chineseProfile.yearPillar}</dd>
+                  <dt>Solar term</dt>
+                  <dd>{report.chineseProfile.solarTerm} (a season marker)</dd>
+                </dl>
+                <p className="readable-body">{report.chineseProfile.wuXingDynamic}</p>
               </div>
 
-              {/* Ancient Mediterranean */}
-              <div className="report-well border border-[#222633] p-4 space-y-2">
-                <div className="text-xs font-mono font-bold text-sky-400 uppercase">
-                  Classical Ancient Civilizations
-                </div>
-                <div className="space-y-1.5 text-xs text-report font-serif">
-                  <div><strong>Egyptian Civil 365-Day:</strong> {report.ancientCalendars.egyptian}</div>
-                  <div><strong>Ethiopian Ge'ez:</strong> {report.ancientCalendars.ethiopian}</div>
-                  <div><strong>Classical Greek Attic:</strong> {report.ancientCalendars.greekAttic}</div>
-                  <div className="font-mono text-[11px] text-report-muted">{report.ancientCalendars.julianEquivalent}</div>
-                </div>
+              <div className="instrument-panel space-y-3">
+                <CultureHeader culture="egyptian" title="Egyptian, Ethiopian and Athenian calendars" explain={false} />
+                <dl className="trad-facts">
+                  <dt>Egyptian</dt>
+                  <dd>{report.ancientCalendars.egyptian}</dd>
+                  <dt>Ethiopian</dt>
+                  <dd>{report.ancientCalendars.ethiopian}</dd>
+                  <dt>Athenian</dt>
+                  <dd>{report.ancientCalendars.greekAttic}</dd>
+                  <dt>Old Roman</dt>
+                  <dd>{report.ancientCalendars.julianEquivalent}</dd>
+                </dl>
               </div>
 
-              {/* Enochian / Biblical / Roman */}
               {(report.ancientCalendars.enochian || report.ancientCalendars.biblicalTekufah) && (
-                <div className="report-well border border-amber-500/30 p-4 space-y-2">
-                  <div className="text-xs font-mono font-bold text-amber-400 uppercase">
-                    Enochian Time · Biblical Tekufot · Roman Dies
-                  </div>
-                  <div className="space-y-1.5 text-xs text-report font-serif">
+                <div className="instrument-panel space-y-3">
+                  <CultureHeader culture="hebrew" title="Seasons, the 364-day calendar and the Roman weekday" />
+                  <dl className="trad-facts">
                     {report.ancientCalendars.enochian && (
-                      <div><strong>Enochian:</strong> {report.ancientCalendars.enochian}</div>
+                      <>
+                        <dt>364-day calendar</dt>
+                        <dd>{report.ancientCalendars.enochian}</dd>
+                      </>
                     )}
                     {report.ancientCalendars.biblicalTekufah && (
-                      <div><strong>Biblical Transit:</strong> {report.ancientCalendars.biblicalTekufah}</div>
+                      <>
+                        <dt>Biblical season</dt>
+                        <dd>{report.ancientCalendars.biblicalTekufah}</dd>
+                      </>
                     )}
                     {report.ancientCalendars.romanDies && (
-                      <div><strong>Roman Dies:</strong> {report.ancientCalendars.romanDies}</div>
+                      <>
+                        <dt>Roman weekday</dt>
+                        <dd>{report.ancientCalendars.romanDies}</dd>
+                      </>
                     )}
                     {report.ancientCalendars.planetaryHour && (
-                      <div><strong>Planetary Hour:</strong> {report.ancientCalendars.planetaryHour}</div>
+                      <>
+                        <dt>Planet of the hour</dt>
+                        <dd>{report.ancientCalendars.planetaryHour}</dd>
+                      </>
                     )}
-                  </div>
+                  </dl>
                   {ctx?.enochianBiblical && (
-                    <div className="pt-2 border-t border-[#1e212c] grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <div className="report-well-nested p-2 border border-cyan-900/40">
-                        <div className="text-[9px] uppercase text-cyan-400 font-bold font-mono">Peek A · Civil</div>
-                        <p className="text-[10px] text-report-muted mt-1 leading-snug">{ctx.enochianBiblical.abPeek.pathA.summary}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="curious-box">
+                        <p className="readable-muted">Read by the everyday calendar</p>
+                        <p className="text-sm text-[color:var(--text-secondary)] mt-1">
+                          {ctx.enochianBiblical.abPeek.pathA.summary}
+                        </p>
                       </div>
-                      <div className="report-well-nested p-2 border border-amber-900/40">
-                        <div className="text-[9px] uppercase text-amber-400 font-bold font-mono">Peek B · Enochian</div>
-                        <p className="text-[10px] text-report-muted mt-1 leading-snug">{ctx.enochianBiblical.abPeek.pathB.summary}</p>
+                      <div className="curious-box">
+                        <p className="readable-muted">Read by the 364-day calendar</p>
+                        <p className="text-sm text-[color:var(--text-secondary)] mt-1">
+                          {ctx.enochianBiblical.abPeek.pathB.summary}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -969,98 +889,74 @@ Third read: ${report.dailyStrategicActionPlan.dialecticalFork.syntheticResolutio
             </div>
           )}
 
-          {/* TAB 5: STRATEGY & FORKS */}
+          {/* What to do */}
           {activeTab === 'STRATEGY' && (
-            <div className="space-y-5">
-              {/* Dialectical Fork */}
-              <div className="report-well border border-amber-500/30 p-5 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 uppercase">
-                  <GitFork className="w-4 h-4" />
-                  <span>{report.dailyStrategicActionPlan.dialecticalFork.title}</span>
+            <div className="space-y-4">
+              <div className="instrument-panel flex items-center justify-between gap-3">
+                <div>
+                  <p className="ui-eyebrow">Best time of day</p>
+                  <p className="trad-hero-value mt-1">{report.dailyStrategicActionPlan.peakPowerWindow}</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="report-well-nested border border-[#252838] p-3 space-y-1.5">
-                    <div className="text-[10px] font-mono text-amber-300 uppercase font-bold">Branch A: Solar Manifestation</div>
-                    <p className="text-xs text-report leading-relaxed">
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="instrument-panel space-y-2">
+                  <p className="ui-eyebrow" style={{ color: 'var(--temporal-deep)' }}>
+                    What to use today
+                  </p>
+                  <ul className="curious-list">
+                    {report.dailyStrategicActionPlan.whatToHarness.map((h, i) => (
+                      <li key={i}>{h}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="instrument-panel space-y-2">
+                  <p className="ui-eyebrow" style={{ color: 'var(--el-fire)' }}>
+                    What to watch out for today
+                  </p>
+                  <ul className="curious-list">
+                    {report.dailyStrategicActionPlan.whatToAvoid.map((a, i) => (
+                      <li key={i}>{a}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="instrument-panel space-y-3">
+                <div>
+                  <p className="ui-eyebrow">A choice for today</p>
+                  <h3 className="panel-title">{report.dailyStrategicActionPlan.dialecticalFork.title}</h3>
+                  <p className="readable-muted mt-1">
+                    The traditions point two ways today. Here are both, plus a middle way.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="curious-box space-y-1">
+                    <p className="ui-eyebrow">Option A: act and build</p>
+                    <p className="text-sm text-[color:var(--text-secondary)]">
                       {report.dailyStrategicActionPlan.dialecticalFork.choiceA}
                     </p>
                   </div>
-                  <div className="report-well-nested border border-[#252838] p-3 space-y-1.5">
-                    <div className="text-[10px] font-mono text-sky-300 uppercase font-bold">Branch B: Receptive Sanctuary</div>
-                    <p className="text-xs text-report leading-relaxed">
+                  <div className="curious-box space-y-1">
+                    <p className="ui-eyebrow">Option B: rest and protect</p>
+                    <p className="text-sm text-[color:var(--text-secondary)]">
                       {report.dailyStrategicActionPlan.dialecticalFork.choiceB}
                     </p>
                   </div>
                 </div>
-                <div className="bg-[#161922] border border-emerald-500/30 p-3 mt-3">
-                  <div className="text-[10px] font-mono text-emerald-400 uppercase font-bold mb-1">
-                    The Synthetic Resolution (The Third Way)
-                  </div>
-                  <p className="text-xs text-gray-200 leading-relaxed">
-                    {report.dailyStrategicActionPlan.dialecticalFork.syntheticResolution}
-                  </p>
-                </div>
-              </div>
-
-              {/* What to Harness vs What to Avoid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="report-well border border-emerald-500/20 p-4 space-y-3">
-                  <div className="text-xs font-mono font-bold text-emerald-400 uppercase flex items-center gap-1.5">
-                    <Check className="w-4 h-4" />
-                    <span>What to Harness Today</span>
-                  </div>
-                  <ul className="space-y-2 text-xs text-report">
-                    {report.dailyStrategicActionPlan.whatToHarness.map((h, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-emerald-400 mt-0.5">•</span>
-                        <span>{h}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="report-well border border-red-500/20 p-4 space-y-3">
-                  <div className="text-xs font-mono font-bold text-red-400 uppercase flex items-center gap-1.5">
-                    <X className="w-4 h-4" />
-                    <span>What to Guard Against Today</span>
-                  </div>
-                  <ul className="space-y-2 text-xs text-report">
-                    {report.dailyStrategicActionPlan.whatToAvoid.map((a, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-red-400 mt-0.5">•</span>
-                        <span>{a}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Peak Power Window */}
-              <div className="report-well border border-[#222633] p-4 flex items-center justify-between">
-                <div>
-                  <div className="text-[10px] font-mono text-report-muted uppercase">Peak Power Window of Today</div>
-                  <div className="text-sm font-semibold text-amber-300 mt-0.5">
-                    {report.dailyStrategicActionPlan.peakPowerWindow}
-                  </div>
-                </div>
-                <Flame className="w-5 h-5 text-amber-400 animate-pulse" />
+                <p className="trad-meaning">
+                  <strong>A middle way:</strong> {report.dailyStrategicActionPlan.dialecticalFork.syntheticResolution}
+                </p>
               </div>
             </div>
           )}
-        </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-[#20222c] bg-[#101217] text-xs font-mono text-report-muted">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>The Crucible Daily Computus Service</span>
+          <div className="flex justify-end pt-2">
+            <button type="button" onClick={onClose} className="cta-ghost">
+              Close
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-colors font-bold uppercase"
-          >
-            Close Dossier
-          </button>
         </div>
       </div>
     </div>

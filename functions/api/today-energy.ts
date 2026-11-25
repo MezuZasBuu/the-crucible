@@ -13,7 +13,7 @@ type TodayEnergyBody = {
     gaiaOvercast?: { lunarPhaseName?: string };
     celestialBodies?: Array<{ id?: string; zodiacSign?: string }>;
     geneKeysSun?: { gate?: number; line?: number; gift?: string };
-    synthesis?: { topResonatingTribe?: { tribe?: string }; harmonicResonanceIndex?: number };
+    synthesis?: { topCalling?: { calling?: string }; harmonicResonanceIndex?: number };
     dialecticalForks?: Array<{ title?: string }>;
     methodology?: { calendarCorrelation?: string };
   };

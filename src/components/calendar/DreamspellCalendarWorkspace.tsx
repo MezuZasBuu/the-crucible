@@ -1,5 +1,5 @@
 /**
- * Dreamspell calendar workspace — 13 Moon grid and Tzolkin harmonic module.
+ * Dreamspell calendar — the 13-month year grid and the 260-day grid.
  */
 
 import React, { useMemo, useState } from 'react';
@@ -12,10 +12,9 @@ import {
   dreamspellKinForYmd,
   moonYearStart
 } from '../../engine/dreamspellCalendar';
-import { GALACTIC_TONES, SOLAR_SEALS } from '../../engine/dreamspell';
-import { describeKinEnergy, cellFromKin } from '../../engine/kinEnergy';
-import { EpistemicBadge } from '../EpistemicBadge';
-import { FadeInText } from '../ui/FadeInText';
+import { GALACTIC_TONES, SOLAR_SEALS, THIRTEEN_MOONS } from '../../engine/dreamspell';
+import { cellFromKin } from '../../engine/kinEnergy';
+import { CultureHeader, MayaNumeral } from '../symbols/CultureSymbols';
 
 function kinGradientClass(color: string, isPortal: boolean, isSelected: boolean, isToday: boolean): string {
   const base =
@@ -37,48 +36,94 @@ function kinGradientClass(color: string, isPortal: boolean, isSelected: boolean,
     .join(' ');
 }
 
+interface PlainKinReading {
+  title: string;
+  summary: string;
+  symbolHeadline: string;
+  symbolText: string;
+  toneNumber: number;
+  toneHeadline: string;
+  toneText: string;
+  tryThis: string;
+  monthNote?: string;
+  portalNote?: string;
+}
+
+/** Plain-language description of one Dreamspell day, built from the same day data the grids use. */
+function describeKinPlainly(cell: DreamspellDayCell, moonName?: string): PlainKinReading {
+  const seal = cell.seal;
+  const tone = GALACTIC_TONES[cell.toneNumber - 1];
+  const essence = seal.essence.toLowerCase();
+  const power = seal.power.toLowerCase();
+
+  let monthNote: string | undefined;
+  if (moonName) {
+    const moon = THIRTEEN_MOONS.find((m) => m.name === moonName || moonName.startsWith(m.name.split(' ')[0]));
+    if (moon) {
+      monthNote = `${moon.name}. Its animal is the ${moon.animalTotem.toLowerCase()} and its question for the month is “${moon.question}”`;
+    }
+  }
+
+  return {
+    title: `Kin ${cell.kin}: ${seal.name}, tone ${tone.number} (${tone.name})`,
+    summary: `This day pairs the symbol ${seal.name} with number tone ${tone.number}, called ${tone.name}. Dreamspell links the symbol with ${essence} and ${power}, and the tone with ${tone.power.toLowerCase()}. Treat it as a theme to think about, not a prediction.`,
+    symbolHeadline: seal.name,
+    symbolText: `One of the 20 symbols (Maya day name: ${seal.mayaName}). Its key words are ${essence}, ${power} and “${seal.action.toLowerCase()}”.`,
+    toneNumber: tone.number,
+    toneHeadline: `${tone.number} of 13 · ${tone.name}`,
+    toneText: `The tone says where the day falls in its 13-day cycle. Its key words are ${tone.action.toLowerCase()}, ${tone.power.toLowerCase()} and ${tone.essence.toLowerCase()}.`,
+    tryThis: `Something to try: notice where ${essence} and ${tone.power.toLowerCase()} show up in one real choice today.`,
+    monthNote,
+    portalNote: cell.isPortal
+      ? 'This is one of the 52 portal days marked in the Dreamspell calendar. People who follow it treat these as days to slow down and pay closer attention.'
+      : undefined
+  };
+}
+
 const KinDetailSheet: React.FC<{
   cell: DreamspellDayCell | ThirteenMoonCell;
   onClose: () => void;
 }> = ({ cell, onClose }) => {
   const moonName = 'moonName' in cell ? cell.moonName : undefined;
-  const energy = describeKinEnergy(cell, moonName);
+  const reading = describeKinPlainly(cell, moonName);
 
   return (
     <div className="detail-overlay" role="presentation" onClick={onClose}>
-      <article className="detail-sheet gradient-card-base gradient-card-sage kin-detail-sheet" onClick={(e) => e.stopPropagation()}>
+      <article className="detail-sheet gradient-card-base kin-detail-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="detail-sheet-header">
-          <p className="scroll-label readable-muted">Kin energy for this day</p>
+          <p className="ui-eyebrow">About this day</p>
           <button type="button" className="detail-close" onClick={onClose}>
             Close
           </button>
         </div>
-        <FadeInText text={energy.title} as="h3" className="detail-title" />
-        <FadeInText text={energy.dailyEnergy} className="detail-body" delayMs={100} />
-        <div className="kin-energy-blocks motion-fade-in">
-          <div className="kin-energy-block gradient-card-ochre">
-            <p className="scroll-label readable-muted">Solar seal</p>
-            <p className="readable-body font-semibold text-[1.05rem]">{energy.sealHeadline}</p>
-            <p className="readable-body mt-2">{energy.sealDeep}</p>
+        <h3 className="panel-title">{reading.title}</h3>
+        <p className="readable-body mt-2">{reading.summary}</p>
+        <div className="space-y-3 mt-4">
+          <div className="curious-box">
+            <p className="ui-eyebrow">Symbol</p>
+            <p className="readable-body font-semibold mt-1">{reading.symbolHeadline}</p>
+            <p className="readable-body mt-1">{reading.symbolText}</p>
           </div>
-          <div className="kin-energy-block gradient-card-indigo">
-            <p className="scroll-label readable-muted">Galactic tone</p>
-            <p className="readable-body font-semibold text-[1.05rem]">{energy.toneHeadline}</p>
-            <p className="readable-body mt-2">{energy.toneDeep}</p>
+          <div className="curious-box">
+            <p className="ui-eyebrow">Number tone (1–13)</p>
+            <p className="readable-body font-semibold mt-1 flex items-center gap-2">
+              <MayaNumeral value={reading.toneNumber} size={24} title={`Number tone ${reading.toneNumber}`} />
+              {reading.toneHeadline}
+            </p>
+            <p className="readable-body mt-1">{reading.toneText}</p>
           </div>
-          {energy.moonContext && (
-            <div className="kin-energy-block gradient-card-sage">
-              <p className="scroll-label readable-muted">13 Moon context</p>
-              <p className="readable-body">{energy.moonContext}</p>
+          {reading.monthNote && (
+            <div className="curious-box">
+              <p className="ui-eyebrow">Month</p>
+              <p className="readable-body mt-1">{reading.monthNote}</p>
             </div>
           )}
-          {energy.portalNote && (
-            <div className="kin-energy-block gradient-card-portal">
-              <p className="scroll-label readable-muted">Portal kin</p>
-              <p className="readable-body">{energy.portalNote}</p>
+          {reading.portalNote && (
+            <div className="chart-note">
+              <strong>Portal day.</strong> {reading.portalNote}
             </div>
           )}
-          <FadeInText text={energy.combinedPractice} className="readable-body font-semibold text-[1.08rem]" delayMs={400} />
+          <p className="trad-meaning">{reading.tryThis}</p>
         </div>
       </article>
     </div>
@@ -99,10 +144,10 @@ export const DreamspellCalendarWorkspace: React.FC<{ ctx: CompleteCalculationCon
   const calendar = useMemo(() => buildThirteenMoonYear(year, today), [year, today.year, today.month, today.day]);
   const matrix = useMemo(() => buildTzolkinMatrix(), []);
   const todayKin = useMemo(() => dreamspellKinForYmd(today.year, today.month, today.day), [today.year, today.month, today.day]);
-  const todayEnergy = useMemo(() => describeKinEnergy(todayKin), [todayKin]);
+  const todayReading = useMemo(() => describeKinPlainly(todayKin), [todayKin]);
   const detail = focused;
-  const detailEnergy = detail
-    ? describeKinEnergy(detail, 'moonName' in detail ? detail.moonName : undefined)
+  const detailReading = detail
+    ? describeKinPlainly(detail, 'moonName' in detail ? detail.moonName : undefined)
     : null;
 
   const openCell = (cell: DreamspellDayCell | ThirteenMoonCell) => {
@@ -111,39 +156,62 @@ export const DreamspellCalendarWorkspace: React.FC<{ ctx: CompleteCalculationCon
   };
 
   return (
-    <div className="instrument-panel instrument-panel-maya space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="ui-eyebrow readable-muted">Dreamspell practice calendar</p>
-          <h3 className="panel-title mt-1 readable-body">13 Moons and the 260-kin matrix</h3>
-          <p className="readable-body text-[1.08rem] mt-2 max-w-2xl">
-            Modern Dreamspell (Argüelles), not classical Maya Long Count. Portal markers use the 52 Galactic Activation Portal kins as a practice overlay.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <EpistemicBadge epistemicClass="SYSTEM_INTERPRETATION" />
-          <div className="flex rounded-[var(--radius-md)] border border-[color:var(--line-soft)] p-1">
-            <button type="button" className={`nav-tab ${view === 'MOONS' ? 'nav-tab-active' : ''}`} onClick={() => setView('MOONS')}>
-              13 Moons
-            </button>
-            <button type="button" className={`nav-tab ${view === 'TZOLKIN' ? 'nav-tab-active' : ''}`} onClick={() => setView('TZOLKIN')}>
-              Tzolkin
-            </button>
-          </div>
+    <div className="instrument-panel space-y-5">
+      <CultureHeader culture="dreamspell" />
+
+      <p className="readable-body max-w-3xl">
+        Dreamspell is a modern system created in 1987 by José Argüelles; it was inspired by the traditional Maya count
+        but numbers its days differently, so the two do not match. Each day has a day number (kin) from 1 to 260, a
+        symbol and a number tone (1–13). Choose any day in the grid to read about it.
+      </p>
+
+      <div className="trad-hero">
+        <span className="trad-hero-symbol">
+          <MayaNumeral value={todayReading.toneNumber} size={30} title={`Number tone ${todayReading.toneNumber}`} />
+        </span>
+        <div className="min-w-0">
+          <p className="ui-eyebrow">Today’s signature</p>
+          <p className="trad-hero-value">{todayReading.title}</p>
+          <p className="trad-hero-sub">{todayReading.summary}</p>
         </div>
       </div>
 
-      <div className="scroll-card gradient-card-solar kin-today-banner">
-        <p className="scroll-label readable-muted">Today’s kin energy</p>
-        <FadeInText text={todayEnergy.title} as="h3" className="readable-body font-semibold text-[1.25rem]" />
-        <FadeInText text={todayEnergy.dailyEnergy} className="readable-body text-[1.05rem] mt-2" delayMs={80} />
-        <p className="readable-body text-[1rem] mt-3 font-medium">{todayEnergy.combinedPractice}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="seg" role="tablist" aria-label="Calendar view">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === 'MOONS'}
+            className={`seg-btn ${view === 'MOONS' ? 'seg-btn-active' : ''}`}
+            onClick={() => setView('MOONS')}
+          >
+            This year: 13 months
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === 'TZOLKIN'}
+            className={`seg-btn ${view === 'TZOLKIN' ? 'seg-btn-active' : ''}`}
+            onClick={() => setView('TZOLKIN')}
+          >
+            All 260 days
+          </button>
+        </div>
+        <p className="readable-muted text-sm">
+          {view === 'MOONS'
+            ? 'Each row is a 28-day month. The big number is the kin; the bars and dots are the number tone.'
+            : 'Each row is one of the 20 symbols; each column is a number tone from 1 to 13.'}
+        </p>
       </div>
 
-      <div className="flex flex-wrap gap-3 text-[0.95rem] readable-muted">
-        <span className="inline-flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm border-2 border-[color:var(--solar)]" /> Today</span>
-        <span className="inline-flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[color:var(--text-primary)]" /> Selected</span>
-        <span className="inline-flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm border border-dashed border-emerald-600" /> Portal kin</span>
+      <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm readable-muted">
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-sm border-2 border-[color:var(--solar)]" /> Today</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-sm border-2 border-[color:var(--text-primary)]" /> Selected</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-sm kin-cell-portal border border-dashed" /> Portal day</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-sm kin-cell-red border border-[color:var(--line-soft)]" /> Red</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-sm kin-cell-white border border-[color:var(--line-soft)]" /> White</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-sm kin-cell-blue border border-[color:var(--line-soft)]" /> Blue</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-sm kin-cell-yellow border border-[color:var(--line-soft)]" /> Yellow</span>
       </div>
 
       {view === 'MOONS' && (
@@ -151,16 +219,16 @@ export const DreamspellCalendarWorkspace: React.FC<{ ctx: CompleteCalculationCon
           <table className="w-full min-w-[720px] border-collapse">
             <thead>
               <tr>
-                <th className="text-left p-1 scroll-label">Moon</th>
+                <th className="text-left p-1 text-sm font-semibold text-[color:var(--text-muted)]">Month</th>
                 {Array.from({ length: 28 }, (_, i) => (
-                  <th key={i} className="p-1 readable-muted font-normal text-[0.85rem]">{i + 1}</th>
+                  <th key={i} className="p-1 readable-muted font-normal text-sm">{i + 1}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {calendar.moons.map((row) => (
                 <tr key={row[0].moonNumber}>
-                  <td className="p-1 pr-2 font-semibold readable-body whitespace-nowrap text-[0.95rem]">
+                  <td className="p-1 pr-2 font-semibold readable-body whitespace-nowrap text-sm">
                     {row[0].moonNumber}. {row[0].moonName.replace(' Moon', '')}
                   </td>
                   {row.map((cell) => {
@@ -171,10 +239,12 @@ export const DreamspellCalendarWorkspace: React.FC<{ ctx: CompleteCalculationCon
                           type="button"
                           onClick={() => openCell(cell)}
                           className={kinGradientClass(cell.seal.color, cell.isPortal, isSel, cell.isToday)}
-                          title={`Kin ${cell.kin} ${cell.seal.name}`}
+                          title={`Kin ${cell.kin}: ${cell.seal.name}, tone ${cell.toneNumber}${cell.isPortal ? ' (portal day)' : ''}`}
                         >
                           <span className="kin-cell-number">{cell.kin}</span>
-                          <span className="kin-cell-tone">{cell.toneNumber}</span>
+                          <span className="kin-cell-tone">
+                            <MayaNumeral value={cell.toneNumber} size={14} />
+                          </span>
                         </button>
                       </td>
                     );
@@ -188,7 +258,7 @@ export const DreamspellCalendarWorkspace: React.FC<{ ctx: CompleteCalculationCon
             onClick={() => openCell(calendar.dayOutOfTime)}
             className={`mt-3 cta-ghost readable-body ${calendar.dayOutOfTime.isToday ? '!border-[color:var(--solar)]' : ''}`}
           >
-            Day Out of Time · 25 July {year + 1} · Kin {calendar.dayOutOfTime.kin}
+            Day Out of Time (the one extra day outside the 13 months) · 25 July {year + 1} · kin {calendar.dayOutOfTime.kin}
           </button>
         </div>
       )}
@@ -198,18 +268,20 @@ export const DreamspellCalendarWorkspace: React.FC<{ ctx: CompleteCalculationCon
           <table className="w-full min-w-[720px] border-collapse tzolkin-matrix">
             <thead>
               <tr>
-                <th className="p-1 scroll-label">Solar seal</th>
+                <th className="text-left p-1 text-sm font-semibold text-[color:var(--text-muted)]">Symbol</th>
                 {GALACTIC_TONES.map((t) => (
-                  <th key={t.number} className="p-1 font-normal readable-muted text-[0.85rem]">{t.number}</th>
+                  <th key={t.number} className="p-1 font-normal readable-muted text-sm" title={`Number tone ${t.number}: ${t.name}`}>
+                    {t.number}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {matrix.map((row, i) => (
                 <tr key={SOLAR_SEALS[i].number}>
-                  <td className="p-1 pr-2 whitespace-nowrap readable-body font-semibold text-[0.92rem]">{SOLAR_SEALS[i].name}</td>
+                  <td className="p-1 pr-2 whitespace-nowrap readable-body font-semibold text-sm">{SOLAR_SEALS[i].name}</td>
                   {row.map((cell) => {
-                    const isTodayKin = cell.kin === ctx.dreamspell.kinNumber;
+                    const isTodayKin = cell.kin === ctx.dreamspell.kin;
                     const isSel = focused?.kin === cell.kin;
                     return (
                       <td key={cell.kin} className="p-0.5 align-top">
@@ -217,9 +289,12 @@ export const DreamspellCalendarWorkspace: React.FC<{ ctx: CompleteCalculationCon
                           type="button"
                           onClick={() => openCell(cellFromKin(cell.kin))}
                           className={kinGradientClass(cell.seal.color, cell.isPortal, isSel, isTodayKin)}
+                          title={`Kin ${cell.kin}: ${cell.seal.name}, tone ${cell.toneNumber}${cell.isPortal ? ' (portal day)' : ''}`}
                         >
                           <span className="kin-cell-number">{cell.kin}</span>
-                          <span className="kin-cell-tone">{cell.toneNumber}</span>
+                          <span className="kin-cell-tone">
+                            <MayaNumeral value={cell.toneNumber} size={14} />
+                          </span>
                         </button>
                       </td>
                     );
@@ -231,16 +306,15 @@ export const DreamspellCalendarWorkspace: React.FC<{ ctx: CompleteCalculationCon
         </div>
       )}
 
-      {detail && detailEnergy && (
-        <div className="scroll-card gradient-card-base gradient-card-sage kin-node-reading">
-          <p className="scroll-label readable-muted">Selected node · energy for the day</p>
-          <FadeInText text={detailEnergy.title} as="h3" className="readable-body font-semibold text-[1.2rem]" />
-          <FadeInText text={detailEnergy.dailyEnergy} className="readable-body text-[1.05rem] mt-2" delayMs={60} />
-          <p className="readable-body mt-3">{detailEnergy.sealDeep}</p>
-          <p className="readable-body mt-2">{detailEnergy.toneDeep}</p>
-          <p className="readable-body mt-3 font-semibold">{detailEnergy.combinedPractice}</p>
+      {detail && detailReading && (
+        <div className="curious-box">
+          <p className="ui-eyebrow">Selected day</p>
+          <h3 className="panel-title mt-1">{detailReading.title}</h3>
+          <p className="readable-body mt-2">{detailReading.summary}</p>
+          {detailReading.portalNote && <p className="chart-note mt-3">{detailReading.portalNote}</p>}
+          <p className="trad-meaning mt-3">{detailReading.tryThis}</p>
           <button type="button" className="cta-ghost mt-4" onClick={() => setSheetOpen(true)}>
-            Open full kin reading
+            Read more about this day
           </button>
         </div>
       )}

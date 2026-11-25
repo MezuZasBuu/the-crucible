@@ -1,7 +1,6 @@
 /**
- * The Crucible — Report & Export Modal
- * High Density Theme: #0a0a0a surfaces, #222 borders, sharp corners,
- * e-book typography, and one-click PDF / CSV / JSON export pipelines.
+ * The Crucible — "Save or print this report" modal.
+ * Print, download as CSV / JSON, or open one of the three report versions.
  */
 
 import React from 'react';
@@ -9,6 +8,22 @@ import { downloadFile, generateCSVReport, openPrintDialog } from '../engine/expo
 import { DOSSIER_TIER_META, downloadDossierHTML, openDossierPrintWindow } from '../engine/dossierExport';
 import { getClaimsJSONL } from '../engine/knowledgeBase';
 import { CompleteCalculationContext, DossierTier } from '../types';
+import { X, Printer, Download } from 'lucide-react';
+import { SignGlyph } from './symbols/AstroGlyph';
+import { CultureHeader, CallingEmblem } from './symbols/CultureSymbols';
+
+/** Plain-language names for the three report versions. */
+const TIER_PLAIN: Record<DossierTier, { label: string; blurb: string }> = {
+  FREE_PREVIEW: { label: 'Short version', blurb: 'The basics from the main traditions, enough to see what this day holds.' },
+  FULL_READING: {
+    label: 'Full version',
+    blurb: 'Every tradition in full, how they connect, the calculations behind them, and name analysis.'
+  },
+  DEEP_REPORT: {
+    label: 'Longest version',
+    blurb: 'Everything in the full version, plus a longer written summary, the world map reading and the next 14 days.'
+  }
+};
 
 interface ReportExportModalProps {
   ctx: CompleteCalculationContext;
@@ -50,209 +65,265 @@ export const ReportExportModal: React.FC<ReportExportModalProps> = ({ ctx, isOpe
     });
   };
 
+  const calling = ctx.synthesis.topCalling;
+  const tiers: DossierTier[] = ['FREE_PREVIEW', 'FULL_READING', 'DEEP_REPORT'];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-sm border border-[#222] bg-[#0a0a0a] shadow-2xl overflow-hidden font-mono">
-        <div className="flex items-center justify-between border-b border-[#222] p-3 bg-[#070707] no-print">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rotate-45 border border-cyan-400 bg-cyan-950/80" />
-            <div>
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider font-cinzel">
-                Master Report & Personal Systems Dossier
-              </h3>
-              <p className="text-[9px] text-gray-500 uppercase">
-                Mathematical Hash: {ctx.rulesetHash}
+    <div className="guide-overlay overflow-y-auto" role="dialog" aria-modal="true" aria-label="Save or print this report">
+      <div className="guide-sheet">
+        <div className="guide-head no-print">
+          <div>
+            <p className="ui-eyebrow">
+              {ctx.input.dateString} at {ctx.input.timeString} {ctx.input.isUTC ? 'UTC' : 'local time'}
+            </p>
+            <h3 className="guide-title">Save or print this report</h3>
+          </div>
+          <button type="button" onClick={onClose} className="guide-close" aria-label="Close">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="guide-body space-y-6">
+          {/* Actions */}
+          <div className="no-print space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={openPrintDialog} className="cta-primary">
+                <Printer className="w-4 h-4" />
+                <span>Print</span>
+              </button>
+              <button type="button" onClick={handleDownloadCSV} className="cta-ghost" title="A table you can open in a spreadsheet">
+                <Download className="w-4 h-4" />
+                <span>Download CSV</span>
+              </button>
+              <button type="button" onClick={handleDownloadJSON} className="cta-ghost" title="All the calculated data, for use in other programs">
+                <Download className="w-4 h-4" />
+                <span>Download JSON</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadJSONL}
+                className="cta-ghost"
+                title="The reference notes the app draws on, one record per line"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download reference notes (JSONL)</span>
+              </button>
+            </div>
+            <p className="field-help">
+              Print opens your browser’s print window; choose “Save as PDF” there to keep a PDF. CSV opens in a
+              spreadsheet. JSON and JSONL are data files for other programs.
+            </p>
+          </div>
+
+          {/* Report versions */}
+          <div className="no-print space-y-2">
+            <p className="ui-eyebrow">Or open a longer written report</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {tiers.map((tier) => {
+                const m = DOSSIER_TIER_META[tier];
+                const plain = TIER_PLAIN[tier];
+                return (
+                  <div key={tier} className="curious-box flex flex-col gap-2">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-base font-semibold text-[color:var(--text-primary)]">{plain.label}</span>
+                      <span className="readable-muted">{m.priceHint}</span>
+                    </div>
+                    <p className="text-sm text-[color:var(--text-secondary)] flex-1">{plain.blurb}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => openTier(tier)} className="cta-ghost">
+                        Open to print or save as PDF
+                      </button>
+                      <button type="button" onClick={() => downloadTier(tier)} className="cta-ghost">
+                        Download as web page
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Printable summary */}
+          <div className="printable-report space-y-6 text-[color:var(--text-secondary)]">
+            <div className="border-b border-[color:var(--line-soft)] pb-4">
+              <p className="ui-eyebrow">The Crucible</p>
+              <h1 className="panel-title">Report for {ctx.input.dateString}</h1>
+              <p className="readable-muted mt-1">
+                One day as seen by several calendar and astrology traditions. {ctx.input.dateString} at{' '}
+                {ctx.input.timeString} {ctx.input.isUTC ? 'UTC' : 'local time'}.
               </p>
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              onClick={openPrintDialog}
-              className="px-2.5 py-1 rounded-sm bg-[#161616] hover:bg-[#222] border border-cyan-800 text-cyan-400 text-[10px] uppercase font-bold transition-colors shadow-sm"
-            >
-              Print Shell
-            </button>
-            <button
-              onClick={handleDownloadCSV}
-              className="px-2 py-1 rounded-sm bg-[#111] hover:bg-[#1a1a1a] text-gray-300 border border-[#222] text-[10px] uppercase transition-colors"
-            >
-              Export CSV
-            </button>
-            <button
-              onClick={handleDownloadJSON}
-              className="px-2 py-1 rounded-sm bg-[#111] hover:bg-[#1a1a1a] text-gray-300 border border-[#222] text-[10px] uppercase transition-colors"
-            >
-              Export JSON
-            </button>
-            <button
-              onClick={handleDownloadJSONL}
-              className="px-2 py-1 rounded-sm bg-[#111] hover:bg-[#1a1a1a] text-cyan-500 border border-[#222] text-[10px] uppercase transition-colors"
-            >
-              JSONL Claims
-            </button>
-            <button
-              onClick={onClose}
-              className="px-2 py-0.5 text-gray-400 hover:text-white rounded-sm bg-[#111] border border-[#222] text-xs"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
+            <section className="space-y-3">
+              <h2 className="panel-title">The date in each calendar</h2>
+              <p className="readable-muted">The same moment, written the way each tradition counts time.</p>
 
-        {/* Commercial dossier tiers */}
-        <div className="no-print border-b border-[#222] bg-[#080808] p-3 grid grid-cols-1 md:grid-cols-3 gap-2">
-          {(['FREE_PREVIEW', 'FULL_READING', 'DEEP_REPORT'] as DossierTier[]).map((tier) => {
-            const m = DOSSIER_TIER_META[tier];
-            const accent =
-              tier === 'FREE_PREVIEW'
-                ? 'border-[#333] text-gray-300'
-                : tier === 'FULL_READING'
-                  ? 'border-amber-700 text-amber-300'
-                  : 'border-cyan-700 text-cyan-300';
-            return (
-              <div key={tier} className={`border ${accent} bg-[#0d0d0d] p-2.5 rounded-sm space-y-2`}>
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[10px] uppercase font-bold font-cinzel tracking-wider">{m.label}</span>
-                  <span className="text-[10px] font-mono">{m.priceHint}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="curious-box space-y-3">
+                  <CultureHeader culture="maya" />
+                  <dl className="trad-facts">
+                    <dt>Long Count</dt>
+                    <dd>{ctx.mayan.longCount.formatted} (a running count of days)</dd>
+                    <dt>Tzolk'in</dt>
+                    <dd>
+                      {ctx.mayan.tzolkin.formatted}, day {ctx.mayan.kinNumber} of the 260-day sacred count (direction:{' '}
+                      {ctx.mayan.tzolkin.direction})
+                    </dd>
+                    <dt>Haab'</dt>
+                    <dd>{ctx.mayan.haab.formatted} (the 365-day year)</dd>
+                    <dt>Both together</dt>
+                    <dd>{ctx.mayan.calendarRound}</dd>
+                  </dl>
                 </div>
-                <p className="text-[9px] text-gray-500 font-serif italic leading-snug">{m.blurb}</p>
-                <div className="flex gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => openTier(tier)}
-                    className="flex-1 px-2 py-1 text-[9px] uppercase font-bold border border-current/40 hover:bg-white/5"
-                  >
-                    Open · Print PDF
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => downloadTier(tier)}
-                    className="px-2 py-1 text-[9px] uppercase font-bold border border-[#333] text-gray-400 hover:text-white"
-                  >
-                    HTML
-                  </button>
+
+                <div className="curious-box space-y-3">
+                  <CultureHeader culture="chinese" />
+                  <dl className="trad-facts">
+                    <dt>Year</dt>
+                    <dd>
+                      {ctx.chinese.yearPillar.stemElement} {ctx.chinese.yearPillar.zodiacAnimal} (
+                      {ctx.chinese.yearPillar.stemPinYin}-{ctx.chinese.yearPillar.branchPinYin})
+                    </dd>
+                    <dt>Solar term</dt>
+                    <dd>
+                      {ctx.chinese.solarTerm.name} ({ctx.chinese.solarTerm.chineseName}), a season marker
+                    </dd>
+                    <dt>Strongest element</dt>
+                    <dd>{ctx.chinese.dominantElement} (of the five Chinese elements)</dd>
+                    <dt>Moon</dt>
+                    <dd>
+                      {ctx.chinese.lunarPhaseName}, day {ctx.chinese.lunarDay} of the lunar month
+                    </dd>
+                  </dl>
+                </div>
+
+                <div className="curious-box space-y-3">
+                  <CultureHeader culture="egyptian" title="Egyptian, Ethiopian and Athenian calendars" explain={false} />
+                  <dl className="trad-facts">
+                    <dt>Egyptian</dt>
+                    <dd>
+                      Year {ctx.egyptian.civilYear}, {ctx.egyptian.monthName}, day {ctx.egyptian.dayOfMonth}
+                    </dd>
+                    <dt>Egyptian season</dt>
+                    <dd>
+                      {ctx.egyptian.season} ({ctx.egyptian.seasonNameTrans})
+                    </dd>
+                    <dt>Sirius cycle</dt>
+                    <dd>
+                      Cycle {ctx.egyptian.sothicGreatYearCycle}, year {ctx.egyptian.sothicYearInCycle} of 1,460 (how long
+                      the calendar takes to realign with the star Sirius)
+                    </dd>
+                    <dt>Ethiopian</dt>
+                    <dd>
+                      {ctx.ethiopian.monthName} {ctx.ethiopian.dayOfMonth}, year {ctx.ethiopian.year}
+                    </dd>
+                    <dt>Athenian</dt>
+                    <dd>
+                      {ctx.greek.atticMonthName}, day {ctx.greek.atticDay}
+                    </dd>
+                  </dl>
+                </div>
+
+                <div className="curious-box space-y-3">
+                  <CultureHeader culture="numerology" />
+                  <dl className="trad-facts">
+                    <dt>Life path number</dt>
+                    <dd>
+                      {ctx.numerology.lifePathNumber}
+                      {ctx.numerology.lifePathIsMaster ? ' (a “master number”)' : ''}, the digits of the date added
+                      together
+                    </dd>
+                    <dt>Day number</dt>
+                    <dd>{ctx.numerology.universalDay}</dd>
+                    <dt>Month number</dt>
+                    <dd>{ctx.numerology.universalMonth}</dd>
+                    <dt>Year number</dt>
+                    <dd>{ctx.numerology.universalYear}</dd>
+                    <dt>Chaldean number</dt>
+                    <dd>{ctx.numerology.chaldeanVibration} (an older Babylonian way of numbering)</dd>
+                  </dl>
                 </div>
               </div>
-            );
-          })}
-        </div>
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-[#0d0d0d] text-gray-200 printable-report space-y-6 font-serif leading-relaxed">
-          {/* Cover Header */}
-          <div className="border-b border-[#333] pb-5 text-center">
-            <div className="text-[10px] font-mono text-cyan-500 uppercase tracking-widest">
-              The Universal Synchronic Matrix
-            </div>
-            <h1 className="font-cinzel text-2xl md:text-3xl font-bold text-white mt-1 tracking-wider">
-              THE CRUCIBLE DOSSIER
-            </h1>
-            <p className="text-xs italic text-gray-400 mt-1">
-              Deterministic Convergence of Mesoamerican, Sinitic, Mediterranean & Archetypal Computus
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="panel-title">Today's calling</h2>
+              <div className="curious-box space-y-3">
+                <CultureHeader culture="callings" />
+                <div className="trad-hero">
+                  <span className="trad-hero-symbol">
+                    <CallingEmblem emblemId={calling.emblemId} size={26} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="trad-hero-value">{calling.calling}</p>
+                    <p className="trad-hero-sub">{calling.motto}</p>
+                  </div>
+                </div>
+                <dl className="trad-facts">
+                  <dt>Quarter</dt>
+                  <dd>{calling.quarter}</dd>
+                  <dt>Gemstone</dt>
+                  <dd>{calling.gemstone}</dd>
+                  <dt>Zodiac sign</dt>
+                  <dd>
+                    <SignGlyph sign={calling.zodiacCorrespondence} size={16} tinted /> {calling.zodiacCorrespondence}
+                  </dd>
+                  <dt>Match score</dt>
+                  <dd>{calling.affinityScore}%</dd>
+                  <dt>Role</dt>
+                  <dd>{calling.archetypeRole}</dd>
+                </dl>
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="panel-title">Gene Keys for today</h2>
+              <div className="curious-box space-y-3">
+                <CultureHeader culture="gene_keys" />
+                <p className="readable-muted">
+                  Each key names a difficulty (“shadow”), the strength it can turn into (“gift”) and its highest form
+                  (“siddhi”).
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {([
+                    { label: 'From the Sun’s position', key: ctx.geneKeysSun },
+                    { label: 'From the point opposite the Sun (the Earth point)', key: ctx.geneKeysEarth }
+                  ] as const).map(({ label, key }) => (
+                    <div key={label} className="space-y-2">
+                      <p className="readable-muted">{label}</p>
+                      <p className="trad-hero-value">
+                        Key {key.gate}, line {key.line}: {key.name}
+                      </p>
+                      <dl className="trad-facts">
+                        <dt>Difficulty</dt>
+                        <dd>{key.shadow}</dd>
+                        <dt>Strength</dt>
+                        <dd>{key.gift}</dd>
+                        <dt>Highest form</dt>
+                        <dd>{key.siddhi}</dd>
+                      </dl>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <p className="chart-note">
+              These readings come from traditions and are offered for reflection. They are not predictions.
             </p>
-            <div className="mt-2.5 inline-block font-mono text-[10px] bg-[#111] px-2.5 py-1 rounded-sm border border-[#222] text-gray-400">
-              Temporal Coordinate: {ctx.input.dateString} {ctx.input.timeString} ({ctx.input.isUTC ? 'UTC' : 'Local'}) • JD {ctx.temporal.julianDayUT.toFixed(4)}
-            </div>
+
+            <details className="no-print">
+              <summary className="readable-muted cursor-pointer">Technical details</summary>
+              <dl className="trad-facts mt-2">
+                <dt>Julian day</dt>
+                <dd>{ctx.temporal.julianDayUT.toFixed(4)} (astronomers' running day count)</dd>
+                <dt>Maya date matching</dt>
+                <dd>GMT 584283, the standard way of lining up Maya and modern dates</dd>
+                <dt>Calculation version code</dt>
+                <dd className="break-all">{ctx.rulesetHash}</dd>
+              </dl>
+            </details>
           </div>
-
-          {/* Chapter I: Chronological Coordinates */}
-          <section className="space-y-2.5">
-            <h2 className="font-cinzel text-lg font-bold text-cyan-400 border-b border-[#222] pb-1">
-              I. Chronological & Calendrical Convergence
-            </h2>
-            <p className="text-xs text-gray-300 font-sans">
-              At the designated coordinate, the planetary temporal framework locks into the following simultaneous cyclical positions:
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-sans text-xs">
-              <div className="p-3 rounded-sm border border-[#222] bg-[#080808] border-l-2 border-l-cyan-500">
-                <div className="font-cinzel font-bold text-cyan-400 text-xs mb-1 uppercase">Mesoamerican Maya</div>
-                <div><span className="text-gray-500">Long Count:</span> <strong className="text-white">{ctx.mayan.longCount.formatted}</strong></div>
-                <div><span className="text-gray-500">Tzolk'in:</span> <strong className="text-white">{ctx.mayan.tzolkin.formatted}</strong> (Kin {ctx.mayan.kinNumber}, {ctx.mayan.tzolkin.direction})</div>
-                <div><span className="text-gray-500">Haab':</span> <strong className="text-white">{ctx.mayan.haab.formatted}</strong></div>
-                <div><span className="text-gray-500">Calendar Round:</span> <strong className="text-amber-300">{ctx.mayan.calendarRound}</strong></div>
-                <div><span className="text-gray-500">Correlation:</span> GMT 584283 Canonical</div>
-              </div>
-
-              <div className="p-3 rounded-sm border border-[#222] bg-[#080808] border-l-2 border-l-green-500">
-                <div className="font-cinzel font-bold text-green-400 text-xs mb-1 uppercase">Chinese Sexagenary</div>
-                <div><span className="text-gray-500">Year Pillar:</span> <strong className="text-white">{ctx.chinese.yearPillar.stemPinYin}-{ctx.chinese.yearPillar.branchPinYin} ({ctx.chinese.yearPillar.stemElement} {ctx.chinese.yearPillar.zodiacAnimal})</strong></div>
-                <div><span className="text-gray-500">Solar Term:</span> <strong className="text-white">{ctx.chinese.solarTerm.name} ({ctx.chinese.solarTerm.chineseName})</strong></div>
-                <div><span className="text-gray-500">Dominant Wu Xing:</span> <strong className="text-green-400">{ctx.chinese.dominantElement}</strong></div>
-                <div><span className="text-gray-500">Lunar Phase:</span> {ctx.chinese.lunarPhaseName} (Day {ctx.chinese.lunarDay})</div>
-              </div>
-
-              <div className="p-3 rounded-sm border border-[#222] bg-[#080808] border-l-2 border-l-amber-500">
-                <div className="font-cinzel font-bold text-amber-400 text-xs mb-1 uppercase">Ancient Mediterranean & Ge'ez</div>
-                <div><span className="text-gray-500">Egyptian Civil:</span> Year {ctx.egyptian.civilYear}, {ctx.egyptian.monthName} Day {ctx.egyptian.dayOfMonth}</div>
-                <div><span className="text-gray-500">Season:</span> {ctx.egyptian.season} ({ctx.egyptian.seasonNameTrans})</div>
-                <div><span className="text-gray-500">Sothic Great Cycle:</span> Cycle {ctx.egyptian.sothicGreatYearCycle}, Year {ctx.egyptian.sothicYearInCycle}/1460</div>
-                <div><span className="text-gray-500">Ethiopian Ge'ez:</span> {ctx.ethiopian.monthName} {ctx.ethiopian.dayOfMonth}, {ctx.ethiopian.year} A.M.</div>
-                <div><span className="text-gray-500">Attic Greek:</span> {ctx.greek.atticMonthName}, Day {ctx.greek.atticDay}</div>
-              </div>
-
-              <div className="p-3 rounded-sm border border-[#222] bg-[#080808] border-l-2 border-l-purple-500">
-                <div className="font-cinzel font-bold text-purple-400 text-xs mb-1 uppercase">Pythagorean & Chaldean Decad</div>
-                <div><span className="text-gray-500">Life Path Vibration:</span> <strong className="text-purple-300">{ctx.numerology.lifePathNumber}</strong> {ctx.numerology.lifePathIsMaster ? '(Master)' : ''}</div>
-                <div><span className="text-gray-500">Universal Cycle:</span> Day {ctx.numerology.universalDay} | Month {ctx.numerology.universalMonth} | Year {ctx.numerology.universalYear}</div>
-                <div><span className="text-gray-500">Chaldean Key:</span> Sound Root {ctx.numerology.chaldeanVibration}</div>
-              </div>
-            </div>
-          </section>
-
-          {/* Chapter II: Archetypal Matrix */}
-          <section className="space-y-2.5">
-            <h2 className="font-cinzel text-lg font-bold text-cyan-400 border-b border-[#222] pb-1">
-              II. Archetypal Resonance & Twelve Tribes Alignment
-            </h2>
-            <div className="p-3 rounded-sm border border-[#222] bg-[#080808] font-sans text-xs space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1a1a1a] pb-1.5">
-                <div>
-                  <span className="text-gray-500">Primary Resonating Tribe:</span>{' '}
-                  <strong className="text-white text-sm">{ctx.synthesis.topResonatingTribe.tribe}</strong> ({ctx.synthesis.topResonatingTribe.hebrewName})
-                </div>
-                <div className="text-green-400 font-mono font-bold">
-                  Affinity: {ctx.synthesis.topResonatingTribe.affinityScore}% ({ctx.synthesis.topResonatingTribe.directionInCamp} Camp)
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-gray-500">Breastplate Gemstone:</span>{' '}
-                  <span className="text-white font-medium">{ctx.synthesis.topResonatingTribe.gemstone}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Zodiac Alignment:</span>{' '}
-                  <span className="text-white font-medium">{ctx.synthesis.topResonatingTribe.zodiacCorrespondence}</span>
-                </div>
-              </div>
-              <div className="text-gray-400 italic mt-1">
-                Role: {ctx.synthesis.topResonatingTribe.archetypeRole}
-              </div>
-            </div>
-          </section>
-
-          {/* Chapter III: Gene Keys Golden Path */}
-          <section className="space-y-2.5">
-            <h2 className="font-cinzel text-lg font-bold text-cyan-400 border-b border-[#222] pb-1">
-              III. Gene Keys Transit Spectrum
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-sans text-xs">
-              <div className="p-3 rounded-sm border border-[#222] bg-[#080808] border-l-2 border-l-amber-500">
-                <div className="font-bold text-amber-400 uppercase text-xs">Conscious Sun Gate {ctx.geneKeysSun.gate}.{ctx.geneKeysSun.line}</div>
-                <div className="text-white font-medium my-1">{ctx.geneKeysSun.name}</div>
-                <div className="text-[11px] text-gray-400">
-                  Shadow: <strong className="text-red-300">{ctx.geneKeysSun.shadow}</strong> → Gift: <strong className="text-cyan-300">{ctx.geneKeysSun.gift}</strong> → Siddhi: <strong className="text-amber-300">{ctx.geneKeysSun.siddhi}</strong>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-sm border border-[#222] bg-[#080808] border-l-2 border-l-green-500">
-                <div className="font-bold text-green-400 uppercase text-xs">Design Earth Gate {ctx.geneKeysEarth.gate}.{ctx.geneKeysEarth.line}</div>
-                <div className="text-white font-medium my-1">{ctx.geneKeysEarth.name}</div>
-                <div className="text-[11px] text-gray-400">
-                  Shadow: <strong className="text-red-300">{ctx.geneKeysEarth.shadow}</strong> → Gift: <strong className="text-cyan-300">{ctx.geneKeysEarth.gift}</strong> → Siddhi: <strong className="text-amber-300">{ctx.geneKeysEarth.siddhi}</strong>
-                </div>
-              </div>
-            </div>
-          </section>
         </div>
       </div>
     </div>
