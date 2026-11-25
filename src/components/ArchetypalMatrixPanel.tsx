@@ -1,6 +1,6 @@
 /**
- * The Crucible — Archetypal Synthesis & Twelve Tribes Matrix Panel
- * Explains tribal life meaning and cross-system intertwining notes.
+ * The Crucible — Archetypal Synthesis & Twelve Callings Panel
+ * Explains calling life meaning and cross-system intertwining notes.
  */
 
 import React, { useState } from 'react';
@@ -14,16 +14,16 @@ interface ArchetypalMatrixPanelProps {
 
 export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ctx }) => {
   const { synthesis, geneKeysSun, geneKeysEarth, intertwining } = ctx;
-  const primary = intertwining.primaryTribeLife;
-  const [selectedTribeIdx, setSelectedTribeIdx] = useState(0);
-  const selected = synthesis.twelveTribesScores[selectedTribeIdx] || synthesis.topResonatingTribe;
-  const tribeNote = intertwining.systemNotes.find((n) => n.systemId === 'twelve_tribes');
+  const primary = intertwining.primaryCallingLife;
+  const [selectedCallingIdx, setSelectedCallingIdx] = useState(0);
+  const selected = synthesis.callingScores[selectedCallingIdx] || synthesis.topCalling;
+  const callingNote = intertwining.systemNotes.find((n) => n.systemId === 'twelve_callings');
 
   return (
     <div className="space-y-5 motion-enter">
       <div className="instrument-panel instrument-panel-maya">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="ui-eyebrow text-emerald-400">Why the Twelve Tribes sit beside every system</p>
+          <p className="ui-eyebrow text-emerald-400">Why the Twelve Callings sit beside every system</p>
           <EpistemicBadge epistemicClass="COMPARATIVE_ANALOGY" />
           <EpistemicBadge epistemicClass="SYSTEM_INTERPRETATION" />
         </div>
@@ -32,7 +32,7 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
         </p>
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="rounded-[var(--radius-md)] border border-emerald-500/25 bg-[color:var(--surface-well)] p-4">
-            <p className="ui-eyebrow text-emerald-400">Archetypal alignment · {primary.tribe}</p>
+            <p className="ui-eyebrow text-emerald-400">Archetypal alignment · {primary.calling}</p>
             <p className="text-sm text-[color:var(--text-secondary)] mt-2 leading-snug">{primary.lifeRepresents}</p>
           </div>
           <div className="rounded-[var(--radius-md)] border border-[color:var(--solar)]/25 bg-[color:var(--surface-well)] p-4 space-y-2 text-sm">
@@ -47,7 +47,7 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
           <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] p-3"><span className="ui-eyebrow text-emerald-400">Birth chart</span><p className="text-[color:var(--text-muted)] mt-1 leading-snug">{primary.birthChartLink}</p></div>
           <div className="rounded-[var(--radius-sm)] border border-[color:var(--line-soft)] p-3"><span className="ui-eyebrow">Name</span><p className="text-[color:var(--text-muted)] mt-1 leading-snug">{primary.nameLink}</p></div>
         </div>
-        {tribeNote && <SystemCrossNoteCard note={tribeNote} compact accentClass="border-emerald-700 text-emerald-400" />}
+        {callingNote && <SystemCrossNoteCard note={callingNote} compact accentClass="border-emerald-700 text-emerald-400" />}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -60,7 +60,7 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
           <div className="score-track mt-3">
             <div className="score-fill" style={{ width: `${synthesis.harmonicResonanceIndex}%` }} />
           </div>
-          <p className="font-garamond italic text-[14px] text-[color:var(--text-muted)] mt-3">Convergence across Maya, Chinese, Gene Keys, Enochian, and Hebraic camp streams.</p>
+          <p className="font-garamond italic text-[14px] text-[color:var(--text-muted)] mt-3">Convergence across Maya, Chinese, Gene Keys, Enochian, and Twelve Callings streams.</p>
         </div>
 
         <div className="instrument-panel instrument-panel-solar !p-5">
@@ -72,10 +72,10 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
 
         <div className="instrument-panel instrument-panel-maya !p-5">
           <p className="ui-eyebrow">Strongest Archetypal Alignment</p>
-          <div className="mt-2 font-cinzel text-2xl text-emerald-300">{synthesis.topResonatingTribe.tribe}</div>
-          <div className="mt-1 text-sm text-[color:var(--text-muted)]">{synthesis.topResonatingTribe.hebrewName} · {synthesis.topResonatingTribe.gemstone}</div>
+          <div className="mt-2 font-cinzel text-2xl text-emerald-300">{synthesis.topCalling.calling}</div>
+          <div className="mt-1 text-sm text-[color:var(--text-muted)]">{synthesis.topCalling.motto} · {synthesis.topCalling.gemstone}</div>
           <div className="mt-3 text-sm text-emerald-400 font-semibold">
-            Affinity {synthesis.topResonatingTribe.affinityScore}% · {synthesis.topResonatingTribe.directionInCamp} Camp
+            Affinity {synthesis.topCalling.affinityScore}% · {synthesis.topCalling.quarter} quarter
           </div>
           <p className="text-sm text-[color:var(--text-secondary)] mt-2">{synthesis.recommendedFocus}</p>
         </div>
@@ -85,7 +85,7 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div>
             <p className="ui-eyebrow text-[color:var(--solar)]">Gene Keys · Solar / Earth Transit</p>
-            <h4 className="panel-title mt-1">Intertwined with tribal gift practice</h4>
+            <h4 className="panel-title mt-1">Intertwined with calling gift practice</h4>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -125,31 +125,31 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
       <div className="instrument-panel instrument-panel-maya">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div>
-            <p className="ui-eyebrow">Twelve Tribes Camp Matrix</p>
-            <h4 className="panel-title mt-1">Click a tribe</h4>
+            <p className="ui-eyebrow">The circle of twelve callings</p>
+            <h4 className="panel-title mt-1">Click a calling</h4>
           </div>
-          <span className="text-xs text-[color:var(--text-muted)]">Numbers 2 · Life connotations</span>
+          <span className="text-xs text-[color:var(--text-muted)]">Three callings in each compass quarter</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-          {synthesis.twelveTribesScores.map((t, idx) => (
+          {synthesis.callingScores.map((t, idx) => (
             <button
               key={idx}
               type="button"
-              onClick={() => setSelectedTribeIdx(idx)}
+              onClick={() => setSelectedCallingIdx(idx)}
               className={`p-3 rounded-[var(--radius-md)] border text-left transition-all ${
-                idx === selectedTribeIdx
+                idx === selectedCallingIdx
                   ? 'border-emerald-400/60 bg-emerald-950/25 shadow-[0_0_20px_rgba(52,211,153,0.12)]'
                   : 'border-[color:var(--line-soft)] bg-[color:var(--surface-well)] hover:border-[color:var(--line-medium)]'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-semibold text-white text-sm">{t.tribe.split('(')[0].trim()}</span>
+                <span className="font-semibold text-white text-sm">{t.calling.split('(')[0].trim()}</span>
                 <span className="text-sm font-semibold text-emerald-400">{t.affinityScore}%</span>
               </div>
-              <div className="text-xs text-[color:var(--text-muted)] mt-1">{t.hebrewName}</div>
+              <div className="text-xs text-[color:var(--text-muted)] mt-1">{t.motto}</div>
               <div className="text-xs text-[color:var(--text-secondary)] mt-2 line-clamp-2">{t.lifeConnotation?.giftToEmbody || t.archetypeRole}</div>
               <div className="mt-2 flex items-center justify-between text-[10px] text-[color:var(--text-muted)] pt-2 border-t border-[color:var(--line-soft)]">
-                <span>CAMP {t.directionInCamp}</span>
+                <span>{t.quarter}</span>
                 <span>{t.zodiacCorrespondence.split('(')[0]}</span>
               </div>
             </button>
@@ -158,8 +158,8 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
 
         <div className="mt-4 rounded-[var(--radius-lg)] border border-emerald-500/25 bg-[color:var(--surface-well)] p-5 space-y-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h4 className="font-cinzel text-lg text-white">{selected.tribe}</h4>
-            <span className="text-sm text-emerald-400">{selected.bannerSymbol}</span>
+            <h4 className="font-cinzel text-lg text-white">{selected.calling}</h4>
+            <span className="text-sm text-emerald-400">{selected.emblem}</span>
           </div>
           <p className="font-garamond italic text-[16px] text-[color:var(--text-secondary)] leading-relaxed">
             {selected.lifeConnotation?.lifeRepresents || selected.resonanceDescription}
@@ -188,7 +188,7 @@ export const ArchetypalMatrixPanel: React.FC<ArchetypalMatrixPanelProps> = ({ ct
         <p className="ui-eyebrow mb-1">Cross-notes</p>
         <h4 className="panel-title mb-4">Beside every spiritual system</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {intertwining.systemNotes.filter((n) => n.systemId !== 'twelve_tribes').map((n) => (
+          {intertwining.systemNotes.filter((n) => n.systemId !== 'twelve_callings').map((n) => (
             <SystemCrossNoteCard
               key={n.systemId}
               note={n}

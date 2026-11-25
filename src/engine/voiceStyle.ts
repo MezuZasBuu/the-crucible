@@ -5,7 +5,7 @@
 
 export const BRIEFING_VOICE_PROMPT = `THE CRUCIBLE — Conversational Expert Briefing Style
 
-Rewrite as one knowledgeable researcher briefing another who already understands Mayan calendrics, BaZi, Gene Keys, astrology, Enochian chronology, planetary hours, and tribal symbolism. Do NOT teach basics unless essential.
+Rewrite as one knowledgeable researcher briefing another who already understands Mayan calendrics, BaZi, Gene Keys, astrology, Enochian chronology, planetary hours, and the Twelve Callings. Do NOT teach basics unless essential.
 
 Preserve all data: dates, degrees, coordinates, numerology, forks, epistemic layers. Simplify DELIVERY only — reduce exposition, not information.
 

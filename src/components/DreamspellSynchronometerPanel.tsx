@@ -163,7 +163,7 @@ export const DreamspellSynchronometerPanel: React.FC<DreamspellSynchronometerPan
               </div>
               <div className="space-y-1.5 text-[11px]">
                 <div>
-                  <span className="text-gray-500 uppercase text-[9px]">Solar Tribe Essence:</span>{' '}
+                  <span className="text-gray-500 uppercase text-[9px]">Solar Seal Essence:</span>{' '}
                   <span className="text-white font-medium">{ds.solarSeal.essence}</span>
                 </div>
                 <div>

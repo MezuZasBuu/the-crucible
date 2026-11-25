@@ -139,7 +139,7 @@ export function synthesizeDailyBearing(
   const summary = `*${lead.replace(/\.$/, '')}.* ${second ? `${second} ` : ''}${who}`;
 
   const contributors: DailyBearingContributor[] = selected
-    .filter((e) => e.id !== 'tribe')
+    .filter((e) => e.id !== 'calling')
     .map((e) => ({
       systemId: e.id,
       label: e.tradition,

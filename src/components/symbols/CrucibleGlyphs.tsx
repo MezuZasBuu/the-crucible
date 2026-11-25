@@ -1,7 +1,7 @@
 /**
  * The Crucible — Vector Glyph & Symbol Component
  * High-resolution SVG vector emblems for Maya Tzolk'in signs,
- * Chinese Zodiac animals, Wu Xing elements, and Sacred Tribe emblems.
+ * Chinese Zodiac animals, Wu Xing elements, and Sacred Calling emblems.
  */
 
 import React from 'react';

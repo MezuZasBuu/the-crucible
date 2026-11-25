@@ -76,7 +76,7 @@ export function generateDossierHTML(
 ): string {
   const name = opts?.querentName || ctx.input.querentName || 'Sovereign Querent';
   const meta = DOSSIER_TIER_META[tier];
-  const tribe = ctx.intertwining.primaryTribeLife;
+  const calling = ctx.intertwining.primaryCallingLife;
   const gaia = ctx.gaiaOvercast;
   const vedic = ctx.vedic;
 
@@ -99,7 +99,7 @@ export function generateDossierHTML(
         kv('Universal Day', String(ctx.numerology.universalDay)) +
         kv(
           'Strongest Archetypal Alignment',
-          `${tribe.tribe} (${ctx.synthesis.topResonatingTribe.affinityScore}%) — under this methodology`
+          `${calling.calling} (${ctx.synthesis.topCalling.affinityScore}%) — under this methodology`
         )
     )}
     ${section(
@@ -150,8 +150,8 @@ export function generateDossierHTML(
       `<h3>Agreements</h3><ul>${ctx.synthesis.crossSystemAgreements.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>
        <h3>Tensions</h3><ul>${ctx.synthesis.creativeTensionsOrAnomalies.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>
        <h3>Archetypal practice</h3>
-       ${kv('Explore', tribe.giftToEmbody) + kv('Today', tribe.dayPractice) + kv('Refuse', tribe.shadowToWatch)}
-       <p class="fine">${esc(tribe.whyBesideOtherSystems)}</p>`
+       ${kv('Explore', calling.giftToEmbody) + kv('Today', calling.dayPractice) + kv('Refuse', calling.shadowToWatch)}
+       <p class="fine">${esc(calling.whyBesideOtherSystems)}</p>`
     )}
     ${
       gaia

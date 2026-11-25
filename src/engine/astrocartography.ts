@@ -23,9 +23,9 @@ export const SANCTUARY_NODES: SanctuaryNode[] = [
     lat: 31.778,
     lng: 35.2354,
     elevationMeters: 740,
-    tradition: 'Twelve Tribes & Hebraic',
+    tradition: 'Hebraic',
     archetype: 'Even Shetiya (Foundation Stone of the World)',
-    description: 'Convergence point of the Twelve Camps and focal axis of ancient Semitic prayer.',
+    description: 'Ancient pilgrimage centre and focal axis of ancient Semitic prayer.',
     historicalSignificance: 'Sacred center of the Solomonic temple and cosmic threshold of terrestrial-divine dialogue.'
   },
   {

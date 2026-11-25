@@ -134,7 +134,7 @@ CURRENT CALCULATION CONTEXT:
 - Vedic: ${context?.vedic?.nakshatraName} Pada ${context?.vedic?.nakshatraPada}, Tithi ${context?.vedic?.tithiName} [${context?.vedic?.epistemicClass}]
 - Numerology: Life Path ${context?.numerology?.lifePathNumber}, Universal Day ${context?.numerology?.universalDay}
 - Gene Keys: Sun Gate ${context?.geneKeysSun?.gate}.${context?.geneKeysSun?.line} (${context?.geneKeysSun?.gift})
-- Top Tribe: ${context?.synthesis?.topResonatingTribe?.tribe} — ${context?.intertwining?.primaryTribeLife?.giftToEmbody}
+- Top calling: ${context?.synthesis?.topCalling?.calling} — ${context?.intertwining?.primaryCallingLife?.giftToEmbody}
 - Gaia overlay [${context?.gaiaOvercast?.epistemicClass}]: ${context?.gaiaOvercast?.geomagneticStatus}, Kp~${context?.gaiaOvercast?.geomagneticKpEstimated}, Schumann~${context?.gaiaOvercast?.schumannFrequencyHz}
 - Forks available: ${(context?.dialecticalForks || []).map((f: any) => f.id).join(', ') || 'none'}
 - Harmonic Index: ${context?.synthesis?.harmonicResonanceIndex}/100`;
@@ -152,17 +152,17 @@ CURRENT CALCULATION CONTEXT:
       }
 
       // Fallback deterministic synthesis if API key is not yet configured
-      const topTribe = context?.synthesis?.topResonatingTribe;
+      const topCalling = context?.synthesis?.topCalling;
       const tzolkin = context?.mayan?.tzolkin;
       const yearPillar = context?.chinese?.yearPillar;
       const lifePath = context?.numerology?.lifePathNumber;
       const sunGate = context?.geneKeysSun;
-      const life = context?.intertwining?.primaryTribeLife;
+      const life = context?.intertwining?.primaryCallingLife;
 
       const fallbackReply = `[Crucible Grounded Synthesis for ${context?.input?.dateString}]:
 [Epistemic: SYSTEM_INTERPRETATION + COMPARATIVE_ANALOGY — offline fallback]
 
-The inquiry activates ${topTribe?.tribe || 'Judah'} (${topTribe?.affinityScore || 90}% affinity, ${topTribe?.directionInCamp || 'East'} camp).
+The inquiry activates ${topCalling?.calling || 'The Trailblazer'} (${topCalling?.affinityScore || 90}% affinity, ${topCalling?.quarter || 'East'} quarter).
 Life practice: ${life?.dayPractice || 'Orient one act toward service of the whole.'}
 Gift: ${life?.giftToEmbody || 'Faithful presence'}.
 

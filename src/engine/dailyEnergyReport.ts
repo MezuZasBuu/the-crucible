@@ -149,7 +149,7 @@ export function generateTodayDailyReport(existingContext?: CompleteCalculationCo
   const retrogradeBodies = bodies.filter((b) => b.isRetrograde).map((b) => `${b.name} (${b.zodiacSign} ${b.signDegree.toFixed(1)}°)`);
 
   // 4. Dialectical Fork for Today
-  const topTribe = ctx.synthesis.topResonatingTribe;
+  const topCalling = ctx.synthesis.topCalling;
   const tzolkin = ctx.mayan.tzolkin;
   const yearPillar = ctx.chinese.yearPillar;
   const dayPillar = ctx.chinese.dayPillar;
@@ -158,7 +158,7 @@ export function generateTodayDailyReport(existingContext?: CompleteCalculationCo
   const forkTitle = `${tzolkin.signName} vs. ${dayPillar.stemElement} ${dayPillar.zodiacAnimal} — push or hold`;
   const choiceA = `Move on ${tzolkin.formatted} (${tzolkin.meaning}): visible initiative, faster decisions — watch for bluntness if empathy lags.`;
   const choiceB = `Stay with ${dayPillar.branchPolarity} ${dayPillar.branchElement} currents: gather leverage, let external noise settle before you commit.`;
-  const syntheticResolution = `Hold ${topTribe.directionInCamp} camp (${topTribe.tribe}, ${topTribe.gemstone}): act, but only after you've named the ${geneKeySun.shadow} constraint and pivoted toward ${geneKeySun.gift}.`;
+  const syntheticResolution = `Hold ${topCalling.quarter} quarter (${topCalling.calling}, ${topCalling.gemstone}): act, but only after you've named the ${geneKeySun.shadow} constraint and pivoted toward ${geneKeySun.gift}.`;
 
   // Calculate Vedic Details
   const sunLong = sunBody ? sunBody.eclipticLongitude : 0;
@@ -252,7 +252,7 @@ export function generateTodayDailyReport(existingContext?: CompleteCalculationCo
     whatToHarness: [
       `Use ${tzolkin.formatted} (${tzolkin.meaning}) for one high-integrity initiative.`,
       `Channel ${dayPillar.stemElement} energy into research, synthesis, or a single negotiation.`,
-      `Orient to ${topTribe.directionInCamp} camp (${topTribe.tribe}); Enochian remap → ${eb.compassOrientation.directionRemap[topTribe.directionInCamp]}.`,
+      `Orient to ${topCalling.quarter} quarter (${topCalling.calling}); Enochian remap → ${eb.compassOrientation.directionRemap[topCalling.quarter]}.`,
       `Anchor ${eb.biblicalSeason.hebrewTekufah} with ${eb.biblicalTransits.seasonVerseAnchors[0]} / ${eb.biblicalTransits.seasonVerseAnchors[1]}.`
     ],
     whatToAvoid: [
@@ -348,11 +348,11 @@ export function generateTodayDailyReport(existingContext?: CompleteCalculationCo
       earthGate: ctx.geneKeysEarth.gate,
       earthGift: ctx.geneKeysEarth.gift
     },
-    twelveTribesResonance: {
-      primaryTribe: topTribe.tribe,
-      campDirection: topTribe.directionInCamp,
-      gemstone: topTribe.gemstone,
-      guidance: `Align with the ${topTribe.directionInCamp} camp of ${topTribe.tribe} (${topTribe.bannerSymbol}). ${topTribe.resonanceDescription}`
+    callingResonance: {
+      primaryCalling: topCalling.calling,
+      quarter: topCalling.quarter,
+      gemstone: topCalling.gemstone,
+      guidance: `Align with the ${topCalling.quarter} quarter of ${topCalling.calling} (${topCalling.emblem}). ${topCalling.resonanceDescription}`
     },
     dailyStrategicActionPlan,
     extendedMonograph,

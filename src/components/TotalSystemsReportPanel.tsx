@@ -133,9 +133,9 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
         enochianBiblical: measuredContext.enochianBiblical,
         numerology: measuredContext.numerology,
         geneKeysSun: measuredContext.geneKeysSun,
-        twelveTribesTop: measuredContext.synthesis.topResonatingTribe,
+        topCalling: measuredContext.synthesis.topCalling,
         intertwining: {
-          primaryTribeLife: measuredContext.intertwining.primaryTribeLife,
+          primaryCallingLife: measuredContext.intertwining.primaryCallingLife,
           threads: measuredContext.intertwining.intertwiningThreads,
           systemNoteIds: measuredContext.intertwining.systemNotes.map((n) => n.systemId)
         }
@@ -964,14 +964,14 @@ export const TotalSystemsReportPanel: React.FC<TotalSystemsReportPanelProps> = (
                 </p>
               </div>
 
-              {/* Twelve Tribes Matrix */}
+              {/* Twelve Callings */}
               <div className="rounded-[var(--radius-md)] border border-cyan-300/10 border-l-2 border-l-[color:var(--temporal)] bg-cyan-300/[0.025] p-4 space-y-1">
-                <span className="ui-eyebrow text-[color:var(--temporal)]">Twelve Tribes Sanctuary Affinity</span>
+                <span className="ui-eyebrow text-[color:var(--temporal)]">Today's calling</span>
                 <p className="text-sm font-cinzel font-bold text-white">
-                  {measuredContext.synthesis.topResonatingTribe.tribe}
+                  {measuredContext.synthesis.topCalling.calling}
                 </p>
-                <p className="text-[10px] text-gray-300">Direction: {measuredContext.synthesis.topResonatingTribe.directionInCamp} Camp ({measuredContext.synthesis.topResonatingTribe.affinityScore}% affinity)</p>
-                <p className="text-[10px] text-gray-400">Stone: {measuredContext.synthesis.topResonatingTribe.gemstone}</p>
+                <p className="text-[10px] text-gray-300">Direction: {measuredContext.synthesis.topCalling.quarter} quarter ({measuredContext.synthesis.topCalling.affinityScore}% affinity)</p>
+                <p className="text-[10px] text-gray-400">Stone: {measuredContext.synthesis.topCalling.gemstone}</p>
               </div>
             </div>
           </div>

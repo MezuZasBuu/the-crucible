@@ -212,7 +212,7 @@ export function buildDialecticalForks(
     alchemicalSynthesis: {
       title: 'Transmutation via Sacred Form (The Temple of Breath)',
       description: `Do not break the vessel; re-temper it in the crucible. Update the agreements, rewrite the constitution, and expand the walls rather than abandoning the city.`,
-      transcendentLeveragePoint: `Anchor your transformation within the ${ctx.synthesis.topResonatingTribe.tribe} archetype and its ${ctx.synthesis.topResonatingTribe.gemstone} crystalline frequency.`
+      transcendentLeveragePoint: `Anchor your transformation within the ${ctx.synthesis.topCalling.calling} archetype and its ${ctx.synthesis.topCalling.gemstone} crystalline frequency.`
     }
   });
 
@@ -220,7 +220,7 @@ export function buildDialecticalForks(
   forks.push({
     id: 'FORK-03-CIVIL-DUTY-VS-LUNAR-GNOSIS',
     title: 'The Scribe and the Sibyl: Royal Civil Duty vs. Lunisolar Mystery',
-    traditionsInvolved: ['Ancient Egyptian Sothic Civil Year', 'Attic Greek Metonic Lunisolar', 'Twelve Tribes Matrix'],
+    traditionsInvolved: ['Ancient Egyptian Sothic Civil Year', 'Attic Greek Metonic Lunisolar', 'Twelve Callings'],
     apparentContradictionDescription: `The Egyptian Sothic calendar records Year ${ctx.egyptian.civilYear} in the season of ${ctx.egyptian.season}—an imperial, unyielding solar clockwork measuring civic harvest and civic taxes. Simultaneously, the Athenian Attic Metonic calendar measures Month ${ctx.greek.atticMonthName}, subservient to the fickle, ecstatic lunar horns and patron deity ${ctx.greek.patronDeity}.`,
     whyThisIsAForkInTheRoad: `Civil law demands conformity to the imperial calendar, whereas the lunar mystery cult invites ecstatic communion with wild, untamed cosmic nature.`,
     forkPathAlpha: {
@@ -252,7 +252,7 @@ export function buildDialecticalForks(
     alchemicalSynthesis: {
       title: 'The Sacred Lawgiver (Priest-King Equilibrium)',
       description: `Bring the divine nectar of the oracle into the laws of the marketplace. Let your civil administration be infused with sacred compassion, and let your mystical practice be disciplined with architectural rigor.`,
-      transcendentLeveragePoint: `The ${ctx.synthesis.topResonatingTribe.tribe} banner (${ctx.synthesis.topResonatingTribe.bannerSymbol}) represents the fusion of spiritual kingship with practical governance.`
+      transcendentLeveragePoint: `The ${ctx.synthesis.topCalling.calling} emblem (${ctx.synthesis.topCalling.emblem}) represents the fusion of spiritual kingship with practical governance.`
     }
   });
 
@@ -261,9 +261,9 @@ export function buildDialecticalForks(
   forks.push({
     id: 'FORK-04-CIVIL-VS-ENOCHIAN-FLIP',
     title: 'The Watcher\'s Mirror: Civil North-up vs Enochian Gate Flip',
-    traditionsInvolved: ['Enochian 364-Day Computus', 'Biblical Tekufot', 'Roman Planetary Dies', 'Twelve Tribes Matrix'],
-    apparentContradictionDescription: `Civil chronometry reads ${eb.gregorianWeekdayDeity.latinDies} under ${eb.gregorianWeekdayDeity.romanDeity} with north-up geography, while the Enochian ledger holds ${eb.enochian.formatted} at the ${eb.enochian.watchGate}. Biblical ${eb.biblicalSeason.hebrewTekufah} cites ${eb.biblicalTransits.seasonVerseAnchors.slice(0, 2).join(' and ')}. Under the Enochian flip, civil North becomes ${eb.compassOrientation.directionRemap.North} and East becomes ${eb.compassOrientation.directionRemap.East}, remapping the ${ctx.synthesis.topResonatingTribe.tribe} camp bearing.`,
-    whyThisIsAForkInTheRoad: `Marketplace obligation and Watcher-gate orientation cannot be averaged; they must be held as an explicit A/B peek so tribal banners, map headings, and hour rulers remain mutually intelligible.`,
+    traditionsInvolved: ['Enochian 364-Day Computus', 'Biblical Tekufot', 'Roman Planetary Dies', 'Twelve Callings'],
+    apparentContradictionDescription: `Civil chronometry reads ${eb.gregorianWeekdayDeity.latinDies} under ${eb.gregorianWeekdayDeity.romanDeity} with north-up geography, while the Enochian ledger holds ${eb.enochian.formatted} at the ${eb.enochian.watchGate}. Biblical ${eb.biblicalSeason.hebrewTekufah} cites ${eb.biblicalTransits.seasonVerseAnchors.slice(0, 2).join(' and ')}. Under the Enochian flip, civil North becomes ${eb.compassOrientation.directionRemap.North} and East becomes ${eb.compassOrientation.directionRemap.East}, remapping the ${ctx.synthesis.topCalling.calling} quarter bearing.`,
+    whyThisIsAForkInTheRoad: `Marketplace obligation and Watcher-gate orientation cannot be averaged; they must be held as an explicit A/B peek so calling emblems, map headings, and hour rulers remain mutually intelligible.`,
     forkPathAlpha: {
       pathLabel: 'Branch Alpha',
       title: 'Civil / Gregorian Frame (Peek A)',
@@ -285,7 +285,7 @@ export function buildDialecticalForks(
     alchemicalSynthesis: {
       title: eb.abPeek.synthesis.title,
       description: eb.abPeek.synthesis.summary,
-      transcendentLeveragePoint: `Triangulate ${eb.enochian.watchGate} with Tribe of ${ctx.synthesis.topResonatingTribe.tribe} (${ctx.synthesis.topResonatingTribe.directionInCamp} camp) after Enochian remap → ${eb.compassOrientation.directionRemap[ctx.synthesis.topResonatingTribe.directionInCamp as 'North' | 'East' | 'South' | 'West'] || ctx.synthesis.topResonatingTribe.directionInCamp}.`
+      transcendentLeveragePoint: `Triangulate ${eb.enochian.watchGate} with ${ctx.synthesis.topCalling.calling} (${ctx.synthesis.topCalling.quarter} quarter) after Enochian remap → ${eb.compassOrientation.directionRemap[ctx.synthesis.topCalling.quarter as 'North' | 'East' | 'South' | 'West'] || ctx.synthesis.topCalling.quarter}.`
     }
   });
 

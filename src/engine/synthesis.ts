@@ -1,7 +1,7 @@
 /**
  * The Crucible — Archetypal & Cross-System Synthesis Engine
  * Synthesizes Mayan, Chinese, Historical Calendars, Numerology,
- * Gene Keys, and the Twelve Tribes Archetypal Matrix.
+ * Gene Keys, and the Twelve Callings circle.
  */
 
 import {
@@ -11,118 +11,169 @@ import {
   MayanResult,
   NumerologyResult,
   TemporalCoordinate,
-  TwelveTribeAffinity
+  CallingAffinity
 } from '../types';
-import { enrichTribeWithLife } from './crossSystemBridge';
+import { enrichCallingWithLife } from './crossSystemBridge';
 
-export const TWELVE_TRIBES: Array<Omit<TwelveTribeAffinity, 'affinityScore' | 'resonanceDescription'>> = [
+/**
+ * The Twelve Callings — the Crucible's own twelvefold circle of human vocation.
+ * Twelve roles stand around a shared centre, three in each compass quarter:
+ * East (Dawn — those who begin), South (Noon — those who act),
+ * West (Dusk — those who gather), North (Midnight — those who discern).
+ * Each calling carries a stone, an emblem, a zodiac sign, a gift, a shadow and a daily practice.
+ * It is an original comparative lens, not a claim about ancestry, religion or identity.
+ */
+export const CALLING_QUARTERS: Record<'East' | 'South' | 'West' | 'North', { phase: string; theme: string }> = {
+  East: { phase: 'Dawn', theme: 'those who begin' },
+  South: { phase: 'Noon', theme: 'those who act' },
+  West: { phase: 'Dusk', theme: 'those who gather' },
+  North: { phase: 'Midnight', theme: 'those who discern' }
+};
+
+export const TWELVE_CALLINGS: Array<Omit<CallingAffinity, 'affinityScore' | 'resonanceDescription'>> = [
   {
-    tribe: 'Judah (Yehudah)',
-    hebrewName: 'יְהוּדָה',
-    gemstone: 'Garnet / Carbuncle',
-    bannerSymbol: 'Lion of Sovereign Strength',
-    zodiacCorrespondence: 'Leo (Solar Fire)',
-    directionInCamp: 'East',
-    archetypeRole: 'The Sovereign King & Courageous Vanguard'
+    id: 'trailblazer',
+    calling: 'The Trailblazer',
+    motto: 'Go first',
+    gemstone: 'Garnet',
+    emblem: 'Rising sun',
+    emblemId: 'sunrise',
+    zodiacCorrespondence: 'Leo',
+    element: 'Fire',
+    quarter: 'East',
+    archetypeRole: 'Leads from the front and makes it safer for others to follow'
   },
   {
-    tribe: 'Issachar (Yissakhar)',
-    hebrewName: 'יִשָּׂשכָר',
-    gemstone: 'Sapphire / Lapis Lazuli',
-    bannerSymbol: 'Sun, Moon & Celestial Constellations',
-    zodiacCorrespondence: 'Cancer (Lunar Intuition)',
-    directionInCamp: 'East',
-    archetypeRole: 'The Astronomical Scholar & Discerner of Epochs'
+    id: 'stargazer',
+    calling: 'The Stargazer',
+    motto: 'Read the season',
+    gemstone: 'Sapphire',
+    emblem: 'Moon and stars',
+    emblemId: 'stars',
+    zodiacCorrespondence: 'Cancer',
+    element: 'Water',
+    quarter: 'East',
+    archetypeRole: 'Understands timing — when to plant, wait, or harvest'
   },
   {
-    tribe: 'Zebulun (Zevulun)',
-    hebrewName: 'זְבוּלֻן',
-    gemstone: 'Diamond / Rock Crystal',
-    bannerSymbol: 'Merchant Ship upon Waters',
-    zodiacCorrespondence: 'Gemini (Trade & Communication)',
-    directionInCamp: 'East',
-    archetypeRole: 'The Global Voyager, Patron & Harbor Builder'
+    id: 'wayfarer',
+    calling: 'The Wayfarer',
+    motto: 'Open the harbor',
+    gemstone: 'Rock crystal',
+    emblem: 'Ship under sail',
+    emblemId: 'ship',
+    zodiacCorrespondence: 'Gemini',
+    element: 'Air',
+    quarter: 'East',
+    archetypeRole: 'Connects people, places and ideas through travel and trade'
   },
   {
-    tribe: 'Reuben (Reuven)',
-    hebrewName: 'רְאוּבֵן',
-    gemstone: 'Ruby / Sardius',
-    bannerSymbol: 'Mandrake Blossom & Rising Waters',
-    zodiacCorrespondence: 'Aquarius (Water Bearer)',
-    directionInCamp: 'South',
-    archetypeRole: 'The Firstborn Passion, Human Potential & Awakening'
+    id: 'wellspring',
+    calling: 'The Wellspring',
+    motto: 'Begin again',
+    gemstone: 'Ruby',
+    emblem: 'Rising water',
+    emblemId: 'water',
+    zodiacCorrespondence: 'Aquarius',
+    element: 'Air',
+    quarter: 'South',
+    archetypeRole: 'Brings raw vitality and the honesty to start over'
   },
   {
-    tribe: 'Simeon (Shimon)',
-    hebrewName: 'שִׁמְעוֹן',
-    gemstone: 'Topaz / Chrysolite',
-    bannerSymbol: 'Sword & City Gate of Shechem',
-    zodiacCorrespondence: 'Pisces (Subconscious Depths)',
-    directionInCamp: 'South',
-    archetypeRole: 'The Intense Zealot, Hearer of Truth & Purifier'
+    id: 'listener',
+    calling: 'The Listener',
+    motto: 'Hear what is true',
+    gemstone: 'Topaz',
+    emblem: 'Open ear',
+    emblemId: 'ear',
+    zodiacCorrespondence: 'Pisces',
+    element: 'Water',
+    quarter: 'South',
+    archetypeRole: 'Hears what is really being said and clears away false stories'
   },
   {
-    tribe: 'Gad (Gad)',
-    hebrewName: 'גָּד',
-    gemstone: 'Agate / Jacinth',
-    bannerSymbol: 'Armed Troop / Tents of the Desert Camp',
-    zodiacCorrespondence: 'Aries (Pioneering Warrior)',
-    directionInCamp: 'South',
-    archetypeRole: 'The Resolute Vanguard, Tactician & Overcomer'
+    id: 'sentinel',
+    calling: 'The Sentinel',
+    motto: 'Hold the line',
+    gemstone: 'Agate',
+    emblem: 'Shield',
+    emblemId: 'shield',
+    zodiacCorrespondence: 'Aries',
+    element: 'Fire',
+    quarter: 'South',
+    archetypeRole: 'Protects what matters and stays steady in a crisis'
   },
   {
-    tribe: 'Ephraim / Joseph (Efrayim)',
-    hebrewName: 'אֶפְרַיִם',
-    gemstone: 'Onyx / Beryl',
-    bannerSymbol: 'Fatted Bull & Fruitful Bough by Fountain',
-    zodiacCorrespondence: 'Taurus (Material Manifestation)',
-    directionInCamp: 'West',
-    archetypeRole: 'The Prodigious Builder, Provider & Transmuter of Scarcity'
+    id: 'cultivator',
+    calling: 'The Cultivator',
+    motto: 'Make it grow',
+    gemstone: 'Onyx',
+    emblem: 'Sprouting seed',
+    emblemId: 'sprout',
+    zodiacCorrespondence: 'Taurus',
+    element: 'Earth',
+    quarter: 'West',
+    archetypeRole: 'Builds, provides, and turns scarcity into plenty'
   },
   {
-    tribe: 'Manasseh (Menashe)',
-    hebrewName: 'מְנַשֶּׁה',
+    id: 'memory_keeper',
+    calling: 'The Memory Keeper',
+    motto: 'Recover what was lost',
     gemstone: 'Amethyst',
-    bannerSymbol: 'Wild Ox / Unicorn Horn',
-    zodiacCorrespondence: 'Sagittarius (Expansive Horizon)',
-    directionInCamp: 'West',
-    archetypeRole: 'The Restorer of Forgotten Knowledge & Memory'
+    emblem: 'Hourglass',
+    emblemId: 'hourglass',
+    zodiacCorrespondence: 'Sagittarius',
+    element: 'Fire',
+    quarter: 'West',
+    archetypeRole: 'Restores forgotten knowledge and repairs the thread of lineage'
   },
   {
-    tribe: 'Benjamin (Binyamin)',
-    hebrewName: 'בִּנְיָמִין',
-    gemstone: 'Jasper / Multicolored Agate',
-    bannerSymbol: 'Ravenous Wolf of Morning Light',
-    zodiacCorrespondence: 'Scorpio (Transformative Stealth)',
-    directionInCamp: 'West',
-    archetypeRole: 'The Fierce Protector, Scribe & Temple Keeper'
+    id: 'flamekeeper',
+    calling: 'The Flamekeeper',
+    motto: 'Guard the flame',
+    gemstone: 'Jasper',
+    emblem: 'Hearth flame',
+    emblemId: 'flame',
+    zodiacCorrespondence: 'Scorpio',
+    element: 'Water',
+    quarter: 'West',
+    archetypeRole: 'Guards sacred boundaries and keeps the written word alive'
   },
   {
-    tribe: 'Dan (Dan)',
-    hebrewName: 'דָּן',
-    gemstone: 'Opal / Jacinth',
-    bannerSymbol: 'Horned Viper / Scales of Justice',
-    zodiacCorrespondence: 'Libra (Equilibrium & Law)',
-    directionInCamp: 'North',
-    archetypeRole: 'The Arbiter of Cosmic Law, Judge & Discernment'
+    id: 'arbiter',
+    calling: 'The Arbiter',
+    motto: 'Weigh it fairly',
+    gemstone: 'Opal',
+    emblem: 'Balanced scales',
+    emblemId: 'scales',
+    zodiacCorrespondence: 'Libra',
+    element: 'Air',
+    quarter: 'North',
+    archetypeRole: 'Judges fairly so the circle stays in balance'
   },
   {
-    tribe: 'Asher (Asher)',
-    hebrewName: 'אָשֵׁר',
-    gemstone: 'Peridot / Aquamarine',
-    bannerSymbol: 'Olive Tree of Royal Dainties',
-    zodiacCorrespondence: 'Virgo (Harvest & Healing)',
-    directionInCamp: 'North',
-    archetypeRole: 'The Gracious Host, Alchemist of Oil & Nourishment'
+    id: 'host',
+    calling: 'The Host',
+    motto: 'Set the table',
+    gemstone: 'Peridot',
+    emblem: 'Sheaf of grain',
+    emblemId: 'grain',
+    zodiacCorrespondence: 'Virgo',
+    element: 'Earth',
+    quarter: 'North',
+    archetypeRole: 'Nourishes and heals; makes an ordinary table feel special'
   },
   {
-    tribe: 'Naphtali (Naftali)',
-    hebrewName: 'נַפְתָּלִי',
-    gemstone: 'Carnelian / Emerald',
-    bannerSymbol: 'Swift Hind Giving Pleasant Words',
-    zodiacCorrespondence: 'Capricorn (Agile Mountain Climber)',
-    directionInCamp: 'North',
-    archetypeRole: 'The Swift Messenger of Joy & Eloquent Poet'
+    id: 'messenger',
+    calling: 'The Messenger',
+    motto: 'Carry good words',
+    gemstone: 'Carnelian',
+    emblem: 'Feather',
+    emblemId: 'feather',
+    zodiacCorrespondence: 'Capricorn',
+    element: 'Earth',
+    quarter: 'North',
+    archetypeRole: 'Carries good news quickly and speaks with warmth'
   }
 ];
 
@@ -187,7 +238,7 @@ export function getGeneKeyFromLongitude(longDeg: number): GeneKeyGate {
 }
 
 /**
- * Synthesizes cross-system data into agreements, creative tensions, and 12-Tribe affinities.
+ * Synthesizes cross-system data into agreements, creative tensions, and Twelve Callings affinities.
  */
 export function calculateSynthesis(
   temporal: TemporalCoordinate,
@@ -238,22 +289,18 @@ export function calculateSynthesis(
     anomalies.push('Equilibrium state: Harmonic resonance between seasonal ingress and solar term.');
   }
 
-  // Twelve Tribes affinity scoring
-  const scores: TwelveTribeAffinity[] = TWELVE_TRIBES.map((t, idx) => {
+  // Twelve Callings affinity scoring
+  const scores: CallingAffinity[] = TWELVE_CALLINGS.map((t, idx) => {
     let score = 50; // baseline
 
     // Direction match with Mayan
-    if (t.directionInCamp === mayan.tzolkin.direction) {
+    if (t.quarter === mayan.tzolkin.direction) {
       score += 25;
     }
 
-    // Element match with Chinese
-    if (
-      (t.zodiacCorrespondence.includes('Fire') && chineseElement === 'Fire') ||
-      (t.zodiacCorrespondence.includes('Water') && chineseElement === 'Water') ||
-      (t.zodiacCorrespondence.includes('Earth') && chineseElement === 'Earth') ||
-      (t.zodiacCorrespondence.includes('Air') && chineseElement === 'Metal')
-    ) {
+    // Element match with Chinese (Western Air is read against Chinese Metal; Wood leans Earth)
+    const chineseAsWestern: Record<string, string> = { Fire: 'Fire', Water: 'Water', Earth: 'Earth', Metal: 'Air', Wood: 'Earth' };
+    if (chineseAsWestern[chineseElement] === t.element) {
       score += 20;
     }
 
@@ -265,15 +312,15 @@ export function calculateSynthesis(
     // Cap at 98
     score = Math.min(98, Math.max(30, score));
 
-    return enrichTribeWithLife({
+    return enrichCallingWithLife({
       ...t,
       affinityScore: score,
-      resonanceDescription: `Resonates at ${score}% affinity via ${t.directionInCamp} orientation, ${t.gemstone} mineral frequency, and ${t.archetypeRole}.`
+      resonanceDescription: `${t.calling} scores ${score}% today: ${t.quarter} quarter, ${t.gemstone}, ${t.zodiacCorrespondence}. ${t.archetypeRole}.`
     });
   });
 
   scores.sort((a, b) => b.affinityScore - a.affinityScore);
-  const topTribe = scores[0];
+  const topCalling = scores[0];
 
   const harmonicResonanceIndex = Math.round(
     (scores[0].affinityScore + (mayan.isGalacticPortalDay ? 95 : 75) + (numerology.lifePathIsMaster ? 90 : 80)) / 3
@@ -286,8 +333,8 @@ export function calculateSynthesis(
     keyArchetypalThemes: themes,
     crossSystemAgreements: agreements,
     creativeTensionsOrAnomalies: anomalies,
-    twelveTribesScores: scores,
-    topResonatingTribe: topTribe,
-    recommendedFocus: `Integrate ${topTribe.tribe} stewardship through ${mayan.galacticTone.power.toLowerCase()} and grounding the ${chineseElement} matrix.`
+    callingScores: scores,
+    topCalling: topCalling,
+    recommendedFocus: `Practice the way of ${topCalling.calling} through ${mayan.galacticTone.power.toLowerCase()} and grounding the ${chineseElement} matrix.`
   };
 }

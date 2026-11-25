@@ -202,30 +202,30 @@ export const ReportExportModal: React.FC<ReportExportModalProps> = ({ ctx, isOpe
           {/* Chapter II: Archetypal Matrix */}
           <section className="space-y-2.5">
             <h2 className="font-cinzel text-lg font-bold text-cyan-400 border-b border-[#222] pb-1">
-              II. Archetypal Resonance & Twelve Tribes Alignment
+              II. Archetypal Resonance & Twelve Callings Alignment
             </h2>
             <div className="p-3 rounded-sm border border-[#222] bg-[#080808] font-sans text-xs space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1a1a1a] pb-1.5">
                 <div>
-                  <span className="text-gray-500">Primary Resonating Tribe:</span>{' '}
-                  <strong className="text-white text-sm">{ctx.synthesis.topResonatingTribe.tribe}</strong> ({ctx.synthesis.topResonatingTribe.hebrewName})
+                  <span className="text-gray-500">Today's calling:</span>{' '}
+                  <strong className="text-white text-sm">{ctx.synthesis.topCalling.calling}</strong> ({ctx.synthesis.topCalling.motto})
                 </div>
                 <div className="text-green-400 font-mono font-bold">
-                  Affinity: {ctx.synthesis.topResonatingTribe.affinityScore}% ({ctx.synthesis.topResonatingTribe.directionInCamp} Camp)
+                  Affinity: {ctx.synthesis.topCalling.affinityScore}% ({ctx.synthesis.topCalling.quarter} quarter)
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="text-gray-500">Breastplate Gemstone:</span>{' '}
-                  <span className="text-white font-medium">{ctx.synthesis.topResonatingTribe.gemstone}</span>
+                  <span className="text-white font-medium">{ctx.synthesis.topCalling.gemstone}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">Zodiac Alignment:</span>{' '}
-                  <span className="text-white font-medium">{ctx.synthesis.topResonatingTribe.zodiacCorrespondence}</span>
+                  <span className="text-white font-medium">{ctx.synthesis.topCalling.zodiacCorrespondence}</span>
                 </div>
               </div>
               <div className="text-gray-400 italic mt-1">
-                Role: {ctx.synthesis.topResonatingTribe.archetypeRole}
+                Role: {ctx.synthesis.topCalling.archetypeRole}
               </div>
             </div>
           </section>

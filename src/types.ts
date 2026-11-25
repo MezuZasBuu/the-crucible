@@ -455,9 +455,9 @@ export interface DailyEnergyReport {
     earthGate: number;
     earthGift: string;
   };
-  twelveTribesResonance: {
-    primaryTribe: string;
-    campDirection: string;
+  callingResonance: {
+    primaryCalling: string;
+    quarter: string;
     gemstone: string;
     guidance: string;
   };
@@ -719,24 +719,33 @@ export interface GeneKeyGate {
   line: number;
 }
 
-export interface TwelveTribeLifeConnotation {
+export interface CallingLifeConnotation {
   lifeRepresents: string;
   dayPractice: string;
   shadowToWatch: string;
   giftToEmbody: string;
 }
 
-export interface TwelveTribeAffinity {
-  tribe: string;
-  hebrewName: string;
+export interface CallingAffinity {
+  /** Stable id, e.g. 'trailblazer' */
+  id: string;
+  /** Display name, e.g. 'The Trailblazer' */
+  calling: string;
+  /** Three-word motto */
+  motto: string;
   gemstone: string;
-  bannerSymbol: string;
+  /** Emblem described in words */
+  emblem: string;
+  /** Key for the emblem icon */
+  emblemId: string;
   zodiacCorrespondence: string;
-  directionInCamp: 'East' | 'South' | 'West' | 'North';
+  element: 'Fire' | 'Earth' | 'Air' | 'Water';
+  /** Compass quarter of the circle */
+  quarter: 'East' | 'South' | 'West' | 'North';
   affinityScore: number; // 0 - 100
   archetypeRole: string;
   resonanceDescription: string;
-  lifeConnotation?: TwelveTribeLifeConnotation;
+  lifeConnotation?: CallingLifeConnotation;
   dayConnection?: string;
   monthConnection?: string;
   birthChartConnection?: string;
@@ -813,9 +822,9 @@ export interface IntertwiningThread {
 
 export interface CrossSystemIntertwining {
   systemNotes: SystemCrossNote[];
-  twelveTribesEnriched: TwelveTribeAffinity[];
-  primaryTribeLife: {
-    tribe: string;
+  callingsEnriched: CallingAffinity[];
+  primaryCallingLife: {
+    calling: string;
     lifeRepresents: string;
     dayPractice: string;
     shadowToWatch: string;
@@ -837,8 +846,8 @@ export interface CrossSystemSynthesis {
   keyArchetypalThemes: string[];
   crossSystemAgreements: string[];
   creativeTensionsOrAnomalies: string[];
-  twelveTribesScores: TwelveTribeAffinity[];
-  topResonatingTribe: TwelveTribeAffinity;
+  callingScores: CallingAffinity[];
+  topCalling: CallingAffinity;
   recommendedFocus: string;
 }
 

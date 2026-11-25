@@ -59,7 +59,7 @@ export function buildExecutiveBriefing(ctx: CompleteCalculationContext, b: Brief
   const eb = ctx.enochianBiblical;
   const tz = ctx.mayan.tzolkin;
   const day = ctx.chinese.dayPillar;
-  const tribe = ctx.intertwining.primaryTribeLife;
+  const calling = ctx.intertwining.primaryCallingLife;
   const gk = ctx.geneKeysSun;
 
   return `Look — for ${b.gregorianFormatted} we're on Universal ${b.universalDayNumber} (${b.universalDayVibration}) with Kin ${ctx.mayan.kinNumber} (${tz.formatted}, Tone ${ctx.mayan.galacticTone.number} ${ctx.mayan.galacticTone.name}). BaZi day pillar is ${day.stemPinYin}-${day.branchPinYin} (${day.stemElement} ${day.zodiacAnimal}).
@@ -68,7 +68,7 @@ Field overlay [speculative]: Kp ~${b.kpEstimated}, Schumann ${b.schumannHarmonic
 
 Enochian layer: ${eb.enochian.formatted}, ${eb.biblicalSeason.hebrewTekufah}. Civil clock: ${eb.gregorianWeekdayDeity.latinDies} / ${eb.gregorianWeekdayDeity.romanDeity}; planetary hour ${eb.currentPlanetaryHour.planet} (${eb.currentPlanetaryHour.formattedWindow}).
 
-Tribe lens [comparative analogy]: ${tribe.tribe} — ${tribe.giftToEmbody}. Gate ${gk.gate}.${gk.line}: ${gk.shadow} → ${gk.gift}. Today's move: ${tribe.dayPractice}`;
+Calling [comparative analogy]: ${calling.calling} — ${calling.giftToEmbody}. Gate ${gk.gate}.${gk.line}: ${gk.shadow} → ${gk.gift}. Today's move: ${calling.dayPractice}`;
 }
 
 export function buildStrategicBriefing(b: BriefingInputs): {
@@ -99,7 +99,7 @@ export function buildExtendedBriefing(ctx: CompleteCalculationContext, b: Briefi
   const sat = ctx.celestialBodies.find((x) => x.id === 'saturn');
   const eb = ctx.enochianBiblical;
   const vedic = ctx.vedic;
-  const top = ctx.synthesis.topResonatingTribe;
+  const top = ctx.synthesis.topCalling;
 
   const sky = aspectBrief(b.activeAspects, b.retrogradeBodies);
 
@@ -134,12 +134,12 @@ What's interesting: ${ctx.mayan.galacticTone.name} tone wants to dissolve and re
 
 ---
 
-GENE KEYS & TRIBE
+GENE KEYS & CALLING
 
 Sun Gate ${ctx.geneKeysSun.gate}.${ctx.geneKeysSun.line} (${ctx.geneKeysSun.name}): ${ctx.geneKeysSun.shadow} → ${ctx.geneKeysSun.gift} → ${ctx.geneKeysSun.siddhi}.
 Earth Gate ${ctx.geneKeysEarth.gate}.${ctx.geneKeysEarth.line} grounds the same spectrum.
 
-Tribe alignment [methodology]: ${top.tribe}, ${top.directionInCamp} camp, ${top.gemstone}. ${top.lifeConnotation?.dayPractice || top.resonanceDescription}
+Calling [methodology]: ${top.calling}, ${top.quarter} quarter, ${top.gemstone}. ${top.lifeConnotation?.dayPractice || top.resonanceDescription}
 
 ---
 

@@ -26,7 +26,7 @@ export type TraditionId =
   | 'astrocartography'
   | 'gaia'
   | 'numerology'
-  | 'tribes';
+  | 'callings';
 
 export const SYSTEM_VISUAL: Record<
   TraditionId,
@@ -45,7 +45,7 @@ export const SYSTEM_VISUAL: Record<
   astrocartography: { accent: '#38bdf8', label: 'Astrocartography', borderClass: 'border-sky-700', textClass: 'text-sky-300' },
   gaia: { accent: '#34d399', label: 'Field Overlay', borderClass: 'border-emerald-700', textClass: 'text-emerald-300' },
   numerology: { accent: '#d6d3d1', label: 'Numerology', borderClass: 'border-stone-600', textClass: 'text-stone-300' },
-  tribes: { accent: '#4ade80', label: 'Tribes', borderClass: 'border-green-700', textClass: 'text-green-300' }
+  callings: { accent: '#4ade80', label: 'Callings', borderClass: 'border-green-700', textClass: 'text-green-300' }
 };
 
 export const ELEMENT_FILL: Record<string, string> = {

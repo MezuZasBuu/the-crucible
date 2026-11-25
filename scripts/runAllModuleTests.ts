@@ -154,7 +154,7 @@ async function main() {
       const ctx = executeCrucibleCalculation(baseInput);
       const csv = generateCSVReport(ctx);
       assert(csv.includes('Enochian'), 'csv enochian');
-      assert(csv.includes('Tribe'), 'csv tribe');
+      assert(csv.includes('Calling'), 'csv calling');
     })
   );
 

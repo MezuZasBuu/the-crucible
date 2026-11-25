@@ -30,12 +30,12 @@ export const PRACTICE_NUANCES: PracticeNuance[] = [
     vectorIds: [1, 4, 10]
   },
   {
-    tradition: 'Hebraic Kabbalistic / Patriarchal',
-    practiceFrame: 'Tribe camp as daily archetype',
+    tradition: 'Twelve Callings',
+    practiceFrame: 'Calling quarter as daily archetype',
     meaningLayer:
-      'Twelvefold camp distribution assigns a leadership archetype, gemstone resonance, and directional bearing — a practice of embodying one gift while watching one shadow.',
+      'A circle of twelve roles assigns a calling, a stone, and a compass quarter — a practice of embodying one gift while watching one shadow.',
     nuanceNote:
-      'Patriarchal blessings (Genesis 49, Deuteronomy 33) are textual tradition; camp order from Numbers 2 is calendrical-archetypal, not genealogical prescription.',
+      'The Twelve Callings are an original Crucible framework. They borrow the widely shared pattern of twelve roles around four directions; they are not a historical tradition and say nothing about ancestry.',
     vectorIds: [6, 7]
   },
   {

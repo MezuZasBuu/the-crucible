@@ -5,6 +5,7 @@
  * celestial aspects, and smooth novel-like archetypal commentaries.
  */
 
+import * as Astronomy from 'astronomy-engine';
 import { CelestialCoordinate, TemporalCoordinate } from '../types';
 
 export interface CelestialAspect {
@@ -36,92 +37,145 @@ export const ZODIAC_SIGNS = [
   { name: 'Pisces', symbol: '♓', element: 'Water', modality: 'Mutable', ruler: 'Neptune & Jupiter' }
 ];
 
-const PLANET_DEFINITIONS = [
-  { id: 'sun', name: 'Sun', symbol: '☉', periodDays: 365.256, baseLong: 280.46, dailyMotion: 0.9856474, title: 'The Radiant Heart of Sovereign Will' },
-  { id: 'moon', name: 'Moon', symbol: '☽', periodDays: 27.32166, baseLong: 218.316, dailyMotion: 13.176396, title: 'The Silver Mirror of Memory and Tide' },
-  { id: 'mercury', name: 'Mercury', symbol: '☿', periodDays: 87.969, baseLong: 252.25, dailyMotion: 4.092334, title: 'The Winged Scribe of Crossroads' },
-  { id: 'venus', name: 'Venus', symbol: '♀', periodDays: 224.701, baseLong: 181.98, dailyMotion: 1.60213, title: 'The Rose of Concord and Sacred Desire' },
-  { id: 'mars', name: 'Mars', symbol: '♂', periodDays: 686.98, baseLong: 355.43, dailyMotion: 0.52403, title: 'The Iron Torch of Pioneering Courage' },
-  { id: 'jupiter', name: 'Jupiter', symbol: '♃', periodDays: 4332.59, baseLong: 34.35, dailyMotion: 0.08309, title: 'The Great Benefic and Sovereign Architect' },
-  { id: 'saturn', name: 'Saturn', symbol: '♄', periodDays: 10759.22, baseLong: 50.08, dailyMotion: 0.03346, title: 'The Keeper of the Threshold and Ancient Stone' },
-  { id: 'uranus', name: 'Uranus', symbol: '♅', periodDays: 30685.4, baseLong: 314.05, dailyMotion: 0.01173, title: 'The Lightning of Promethean Awakening' },
-  { id: 'neptune', name: 'Neptune', symbol: '♆', periodDays: 60189.0, baseLong: 304.35, dailyMotion: 0.00598, title: 'The Mystic Ocean of Dissolving Form' },
-  { id: 'pluto', name: 'Pluto', symbol: '♇', periodDays: 90560.0, baseLong: 238.93, dailyMotion: 0.00397, title: 'The Lord of the Deep and Alchemical Crucible' },
-  { id: 'chiron', name: 'Chiron', symbol: '⚷', periodDays: 18420.0, baseLong: 108.20, dailyMotion: 0.01954, title: 'The Wounded Centaur and Master Healer' },
-  { id: 'north_node', name: 'North Node', symbol: '☊', periodDays: 6793.5, baseLong: 125.04, dailyMotion: -0.05295, title: 'The Dragon’s Head of Evolutionary Destiny' }
+const PLANET_DEFINITIONS: Array<{ id: string; name: string; symbol: string; body?: Astronomy.Body; title: string }> = [
+  { id: 'sun', name: 'Sun', symbol: '☉', body: Astronomy.Body.Sun, title: 'The Radiant Heart of Sovereign Will' },
+  { id: 'moon', name: 'Moon', symbol: '☽', body: Astronomy.Body.Moon, title: 'The Silver Mirror of Memory and Tide' },
+  { id: 'mercury', name: 'Mercury', symbol: '☿', body: Astronomy.Body.Mercury, title: 'The Winged Scribe of Crossroads' },
+  { id: 'venus', name: 'Venus', symbol: '♀', body: Astronomy.Body.Venus, title: 'The Rose of Concord and Sacred Desire' },
+  { id: 'mars', name: 'Mars', symbol: '♂', body: Astronomy.Body.Mars, title: 'The Iron Torch of Pioneering Courage' },
+  { id: 'jupiter', name: 'Jupiter', symbol: '♃', body: Astronomy.Body.Jupiter, title: 'The Great Benefic and Sovereign Architect' },
+  { id: 'saturn', name: 'Saturn', symbol: '♄', body: Astronomy.Body.Saturn, title: 'The Keeper of the Threshold and Ancient Stone' },
+  { id: 'uranus', name: 'Uranus', symbol: '♅', body: Astronomy.Body.Uranus, title: 'The Lightning of Promethean Awakening' },
+  { id: 'neptune', name: 'Neptune', symbol: '♆', body: Astronomy.Body.Neptune, title: 'The Mystic Ocean of Dissolving Form' },
+  { id: 'pluto', name: 'Pluto', symbol: '♇', body: Astronomy.Body.Pluto, title: 'The Lord of the Deep and Alchemical Crucible' },
+  { id: 'chiron', name: 'Chiron', symbol: '⚷', title: 'The Wounded Centaur and Master Healer' },
+  { id: 'north_node', name: 'North Node', symbol: '☊', title: 'The Dragon’s Head of Evolutionary Destiny' }
 ];
+
+const DEG = Math.PI / 180;
+const J2000 = 2451545.0;
+
+function wrap360(n: number): number {
+  return ((n % 360) + 360) % 360;
+}
 
 /**
  * Converts Ecliptic Longitude (lambda) and Latitude (beta) to Equatorial RA and Dec.
  * Obliquity of ecliptic eps = 23.4392911 deg.
  */
 function eclipticToEquatorial(longDeg: number, latDeg = 0) {
-  const eps = 23.4392911 * (Math.PI / 180);
-  const l = longDeg * (Math.PI / 180);
-  const b = latDeg * (Math.PI / 180);
+  const eps = 23.4392911 * DEG;
+  const l = longDeg * DEG;
+  const b = latDeg * DEG;
 
   const sinDec = Math.sin(b) * Math.cos(eps) + Math.cos(b) * Math.sin(eps) * Math.sin(l);
-  const decRad = Math.asin(sinDec);
-  const decDeg = decRad * (180 / Math.PI);
+  const decDeg = Math.asin(sinDec) / DEG;
 
   const y = Math.sin(l) * Math.cos(eps) - Math.tan(b) * Math.sin(eps);
   const x = Math.cos(l);
   let raRad = Math.atan2(y, x);
   if (raRad < 0) raRad += 2 * Math.PI;
 
-  const raHours = (raRad * (180 / Math.PI)) / 15.0;
-  return { raHours, decDeg };
+  return { raHours: raRad / DEG / 15.0, decDeg };
+}
+
+/** Geocentric apparent ecliptic position (true ecliptic of date) via astronomy-engine. */
+function geocentricEcliptic(body: Astronomy.Body, time: Astronomy.AstroTime): { lon: number; lat: number } {
+  const ecl = Astronomy.Ecliptic(Astronomy.GeoVector(body, time, true));
+  return { lon: wrap360(ecl.elon), lat: ecl.elat };
 }
 
 /**
- * Calculates planetary positions with orbital perturbations and retrograde stations.
+ * Chiron (2060) — two-body Kepler orbit from osculating elements (J2000 ecliptic),
+ * reduced to a geocentric longitude of date. Good to roughly a degree across
+ * 1950–2100; astronomy-engine does not ship minor-body ephemerides.
+ */
+const CHIRON = {
+  a: 13.6922, // AU
+  e: 0.37911,
+  i: 6.9299,
+  node: 209.2984,
+  peri: 339.2537,
+  perihelionJD: 2450128.1, // 1996-02-14
+  periodDays: 18505.7
+};
+
+function chironGeocentric(time: Astronomy.AstroTime, jd: number): { lon: number; lat: number } {
+  const M = wrap360(((jd - CHIRON.perihelionJD) / CHIRON.periodDays) * 360) * DEG;
+  let E = M;
+  for (let k = 0; k < 12; k++) E = E - (E - CHIRON.e * Math.sin(E) - M) / (1 - CHIRON.e * Math.cos(E));
+  const xv = CHIRON.a * (Math.cos(E) - CHIRON.e);
+  const yv = CHIRON.a * Math.sqrt(1 - CHIRON.e * CHIRON.e) * Math.sin(E);
+  const v = Math.atan2(yv, xv);
+  const r = Math.hypot(xv, yv);
+  const N = CHIRON.node * DEG;
+  const w = CHIRON.peri * DEG;
+  const inc = CHIRON.i * DEG;
+  // Heliocentric ecliptic (J2000) rectangular
+  const hx = r * (Math.cos(N) * Math.cos(v + w) - Math.sin(N) * Math.sin(v + w) * Math.cos(inc));
+  const hy = r * (Math.sin(N) * Math.cos(v + w) + Math.cos(N) * Math.sin(v + w) * Math.cos(inc));
+  const hz = r * Math.sin(v + w) * Math.sin(inc);
+  // Earth heliocentric: astronomy-engine gives J2000 equatorial → rotate to J2000 ecliptic
+  const earth = Astronomy.HelioVector(Astronomy.Body.Earth, time);
+  const eps = 23.4392911 * DEG;
+  const ex = earth.x;
+  const ey = earth.y * Math.cos(eps) + earth.z * Math.sin(eps);
+  const ez = -earth.y * Math.sin(eps) + earth.z * Math.cos(eps);
+  const gx = hx - ex;
+  const gy = hy - ey;
+  const gz = hz - ez;
+  const lonJ2000 = Math.atan2(gy, gx) / DEG;
+  const lat = Math.atan2(gz, Math.hypot(gx, gy)) / DEG;
+  // General precession in longitude, J2000 → date
+  const precession = ((jd - J2000) / 36525) * 1.39697;
+  return { lon: wrap360(lonJ2000 + precession), lat };
+}
+
+/** Mean lunar ascending node (Meeus), the standard "Mean Node". */
+function meanNorthNode(jd: number): number {
+  const T = (jd - J2000) / 36525;
+  return wrap360(125.0445479 - 1934.1362891 * T + 0.0020754 * T * T);
+}
+
+function positionFor(def: (typeof PLANET_DEFINITIONS)[number], jd: number): { lon: number; lat: number } {
+  const time = Astronomy.MakeTime(jd - J2000);
+  if (def.id === 'chiron') return chironGeocentric(time, jd);
+  if (def.id === 'north_node') return { lon: meanNorthNode(jd), lat: 0 };
+  return geocentricEcliptic(def.body as Astronomy.Body, time);
+}
+
+function signedDelta(a: number, b: number): number {
+  return ((a - b + 540) % 360) - 180;
+}
+
+/**
+ * Calculates geocentric tropical positions for the Sun, Moon, planets, Chiron and
+ * the mean lunar node. Planet positions come from the open-source astronomy-engine
+ * library (arc-minute accuracy); retrograde status is measured from actual motion.
  */
 export function calculateEphemeris(temporal: TemporalCoordinate): CelestialCoordinate[] {
-  const d = temporal.julianDayUT - 2451545.0; // Days since J2000.0 epoch
+  const jd = temporal.julianDayUT;
 
   return PLANET_DEFINITIONS.map((planet) => {
-    let meanLong = (planet.baseLong + planet.dailyMotion * d) % 360;
-    if (meanLong < 0) meanLong += 360;
+    const now = positionFor(planet, jd);
+    const before = positionFor(planet, jd - 0.5);
+    const after = positionFor(planet, jd + 0.5);
+    const speed = signedDelta(after.lon, before.lon);
+    const isRetrograde = planet.id !== 'north_node' && planet.id !== 'sun' && planet.id !== 'moon' && speed < 0;
 
-    let eclipticLong = meanLong;
-    let speed = planet.dailyMotion;
-    let isRetrograde = false;
-
-    if (planet.id === 'sun') {
-      const g = ((357.528 + 0.9856003 * d) % 360) * (Math.PI / 180);
-      eclipticLong = meanLong + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g);
-    } else if (planet.id === 'moon') {
-      const m = ((134.963 + 13.064993 * d) % 360) * (Math.PI / 180);
-      eclipticLong = meanLong + 6.289 * Math.sin(m);
-    } else if (planet.id !== 'north_node') {
-      const sunMeanLong = (280.46 + 0.9856474 * d) % 360;
-      const elongation = ((sunMeanLong - meanLong) % 360 + 360) % 360;
-      const elRad = elongation * (Math.PI / 180);
-
-      if (elongation > 150 && elongation < 210 && (planet.id === 'mars' || planet.id === 'jupiter' || planet.id === 'saturn')) {
-        isRetrograde = true;
-        speed = -Math.abs(planet.dailyMotion * 0.4);
-      } else if ((planet.id === 'mercury' || planet.id === 'venus') && elongation > 15 && elongation < 35 && Math.cos(elRad) < 0) {
-        isRetrograde = true;
-        speed = -Math.abs(planet.dailyMotion * 0.5);
-      }
-      eclipticLong = (meanLong + (isRetrograde ? -3.5 : 2.0) * Math.sin(elRad) + 360) % 360;
-    }
-
-    eclipticLong = ((eclipticLong % 360) + 360) % 360;
-
-    const signIndex = Math.floor(eclipticLong / 30);
+    const eclipticLong = now.lon;
+    const signIndex = Math.floor(eclipticLong / 30) % 12;
     const signDegree = Math.round((eclipticLong % 30) * 100) / 100;
     const zodiacSign = ZODIAC_SIGNS[signIndex].name;
 
-    const { raHours, decDeg } = eclipticToEquatorial(eclipticLong, 0);
+    const { raHours, decDeg } = eclipticToEquatorial(eclipticLong, now.lat);
 
     return {
       id: planet.id,
       name: planet.name,
       symbol: planet.symbol,
       eclipticLongitude: Math.round(eclipticLong * 1000) / 1000,
-      eclipticLatitude: 0,
+      eclipticLatitude: Math.round(now.lat * 1000) / 1000,
       rightAscensionHours: Math.round(raHours * 1000) / 1000,
       declinationDegrees: Math.round(decDeg * 1000) / 1000,
       zodiacSign,

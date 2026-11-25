@@ -441,7 +441,7 @@ export function generateFourteenDayForecast(
 
     // Birth Synastry
     const harmoniousInteractions: string[] = [
-      `Transit ${sun.zodiacSign} Sun illuminates Natal ${birthCtx.synthesis.topResonatingTribe.tribe} tribal camp.`,
+      `Transit ${sun.zodiacSign} Sun illuminates Natal ${birthCtx.synthesis.topCalling.calling} calling quarter.`,
       `Day Stem ${dayCtx.chinese.dayPillar.stemElement} forms a generative bridge with Natal ${birthStemElem}.`,
       `Mayan Kin ${dayCtx.mayan.kinNumber} (${dayCtx.mayan.tzolkin.formatted}) weaves harmonically with your Natal Kin ${birthCtx.mayan.kinNumber}.`
     ];

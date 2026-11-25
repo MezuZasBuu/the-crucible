@@ -296,7 +296,7 @@ export const ProfileWhatChangedPanel: React.FC<Props> = ({
                 {natalCtx ? (
                   <>
                     <p className="text-[color:var(--text-primary)]">Maya {natalCtx.mayan.tzolkin.formatted} · Chinese {natalCtx.chinese.dayPillar.stemPinYin}-{natalCtx.chinese.dayPillar.branchPinYin}</p>
-                    <p className="mt-1 text-[color:var(--text-secondary)]">Life Path {natalCtx.numerology.lifePathNumber} · Tribe lens {natalCtx.synthesis.topResonatingTribe.tribe}</p>
+                    <p className="mt-1 text-[color:var(--text-secondary)]">Life Path {natalCtx.numerology.lifePathNumber} · Calling {natalCtx.synthesis.topCalling.calling}</p>
                     <p className="font-garamond text-[15px] italic text-[color:var(--text-muted)] mt-2">Archetypal alignment under methodology — not identity.</p>
                   </>
                 ) : (

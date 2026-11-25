@@ -25,7 +25,7 @@ type GearSystemId =
   | 'greek'
   | 'ephemeris'
   | 'numerology'
-  | 'tribes';
+  | 'callings';
 
 export const GearsVisualizer: React.FC<GearsVisualizerProps> = ({
   ctx,
@@ -46,7 +46,7 @@ export const GearsVisualizer: React.FC<GearsVisualizerProps> = ({
   const greekDeg = ((ctx.greek.metonicCycleYear % 19) / 19) * 360;
   const ephemerisDeg = (ctx.celestialBodies[0]?.eclipticLongitude || 0);
   const numDeg = ((ctx.numerology.universalDay % 9) / 9) * 360;
-  const tribesDeg = ((ctx.synthesis.topResonatingTribe.affinityScore % 12) / 12) * 360;
+  const callingsDeg = ((ctx.synthesis.topCalling.affinityScore % 12) / 12) * 360;
 
   // Helper to generate SVG gear path with realistic involute teeth
   const generateGearPath = (cx: number, cy: number, rInner: number, rOuter: number, numTeeth: number) => {
@@ -92,7 +92,7 @@ export const GearsVisualizer: React.FC<GearsVisualizerProps> = ({
       greek: 45 / speedMultiplier,
       ephemeris: 80 / speedMultiplier,
       numerology: 30 / speedMultiplier,
-      tribes: 50 / speedMultiplier
+      callings: 50 / speedMultiplier
     };
   }, [speedMultiplier]);
 
@@ -542,17 +542,17 @@ export const GearsVisualizer: React.FC<GearsVisualizerProps> = ({
             </text>
           </g>
 
-          {/* GEAR 10: Twelve Tribes Camp Wheel (Bottom Left) */}
+          {/* GEAR 10: Twelve Callings Wheel (Bottom Left) */}
           <g
             transform="translate(250, 465)"
             className="cursor-pointer transition-opacity"
-            onClick={() => setSelectedGear('tribes')}
+            onClick={() => setSelectedGear('callings')}
             opacity={viewMode === 'ALL' ? 1 : 0.25}
           >
             <g
               style={{
-                transform: `rotate(${tribesDeg}deg)`,
-                animation: isPlaying ? `spin-slow ${animDurations.tribes}s linear infinite` : 'none',
+                transform: `rotate(${callingsDeg}deg)`,
+                animation: isPlaying ? `spin-slow ${animDurations.callings}s linear infinite` : 'none',
                 transformOrigin: '0 0'
               }}
             >
@@ -560,19 +560,19 @@ export const GearsVisualizer: React.FC<GearsVisualizerProps> = ({
                 d={generateGearPath(0, 0, 68, 80, 12)}
                 fill="#efe6d8"
                 stroke="#f43f5e"
-                strokeWidth={selectedGear === 'tribes' ? 2 : 1}
+                strokeWidth={selectedGear === 'callings' ? 2 : 1}
               />
               <circle cx="0" cy="0" r="42" stroke="#f43f5e" strokeWidth="0.5" strokeOpacity="0.3" fill="#faf6ef" />
             </g>
             <circle cx="0" cy="0" r="30" fill="#faf6ef" stroke="#f43f5e" strokeWidth="1" />
             <text x="0" y="-6" textAnchor="middle" fill="#fb7185" fontSize="6.5">
-              12 TRIBES
+              12 CALLINGS
             </text>
             <text x="0" y="6" textAnchor="middle" fill="#2c2419" fontSize="8" fontWeight="bold">
-              {ctx.synthesis.topResonatingTribe.tribe}
+              {ctx.synthesis.topCalling.calling}
             </text>
             <text x="0" y="16" textAnchor="middle" fill="#6b7280" fontSize="6">
-              {ctx.synthesis.topResonatingTribe.directionInCamp} Camp
+              {ctx.synthesis.topCalling.quarter} quarter
             </text>
           </g>
 
@@ -602,7 +602,7 @@ export const GearsVisualizer: React.FC<GearsVisualizerProps> = ({
               {selectedGear === 'greek' && 'Attic Greek Lunisolar Metonic Cycle (19 Years)'}
               {selectedGear === 'ephemeris' && 'Geocentric Celestial Ephemeris Ring'}
               {selectedGear === 'numerology' && 'Pythagorean & Chaldean Decad Vibration'}
-              {selectedGear === 'tribes' && 'Twelve Tribes Cardinal Sanctuary Matrix'}
+              {selectedGear === 'callings' && 'The Twelve Callings Circle'}
             </span>
           </div>
 
@@ -619,7 +619,7 @@ export const GearsVisualizer: React.FC<GearsVisualizerProps> = ({
                 { id: 'greek', label: 'Greece' },
                 { id: 'ephemeris', label: 'Ephemeris' },
                 { id: 'numerology', label: 'Decad' },
-                { id: 'tribes', label: 'Tribes' }
+                { id: 'callings', label: 'Callings' }
               ] as const
             ).map((b) => (
               <button
@@ -804,21 +804,21 @@ export const GearsVisualizer: React.FC<GearsVisualizerProps> = ({
           </div>
         )}
 
-        {selectedGear === 'tribes' && (
+        {selectedGear === 'callings' && (
           <div className="p-3 bg-[color:var(--surface-raised)] border-l-2 border-rose-500 space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <span className="text-[9px] uppercase text-rose-400 font-bold">The Camp in the Wilderness</span>
+                <span className="text-[9px] uppercase text-rose-400 font-bold">The circle of twelve callings</span>
                 <p className="text-xs font-serif italic text-[color:var(--text-primary)] font-bold">
-                  Tribe of {ctx.synthesis.topResonatingTribe.tribe} ({ctx.synthesis.topResonatingTribe.hebrewName})
+                  {ctx.synthesis.topCalling.calling} ({ctx.synthesis.topCalling.motto})
                 </p>
               </div>
               <div className="text-[11px] text-gray-400">
-                Camp Quadrant: <strong className="text-rose-300">{ctx.synthesis.topResonatingTribe.directionInCamp}</strong> • Gemstone: <strong className="text-rose-300">{ctx.synthesis.topResonatingTribe.gemstone}</strong>
+                Quarter: <strong className="text-rose-300">{ctx.synthesis.topCalling.quarter}</strong> • Gemstone: <strong className="text-rose-300">{ctx.synthesis.topCalling.gemstone}</strong>
               </div>
             </div>
             <p className="font-serif text-[12px] leading-relaxed text-[color:var(--text-secondary)] italic">
-              “Arranged about the central sanctuary in strict cardinal symmetry, the Twelve Tribes represent the earthly reflection of the celestial sphere. Judah anchors the East like the morning lion, Reuben guards the South with flowing waters, Ephraim holds the West under the sign of the ox, and Dan keeps watch over the North with the vision of an eagle.”
+              “Twelve callings stand around a shared centre, three in each quarter. The East begins things at dawn, the South acts at noon, the West gathers at dusk, and the North weighs and rests at midnight. Today’s calling is the role the day’s cycles point to most strongly — a lens to try on, not a label.”
             </p>
           </div>
         )}

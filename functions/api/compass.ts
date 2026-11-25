@@ -23,7 +23,7 @@ Do NOT invent academic citations. Gaia Kp/Schumann are SPECULATIVE proxies.
 Date: ${calc?.input?.dateString} ${calc?.input?.timeString}
 Maya: ${calc?.mayan?.tzolkin?.formatted} Kin ${calc?.mayan?.kinNumber}
 Chinese: ${calc?.chinese?.yearPillar?.stemPinYin}-${calc?.chinese?.yearPillar?.branchPinYin}
-Tribe: ${calc?.synthesis?.topResonatingTribe?.tribe}
+Calling: ${calc?.synthesis?.topCalling?.calling}
 Harmonic: ${calc?.synthesis?.harmonicResonanceIndex}/100`;
 
       const geminiRes = await fetch(
@@ -45,14 +45,14 @@ Harmonic: ${calc?.synthesis?.harmonicResonanceIndex}/100`;
       }
     }
 
-    const topTribe = calc?.synthesis?.topResonatingTribe;
+    const topCalling = calc?.synthesis?.topCalling;
     const tzolkin = calc?.mayan?.tzolkin;
     const yearPillar = calc?.chinese?.yearPillar;
-    const life = calc?.intertwining?.primaryTribeLife;
+    const life = calc?.intertwining?.primaryCallingLife;
     const reply = `[Crucible Grounded Synthesis for ${calc?.input?.dateString}]:
 [Epistemic: SYSTEM_INTERPRETATION + COMPARATIVE_ANALOGY — Pages offline fallback]
 
-The inquiry activates ${topTribe?.tribe || 'Judah'} (${topTribe?.affinityScore || 90}% affinity).
+The inquiry activates ${topCalling?.calling || 'The Trailblazer'} (${topCalling?.affinityScore || 90}% affinity).
 Life practice: ${life?.dayPractice || 'Orient one act toward service of the whole.'}
 Maya ${tzolkin?.formatted || 'Ahau'} × Chinese ${yearPillar?.zodiacAnimal || 'Dragon'} × Life Path ${calc?.numerology?.lifePathNumber || 7}.
 (Configure GEMINI_API_KEY in Cloudflare Pages for open dialogue.)`;

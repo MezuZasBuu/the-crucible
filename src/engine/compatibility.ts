@@ -84,8 +84,8 @@ export function computeCompatibility(
   const bEl = b.chinese.dominantElement;
   const aDir = a.mayan.tzolkin.direction;
   const bDir = b.mayan.tzolkin.direction;
-  const aTribe = a.synthesis.topResonatingTribe;
-  const bTribe = b.synthesis.topResonatingTribe;
+  const aCalling = a.synthesis.topCalling;
+  const bCalling = b.synthesis.topCalling;
   const aPath = a.numerology.lifePathNumber;
   const bPath = b.numerology.lifePathNumber;
   const aGate = a.geneKeysSun.gate;
@@ -97,15 +97,15 @@ export function computeCompatibility(
   const dir = directionAffinity(aDir, bDir);
   const num = numberHarmony(aPath, bPath);
   const gate = gateProximity(aGate, bGate);
-  const tribeSame = aTribe.tribe === bTribe.tribe;
-  const tribeDir = directionAffinity(aTribe.directionInCamp, bTribe.directionInCamp);
+  const callingSame = aCalling.calling === bCalling.calling;
+  const callingDir = directionAffinity(aCalling.quarter, bCalling.quarter);
   const toneDelta = Math.abs(aTone - bTone);
 
-  const work = clamp(38 + el + (tribeSame ? 8 : tribeDir) + (toneDelta <= 2 ? 10 : 4) + gate * 0.35);
+  const work = clamp(38 + el + (callingSame ? 8 : callingDir) + (toneDelta <= 2 ? 10 : 4) + gate * 0.35);
   const life = clamp(36 + num + dir + el * 0.5 + (a.numerology.universalDay === b.numerology.universalDay ? 6 : 0));
   const love = clamp(34 + gate + num * 0.7 + (toneDelta <= 3 ? 14 : 5) + (dir >= 14 ? 10 : 4));
-  const business = clamp(40 + el + tribeDir + (aPath % 2 === bPath % 2 ? 8 : 3) + gate * 0.4);
-  const friendship = clamp(42 + dir + (toneDelta <= 4 ? 12 : 6) + num * 0.5 + (tribeSame ? 6 : 10));
+  const business = clamp(40 + el + callingDir + (aPath % 2 === bPath % 2 ? 8 : 3) + gate * 0.4);
+  const friendship = clamp(42 + dir + (toneDelta <= 4 ? 12 : 6) + num * 0.5 + (callingSame ? 6 : 10));
 
   const axes: CompatibilityAxisScore[] = [
     {
@@ -126,7 +126,7 @@ export function computeCompatibility(
       summary: `Life Path ${aPath} × ${bPath}; Maya directions ${aDir} / ${bDir}.`,
       sharedSignals: [
         num >= 16 ? 'Numerological near-resonance' : 'Complementary life-path arcs',
-        `Camp lenses ${aTribe.tribe} / ${bTribe.tribe}`
+        `Callings ${aCalling.calling} / ${bCalling.calling}`
       ],
       tensions: dir < 12 ? ['Directional orientation pulls opposite ways'] : []
     },
@@ -145,9 +145,9 @@ export function computeCompatibility(
       axis: 'business',
       label: AXIS_LABELS.business,
       score: business,
-      summary: `Stewardship banners ${aTribe.tribe} × ${bTribe.tribe} under ${aEl}/${bEl} weather.`,
+      summary: `Callings ${aCalling.calling} × ${bCalling.calling} under ${aEl}/${bEl} weather.`,
       sharedSignals: [
-        tribeSame ? 'Same archetypal camp language' : 'Cross-camp complementarity',
+        callingSame ? 'Same calling' : 'Cross-quarter complementarity',
         `Wu Xing ${aEl} / ${bEl}`
       ],
       tensions: el < 10 ? ['Elemental strategy may require a third mediating role'] : []

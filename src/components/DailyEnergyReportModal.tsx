@@ -112,10 +112,10 @@ CALENDARS
 - Ethiopian Ge'ez: ${report.ancientCalendars.ethiopian}
 - Greek Attic: ${report.ancientCalendars.greekAttic}
 
-GENE KEYS & TRIBE LENS
+GENE KEYS & CALLING
 - Solar Transit: Gate ${report.geneKeyTransit.sunGate}.${report.geneKeyTransit.line} (${report.geneKeyTransit.name})
   Shadow: ${report.geneKeyTransit.shadow} -> Gift: ${report.geneKeyTransit.gift} -> Siddhi: ${report.geneKeyTransit.siddhi}
-- Twelve Tribes Alignment: ${report.twelveTribesResonance.primaryTribe} (${report.twelveTribesResonance.campDirection} Camp, Stone: ${report.twelveTribesResonance.gemstone})
+- Twelve Callings Alignment: ${report.callingResonance.primaryCalling} (${report.callingResonance.quarter} quarter, Stone: ${report.callingResonance.gemstone})
 
 TODAY'S MOVE
 ${report.dailyStrategicActionPlan.goldenThread}
@@ -682,9 +682,9 @@ Third read: ${report.dailyStrategicActionPlan.dialecticalFork.syntheticResolutio
                   </p>
                 </ScrollCard>
 
-                <ScrollCard label="Tribe lens" accent="sage">
+                <ScrollCard label="Calling" accent="sage">
                   <p className="font-garamond text-[1.05rem] leading-relaxed text-[color:var(--text-secondary)]">
-                    {report.twelveTribesResonance.guidance}
+                    {report.callingResonance.guidance}
                   </p>
                 </ScrollCard>
               </div>

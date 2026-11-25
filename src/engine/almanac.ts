@@ -278,16 +278,16 @@ export function compileAlmanacEntries(ctx: CompleteCalculationContext): AlmanacE
     epistemic: 'COMPARATIVE_ANALOGY'
   });
 
-  const tribe = ctx.intertwining.primaryTribeLife;
-  const topTribe = ctx.synthesis.topResonatingTribe;
+  const calling = ctx.intertwining.primaryCallingLife;
+  const topCalling = ctx.synthesis.topCalling;
   entries.push({
-    id: 'tribe',
+    id: 'calling',
     tier: 'RELEVANT',
-    tradition: 'Twelve Tribes',
-    dataPoint: `${tribe.tribe} · ${topTribe.directionInCamp} camp · ${topTribe.gemstone}`,
-    collectiveImpact: `Group dynamics favor ${tribe.giftToEmbody} — teams that ignore this gift fracture.`,
-    individualImpact: `${tribe.dayPractice} Shadow watch: ${tribe.shadowToWatch}.`,
-    behavioralCue: tribe.giftToEmbody,
+    tradition: 'Twelve Callings',
+    dataPoint: `${calling.calling} · ${topCalling.quarter} quarter · ${topCalling.gemstone}`,
+    collectiveImpact: `Group dynamics favor ${calling.giftToEmbody} — teams that ignore this gift fracture.`,
+    individualImpact: `${calling.dayPractice} Shadow watch: ${calling.shadowToWatch}.`,
+    behavioralCue: calling.giftToEmbody,
     epistemic: 'COMPARATIVE_ANALOGY'
   });
 

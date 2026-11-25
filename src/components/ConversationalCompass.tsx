@@ -77,7 +77,7 @@ export const ConversationalCompass: React.FC<ConversationalCompassProps> = ({ ct
   const SUGGESTIONS = [
     'Sacred initiatory task for today\'s configuration',
     'Synthesize Maya Tzolk\'in with Chinese Year pillar',
-    'Explain highest Twelve Tribes affinity & gemstone',
+    'Explain highest Twelve Callings affinity & gemstone',
     'Which astrocartography lines offer the strongest creative elevation?'
   ];
 

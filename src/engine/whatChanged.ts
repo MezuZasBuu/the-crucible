@@ -77,11 +77,11 @@ function snapshot(ctx: CompleteCalculationContext): WhatChangedField[] {
       `${ctx.geneKeysSun.gate}.${ctx.geneKeysSun.line} ${ctx.geneKeysSun.name}`
     ),
     field(
-      'tribes',
-      'Twelve Tribes',
+      'callings',
+      'Twelve Callings',
       'Strongest Archetypal Alignment',
-      `${ctx.synthesis.topResonatingTribe.tribe} (${ctx.synthesis.topResonatingTribe.affinityScore}%)`,
-      `${ctx.synthesis.topResonatingTribe.tribe} (${ctx.synthesis.topResonatingTribe.affinityScore}%)`
+      `${ctx.synthesis.topCalling.calling} (${ctx.synthesis.topCalling.affinityScore}%)`,
+      `${ctx.synthesis.topCalling.calling} (${ctx.synthesis.topCalling.affinityScore}%)`
     ),
     field('sky', 'Ephemeris', 'Sun Sign', sun?.zodiacSign || '—', sun?.zodiacSign || '—'),
     field('sky', 'Ephemeris', 'Moon Sign', moon?.zodiacSign || '—', moon?.zodiacSign || '—'),
@@ -145,8 +145,8 @@ export function computeWhatChanged(
   if (changedSystems.has('Vedic') && changedSystems.has('Ephemeris')) {
     convergenceNotes.push('Vedic lunar markers and tropical sky both registered change.');
   }
-  if (changedSystems.has('Twelve Tribes') && !changedSystems.has('Numerology')) {
-    tensionNotes.push('Archetypal tribe alignment shifted while Life Path stayed stable — daily scoring weather, not identity rewrite.');
+  if (changedSystems.has('Twelve Callings') && !changedSystems.has('Numerology')) {
+    tensionNotes.push('Archetypal calling alignment shifted while Life Path stayed stable — daily scoring weather, not identity rewrite.');
   }
   if (changedSystems.has('Maya') && changedSystems.has('Chinese')) {
     const maya = changed.find((c) => c.systemId === 'mayan' && c.label === 'Tzolkʼin');
